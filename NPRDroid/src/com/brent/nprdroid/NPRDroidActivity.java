@@ -23,7 +23,7 @@ import android.widget.TextView;
 
 public class NPRDroidActivity extends Activity {
 
-	String choice, URL;
+	String showChoice, URL;
 	RadioGroup radioGroupShows;
 
 	/** Called when the activity is first created. */
@@ -49,7 +49,6 @@ public class NPRDroidActivity extends Activity {
 				DefaultHttpClient client = new DefaultHttpClient();
 				HttpGet httpGet = new HttpGet(url);
 				final String urlCopy = url;
-				Log.d("NPR", "trying to read from page");
 				runOnUiThread(new Runnable() {
 					public void run() {
 						TextView urlText = (TextView) findViewById(R.id.urlText);
@@ -82,8 +81,8 @@ public class NPRDroidActivity extends Activity {
 	public void readWebpage(View view) {
 		int selectedId = radioGroupShows.getCheckedRadioButtonId();
 		RadioButton selectedButton = (RadioButton) findViewById(selectedId);
-		if (selectedButton.getText().equals("Morning Edition")) choice = "me";
-		else choice = "atc";
+		if (selectedButton.getText().equals("Morning Edition")) showChoice = "me";
+		else showChoice = "atc";
 		Log.i("NPR", "button text: " + selectedButton.getText());
 		Calendar calNow = Calendar.getInstance();
 		int year = calNow.get(Calendar.YEAR);
@@ -91,9 +90,14 @@ public class NPRDroidActivity extends Activity {
 		String month = intMonth > 9 ? "" + intMonth : "0" + intMonth;
 		int intDay = calNow.get(Calendar.DATE);
 		String day = intDay > 9 ? "" + intDay : "0" + intDay;
-		String URL[] = new String[9];
-		for (int i = 0; i < 9; ++i) {
-			URL[i] = "http://pd.npr.org/anon.npr-mp3/npr/" + choice + "/" + year + "/" + month + "/" + year + month + day + "_" + choice + "_0" + (i + 1) + ".mp3";
+		String prepend;
+		String URL[] = new String[30];
+		for (int i = 0; i < 30; ++i) {
+			if (i < 9) 
+				prepend = "_0";
+			else
+				prepend = "_";
+			URL[i] = "http://pd.npr.org/anon.npr-mp3/npr/" + showChoice + "/" + year + "/" + month + "/" + year + month + day + "_" + showChoice + prepend + (i + 1) + ".mp3";
 			Log.i("NPR", URL[i]);
 		}
 		DownloadWebPageTask task = new DownloadWebPageTask();

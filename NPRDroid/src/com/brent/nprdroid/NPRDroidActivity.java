@@ -51,7 +51,7 @@ public class NPRDroidActivity extends ListActivity {
 	}
 
 	private void updateSongList() {
-		sdPath = getExternalFilesDir(null).getAbsolutePath();
+		sdPath = getExternalFilesDir(null).getAbsolutePath() + "/";
 		Log.i(TAG , sdPath);
 		File sdPathFile = new File(sdPath);
 		File[] files = sdPathFile.listFiles();
@@ -67,7 +67,7 @@ public class NPRDroidActivity extends ListActivity {
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		currentPosition = position;
-		playSong(sdPath + "/" + songs.get(position));
+		playSong(sdPath + songs.get(position));
 	}
 
 	private void playSong(String songPath) {

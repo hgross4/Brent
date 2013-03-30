@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="hello">Hello World, NPRDroidActivity!</string>
     <string name="app_name">NPRDroid</string>
+    <string name="me">Morning \n Edition</string>
+    <string name="atc">All Things Considered</string>
 
 </resources>

@@ -37,8 +37,6 @@ public class NPRDroidActivity extends ListActivity {
 	private List<String> songs = new ArrayList<String>();
 	private MediaPlayer mp = new MediaPlayer();
 	private int currentPosition = 0;
-	private String showChoice;
-	private RadioGroup radioGroupShows;
 	private String TAG = "NPRDroidActivity";
 
 	/** Called when the activity is first created. */
@@ -46,7 +44,6 @@ public class NPRDroidActivity extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		radioGroupShows = (RadioGroup) findViewById(R.id.radioGroupShows);
 		updateSongList();
 	}
 
@@ -123,12 +120,6 @@ public class NPRDroidActivity extends ListActivity {
 					while ((length = content.read(buffer)) > 0) {
 						out.write(buffer, 0, length);
 					}
-					//					LinearLayout layout = (LinearLayout) findViewById(R.id.mainLayout);
-					//				    TextView fileText = new TextView(NPRDroidActivity.this);
-					//				    fileText.setText(index + ": " + (new Date(audioFile.lastModified())).toString());
-					//				    fileText.setId(index);
-					//				    fileText.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-					//				    ((LinearLayout) layout).addView(fileText);
 					++index;
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -142,12 +133,11 @@ public class NPRDroidActivity extends ListActivity {
 		}
 	}
 
-	public void readWebpage(View view) {
-		int selectedId = radioGroupShows.getCheckedRadioButtonId();
-		RadioButton selectedButton = (RadioButton) findViewById(selectedId);
-		if (selectedButton.getText().equals("Morning Edition")) showChoice = "me";
+	public void readWebpage(View view) {	
+		String showChoice;
+		if (view.getId() == R.id.me) showChoice = "me";
 		else showChoice = "atc";
-		Log.i("NPR", "button text: " + selectedButton.getText());
+		Log.i(TAG, "button text: " + ((Button)view).getText());
 		Calendar calNow = Calendar.getInstance();
 		int year = calNow.get(Calendar.YEAR);
 		int intMonth = calNow.get(Calendar.MONTH) + 1;

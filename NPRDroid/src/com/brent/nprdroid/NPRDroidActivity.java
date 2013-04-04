@@ -13,29 +13,28 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import android.app.Activity;
 import android.app.ListActivity;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
+import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 public class NPRDroidActivity extends ListActivity {
 	private String sdPath; 
 	private List<String> songs = new ArrayList<String>();
-	private MediaPlayer mp = new MediaPlayer();
+	private MyMediaController mc;
 	private int currentPosition = 0;
 	private String TAG = "NPRDroidActivity";
 
@@ -63,26 +62,30 @@ public class NPRDroidActivity extends ListActivity {
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
+		Log.i(TAG, "onListItemClick");
 		currentPosition = position;
-		playSong(sdPath + songs.get(position));
+//		playSong(sdPath + songs.get(position));
+		startService((new Intent(MusicService.ACTION_URL)).setData(Uri.fromFile(new File(getExternalFilesDir(null), songs.get(position)))));
 	}
 
 	private void playSong(String songPath) {
 		Log.i(TAG, songPath);
-		try {
-			mp.reset();
-			mp.setDataSource(songPath);
-			mp.prepare();
-			mp.start();
-			// Setup listener so next song starts automatically
-			mp.setOnCompletionListener(new OnCompletionListener() {
-				public void onCompletion(MediaPlayer arg0) {
-					nextSong();
-				}
-			});
-		} catch (IOException e) {
-			Log.v(getString(R.string.app_name), e.getMessage());
-		}
+		VideoView mcView = (VideoView)findViewById(R.id.mediaControllerView);
+		mcView.setVideoPath(songPath);
+		mc = new MyMediaController(this);
+		mc.setMediaPlayer(mcView);
+		mc.setPrevNextListeners(null, null);
+		mcView.setMediaController(mc);
+		mcView.requestFocus();
+		mcView.start();
+		mc.setAnchorView((LinearLayout) findViewById(R.id.mainLayout));
+		mc.show();
+		// Setup listener so next song starts automatically
+//			mp.setOnCompletionListener(new OnCompletionListener() {
+//				public void onCompletion(MediaPlayer arg0) {
+//					nextSong();
+//				}
+//			});
 	}
 
 	private void nextSong() {
@@ -125,6 +128,7 @@ public class NPRDroidActivity extends ListActivity {
 					e.printStackTrace();
 				}
 			}
+			updateSongList();
 			return null;
 		}
 
@@ -154,8 +158,7 @@ public class NPRDroidActivity extends ListActivity {
 			URL[i] = "http://pd.npr.org/anon.npr-mp3/npr/" + showChoice + "/" + year + "/" + month + "/" + year + month + day + "_" + showChoice + prepend + (i + 1) + ".mp3";
 			Log.i("NPR", URL[i]);
 		}
-		DownloadWebPageTask task = new DownloadWebPageTask();
-		task.execute(URL);
+		(new DownloadWebPageTask()).execute(URL);
 
 	}
 }

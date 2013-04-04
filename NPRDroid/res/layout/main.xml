@@ -4,34 +4,34 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
-    
+
     <TextView
         android:id="@+id/buttonHeading"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="Download today's stories for either show" />
+        android:text="Download today&apos;s stories for either show" />
 
-    <LinearLayout		
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center" >
+        android:gravity="center"
+        android:orientation="horizontal" >
 
         <Button
             android:id="@+id/me"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_width="0dp"            
-            android:layout_height="wrap_content"           
             android:onClick="readWebpage"
             android:text="@string/me" />
 
         <Button
             android:id="@+id/atc"
-            android:layout_weight="1"
-            android:layout_width="0dp"            
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:onClick="readWebpage"
             android:text="@string/atc" />
     </LinearLayout>
@@ -42,11 +42,18 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"
         android:text="" />
-    
-    <ListView android:id="@+id/android:list"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:layout_weight="1"
-              android:drawSelectorOnTop="false"/>
+
+    <VideoView
+        android:id="@+id/mediaControllerView"
+        android:layout_width="match_parent"
+        android:layout_height="150dp" />
+
+    <ListView
+        android:id="@+id/android:list"
+        android:layout_width="fill_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:drawSelectorOnTop="false" >
+    </ListView>
 
 </LinearLayout>

@@ -6,6 +6,7 @@
 
     <uses-sdk android:minSdkVersion="15" />
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
@@ -21,6 +22,33 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <service android:exported="false" android:name=".MusicService">
+            <intent-filter>
+                <action android:name="com.brent.nprdroid.action.TOGGLE_PLAYBACK" />
+                <action android:name="com.brent.nprdroid.action.PLAY" />
+                <action android:name="com.brent.nprdroid.action.PAUSE" />
+                <action android:name="com.brent.nprdroid.action.SKIP" />
+                <action android:name="com.brent.nprdroid.action.REWIND" />
+                <action android:name="com.brent.nprdroid.action.STOP" />
+                <action android:name="com.brent.nprdroid.action.PLAY_FROM_LIST" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.brent.nprdroid.action.URL" />
+                <data android:scheme="http" />
+                <data android:scheme="file" />
+            </intent-filter>
+        </service>
+
+        <receiver android:name=".MusicIntentReceiver">
+            <intent-filter>
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+        
     </application>
 
 </manifest>

@@ -54,7 +54,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
                 PrepareMusicRetrieverTask.MusicRetrieverPreparedListener {
 
     // The tag we put on debug messages
-    final static String TAG = "RandomMusicPlayer";
+    final static String TAG = "MusicService";
 
     // These are the Intent actions that we are prepared to handle. Notice that the fact these
     // constants exist in our class is a mere convenience: what really defines the actions our
@@ -68,7 +68,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     public static final String ACTION_SKIP = "com.brent.nprdroid.action.SKIP";
     public static final String ACTION_REWIND = "com.brent.nprdroid.action.REWIND";
     public static final String ACTION_URL = "com.brent.nprdroid.action.URL";
-    public static final String ACTION_PLAY_FROM_LIST = "com.brent.nprdroid.action.PLAY_FROM_LIST";
 
     // The volume we set the media player to when we lose audio focus, but are allowed to reduce
     // the volume instead of stopping playback.
@@ -374,10 +373,9 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     }
 
     void processAddRequest(Intent intent) {
-        // user wants to play a song directly by URL or path. The URL or path comes in the "data"
-        // part of the Intent. This Intent is sent by {@link MainActivity} after the user
-        // specifies the URL/path via an alert box.
+        //Called when an item from the list is selected by touching on it
     	Log.i(TAG, "processAddRequest");
+    	mRetriever.listPosition = intent.getIntExtra("listPosition", 0);
         if (mState == State.Retrieving) {
             // we'll play the requested URL right after we finish retrieving
             mWhatToPlayAfterRetrieve = intent.getData();
@@ -519,7 +517,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0,
                 new Intent(getApplicationContext(), NPRDroidActivity.class),
                 PendingIntent.FLAG_UPDATE_CURRENT);
-        mNotification.setLatestEventInfo(getApplicationContext(), "RandomMusicPlayer", text, pi);
+        mNotification.setLatestEventInfo(getApplicationContext(), "Morning Things Considered", text, pi);
         mNotificationManager.notify(NOTIFICATION_ID, mNotification);
     }
 
@@ -534,9 +532,9 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
                 PendingIntent.FLAG_UPDATE_CURRENT);
         mNotification = new Notification();
         mNotification.tickerText = text;
-//        mNotification.icon = R.drawable.ic_stat_playing;
+        mNotification.icon = R.drawable.ic_stat_playing;
         mNotification.flags |= Notification.FLAG_ONGOING_EVENT;
-        mNotification.setLatestEventInfo(getApplicationContext(), "RandomMusicPlayer", text, pi);
+        mNotification.setLatestEventInfo(getApplicationContext(), "Morning Things Considered", text, pi);
         startForeground(NOTIFICATION_ID, mNotification);
     }
 

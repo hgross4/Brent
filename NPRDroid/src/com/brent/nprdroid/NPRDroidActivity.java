@@ -15,6 +15,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.ListActivity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
@@ -22,21 +23,26 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
 
-public class NPRDroidActivity extends ListActivity {
+public class NPRDroidActivity extends ListActivity implements OnTouchListener {
 	private String sdPath; 
 	private List<String> songs = new ArrayList<String>();
 	private MyMediaController mc;
 	private int currentPosition = 0;
 	private String TAG = "NPRDroidActivity";
+	ImageButton playButton, pauseButton;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -44,6 +50,10 @@ public class NPRDroidActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		updateSongList();
+		playButton = (ImageButton) findViewById(R.id.playButton);
+		pauseButton = (ImageButton) findViewById(R.id.pauseButton);
+		playButton.setOnTouchListener(this);
+		pauseButton.setOnTouchListener(this);
 	}
 
 	private void updateSongList() {
@@ -59,43 +69,45 @@ public class NPRDroidActivity extends ListActivity {
 			setListAdapter(songList);
 		}
 	}
+	
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		if (v == playButton) {
+			startService(new Intent(MusicService.ACTION_PLAY));
+			switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+            	playButton.setImageResource(R.drawable.play_button_pressed);
+            	break;
+            case MotionEvent.ACTION_UP:
+            	pauseButton.setImageResource(R.drawable.pause_button_normal);
+			}
+		}
+		else if (v == pauseButton) {
+			startService(new Intent(MusicService.ACTION_PAUSE));
+			switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+            	pauseButton.setImageResource(R.drawable.pause_button_pressed);
+            	break;
+            case MotionEvent.ACTION_UP:
+            	playButton.setImageResource(R.drawable.play_button_normal);
+			}
+		}
+		return false;
+		
+	}
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		Log.i(TAG, "onListItemClick");
 		currentPosition = position;
 //		playSong(sdPath + songs.get(position));
-		startService((new Intent(MusicService.ACTION_URL)).setData(Uri.fromFile(new File(getExternalFilesDir(null), songs.get(position)))));
-	}
-
-	private void playSong(String songPath) {
-		Log.i(TAG, songPath);
-		VideoView mcView = (VideoView)findViewById(R.id.mediaControllerView);
-		mcView.setVideoPath(songPath);
-		mc = new MyMediaController(this);
-		mc.setMediaPlayer(mcView);
-		mc.setPrevNextListeners(null, null);
-		mcView.setMediaController(mc);
-		mcView.requestFocus();
-		mcView.start();
-		mc.setAnchorView((LinearLayout) findViewById(R.id.mainLayout));
-		mc.show();
-		// Setup listener so next song starts automatically
-//			mp.setOnCompletionListener(new OnCompletionListener() {
-//				public void onCompletion(MediaPlayer arg0) {
-//					nextSong();
-//				}
-//			});
-	}
-
-	private void nextSong() {
-		if (++currentPosition >= songs.size()) {
-			// Last song, just reset currentPosition
-			currentPosition = 0;
-		} else {
-			// Play next song
-			playSong(sdPath + songs.get(currentPosition));
-		}
+		Intent intent = new Intent(MusicService.ACTION_URL);
+		intent.setData(Uri.fromFile(new File(getExternalFilesDir(null), songs.get(position))));
+		intent.putExtra("listPosition", position + 1);
+		((TextView) v).setTextColor(Color.BLUE);
+		playButton.setImageResource(R.drawable.play_button_pressed);
+		pauseButton.setImageResource(R.drawable.pause_button_normal);
+		startService((intent));
 	}
 
 	private class DownloadWebPageTask extends AsyncTask<String, Void, String> {
@@ -149,8 +161,8 @@ public class NPRDroidActivity extends ListActivity {
 		int intDay = calNow.get(Calendar.DATE);
 		String day = intDay > 9 ? "" + intDay : "0" + intDay;
 		String prepend;
-		String URL[] = new String[30];
-		for (int i = 0; i < 30; ++i) {
+		String URL[] = new String[25];
+		for (int i = 0; i < 25; ++i) {
 			if (i < 9) 
 				prepend = "_0";
 			else
@@ -161,4 +173,5 @@ public class NPRDroidActivity extends ListActivity {
 		(new DownloadWebPageTask()).execute(URL);
 
 	}
+	
 }

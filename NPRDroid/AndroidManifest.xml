@@ -31,7 +31,6 @@
                 <action android:name="com.brent.nprdroid.action.SKIP" />
                 <action android:name="com.brent.nprdroid.action.REWIND" />
                 <action android:name="com.brent.nprdroid.action.STOP" />
-                <action android:name="com.brent.nprdroid.action.PLAY_FROM_LIST" />
             </intent-filter>
             <intent-filter>
                 <action android:name="com.brent.nprdroid.action.URL" />

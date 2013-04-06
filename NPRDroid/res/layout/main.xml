@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="Download today&apos;s stories for either show" />
+        android:textSize="18sp"
+        android:text="Download today&apos;s stories" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -43,10 +44,26 @@
         android:layout_marginTop="0dp"
         android:text="" />
 
-    <VideoView
-        android:id="@+id/mediaControllerView"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="150dp" />
+        android:layout_height="wrap_content"
+        android:gravity="center" >
+
+        <ImageButton
+            android:id="@+id/playButton"
+            android:background="@drawable/play_button_normal"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="" />
+        <ImageButton
+            android:id="@+id/pauseButton"
+            android:background="@drawable/pause_button_normal"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="" />
+    </LinearLayout>
 
     <ListView
         android:id="@+id/android:list"

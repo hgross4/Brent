@@ -1,11 +1,12 @@
 ¥ Player buttons (play/pause, next, previous, rewind(?), FF(?))
-¥ Change radio buttons and single download button to 2 buttons (one for each show) and a heading ("Download today's stories")
 ¥ Have downloads and audio continue when app not in foreground
 ¥ Highlight story in list that's currently playing
 ¥ Story titles instead of file names in story list
+¥ SeekBar to show playback progress and allow for moving within story
 ¥ File mod dates in story list
 ¥ Shorten download-URL display (just show text after last slash, maybe with easier to read date)
 ¥ Figure out how many stories are available and only download those (download loop arbitrarily set to 30 now) 
 
 Done
 ¥ Fix next story not starting when previous ends 
+¥ Change radio buttons and single download button to 2 buttons (one for each show) and a heading ("Download today's stories")

@@ -1,5 +1,5 @@
 ¥ Player buttons (play/pause, next, previous, rewind(?), FF(?))
-¥ Have downloads and audio continue when app not in foreground
+¥ Have downloads continue when UI not in foreground
 ¥ Highlight story in list that's currently playing
 ¥ Story titles instead of file names in story list
 ¥ SeekBar to show playback progress and allow for moving within story
@@ -10,3 +10,4 @@
 Done
 ¥ Fix next story not starting when previous ends 
 ¥ Change radio buttons and single download button to 2 buttons (one for each show) and a heading ("Download today's stories")
+¥ Audio continues to play when UI not in foreground

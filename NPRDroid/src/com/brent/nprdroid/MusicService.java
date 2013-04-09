@@ -24,7 +24,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
@@ -99,7 +98,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 
     // if mStartPlayingAfterRetrieve is true, this variable indicates the URL that we should
     // start playing when we are ready. If null, we should play a song in storage
-    Uri mWhatToPlayAfterRetrieve = null;
+    String mWhatToPlayAfterRetrieve = null;
 
     enum PauseReason {
         UserRequest,  // paused by user request
@@ -210,7 +209,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-    	Log.i(TAG, "onStart");
+//    	Log.i(TAG, "onStart");
         String action = intent.getAction();
         if (action.equals(ACTION_TOGGLE_PLAYBACK)) processTogglePlaybackRequest();
         else if (action.equals(ACTION_PLAY)) processPlayRequest();
@@ -376,15 +375,16 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         //Called when an item from the list is selected by touching on it
     	Log.i(TAG, "processAddRequest");
     	mRetriever.listPosition = intent.getIntExtra("listPosition", 0);
+    	String fileName = intent.getStringExtra("fileName");
         if (mState == State.Retrieving) {
-            // we'll play the requested URL right after we finish retrieving
-            mWhatToPlayAfterRetrieve = intent.getData();
+            // we'll play the requested file right after we finish retrieving
+            mWhatToPlayAfterRetrieve = fileName;
             mStartPlayingAfterRetrieve = true;
         }
         else if (mState == State.Playing || mState == State.Paused || mState == State.Stopped) {
-            Log.i(TAG, "Playing from URL/path: " + intent.getData().toString());
+            Log.i(TAG, "About to play: " + fileName);
             tryToGetAudioFocus();
-            playNextSong(intent.getData().toString());
+            playNextSong(fileName);
         }
     }
 
@@ -395,25 +395,24 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     }
 
     /**
-     * Starts playing the next song. If manualUrl is null, the next song will be randomly selected
-     * from our Media Retriever (that is, it will be a random song in the user's device). If
-     * manualUrl is non-null, then it specifies the URL or path to the song that will be played
-     * next.
+     * Starts playing the next song. If fileName is null, the next audio item in the 
+     * list will be selected from our Media Retriever.
+     * If fileName is non-null, then that specific audio item will be selected.
      */
-    void playNextSong(String manualUrl) {
+    void playNextSong(String fileName) {
         mState = State.Stopped;
         relaxResources(false); // release everything except MediaPlayer
 
         try {
             MusicRetriever.Item playingItem = null;
-            if (manualUrl != null) {
+            if (fileName != null) {
                 // set the source of the media player to a manual URL or path
                 createMediaPlayerIfNeeded();
                 mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                mPlayer.setDataSource(manualUrl);
-                mIsStreaming = manualUrl.startsWith("http:") || manualUrl.startsWith("https:");
+                mPlayer.setDataSource(getExternalFilesDir(null).getAbsolutePath() + "/" + fileName);
+                mIsStreaming = fileName.startsWith("http:") || fileName.startsWith("https:");
 
-                playingItem = new MusicRetriever.Item(0, null, manualUrl, null, 0);
+                playingItem = new MusicRetriever.Item(0, null, fileName, null, 0);
             }
             else {
                 mIsStreaming = false; // playing a locally available song
@@ -580,7 +579,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         if (mStartPlayingAfterRetrieve) {
             tryToGetAudioFocus();
             playNextSong(mWhatToPlayAfterRetrieve == null ?
-                    null : mWhatToPlayAfterRetrieve.toString());
+                    null : mWhatToPlayAfterRetrieve);
         }
     }
 

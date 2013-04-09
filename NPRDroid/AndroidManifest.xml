@@ -34,8 +34,7 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="com.brent.nprdroid.action.URL" />
-                <data android:scheme="http" />
-                <data android:scheme="file" />
+                
             </intent-filter>
         </service>
 

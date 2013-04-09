@@ -42,7 +42,7 @@ public class NPRDroidActivity extends ListActivity implements OnTouchListener {
 	private MyMediaController mc;
 	private int currentPosition = 0;
 	private String TAG = "NPRDroidActivity";
-	ImageButton playButton, pauseButton;
+	private ImageButton rewindButton, playButton, pauseButton, nextButton;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -50,10 +50,14 @@ public class NPRDroidActivity extends ListActivity implements OnTouchListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		updateSongList();
+		rewindButton = (ImageButton) findViewById(R.id.rewindButton);
 		playButton = (ImageButton) findViewById(R.id.playButton);
 		pauseButton = (ImageButton) findViewById(R.id.pauseButton);
+		nextButton = (ImageButton) findViewById(R.id.nextButton);
+		rewindButton.setOnTouchListener(this);
 		playButton.setOnTouchListener(this);
 		pauseButton.setOnTouchListener(this);
+		nextButton.setOnTouchListener(this);
 	}
 
 	private void updateSongList() {
@@ -92,17 +96,27 @@ public class NPRDroidActivity extends ListActivity implements OnTouchListener {
             	playButton.setImageResource(R.drawable.play_button_normal);
 			}
 		}
-		return false;
-		
+		else if (v == nextButton) {
+			startService(new Intent(MusicService.ACTION_SKIP));
+			switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+            	nextButton.setImageResource(R.drawable.next_button_pressed);
+            	break;
+            case MotionEvent.ACTION_UP:
+            	nextButton.setImageResource(0); //restores button to "normal", where R.drawable.next_button_normal produces weird effects
+            	playButton.setImageResource(R.drawable.play_button_pressed);
+            	pauseButton.setImageResource(R.drawable.pause_button_normal);
+			}
+		}
+		return false;		
 	}
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		Log.i(TAG, "onListItemClick");
 		currentPosition = position;
-//		playSong(sdPath + songs.get(position));
 		Intent intent = new Intent(MusicService.ACTION_URL);
-		intent.setData(Uri.fromFile(new File(getExternalFilesDir(null), songs.get(position))));
+		intent.putExtra("fileName", songs.get(position));
 		intent.putExtra("listPosition", position + 1);
 		((TextView) v).setTextColor(Color.BLUE);
 		playButton.setImageResource(R.drawable.play_button_pressed);

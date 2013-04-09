@@ -48,7 +48,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center" >
-
+        
+        <ImageButton
+            android:id="@+id/rewindButton"
+            android:background="@drawable/rewind_button_normal"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="" />
         <ImageButton
             android:id="@+id/playButton"
             android:background="@drawable/play_button_normal"
@@ -59,6 +66,13 @@
         <ImageButton
             android:id="@+id/pauseButton"
             android:background="@drawable/pause_button_normal"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="" />
+        <ImageButton
+            android:id="@+id/nextButton"
+            android:background="@drawable/next_button_normal"
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

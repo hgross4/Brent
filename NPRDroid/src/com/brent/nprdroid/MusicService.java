@@ -31,9 +31,9 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.RemoteControlClient;
-import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
@@ -150,6 +150,16 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     NotificationManager mNotificationManager;
 
     Notification mNotification = null;
+    
+    // Binder given to clients
+    private final IBinder mBinder = new LocalBinder();
+    
+    public class LocalBinder extends Binder {
+        MusicService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return MusicService.this;
+        }
+    }
 
     /**
      * Makes sure the media player exists and has been reset. This will create the media player
@@ -594,6 +604,23 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 
     @Override
     public IBinder onBind(Intent arg0) {
-        return null;
+    	return mBinder;
     }
+    
+    public int getPlayerPosition() {
+    	if (mPlayer != null)
+    		return mPlayer.getCurrentPosition()/1000;
+    	else return 0;
+    }
+    
+    public int getDuration() {
+    	if (mPlayer != null)
+    		return mPlayer.getDuration()/1000;
+    	else return 0;
+    }
+    
+    public int getListPosition() {
+    	return mRetriever.listPosition;
+    }
+    
 }

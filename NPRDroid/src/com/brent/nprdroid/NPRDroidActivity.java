@@ -253,12 +253,12 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 					e.printStackTrace();
 				}
 			}
-			updateSongList();
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(String result) {
+			updateSongList();
 		}
 	}
 

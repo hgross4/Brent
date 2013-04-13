@@ -1,9 +1,10 @@
 ¥ Player buttons (rewind, play, pause, next)
-¥ Highlight story in list that's currently playing
+¥ Highlight story in list that's currently playing (implementation has been started but is not working correctly)
 ¥ Have downloads continue when UI not in foreground
 ¥ Warn user when there's no Internet connection
+¥ What happens when stories downloaded while audio is playing, and how should that be handled?
 ¥ Story titles instead of file names in story list
-¥ SeekBar to show playback progress and allow for moving within story
+¥ SeekBar to allow for moving within story
 ¥ Make rewind button move story back X seconds (X = 10, 30?)
 ¥ File mod dates in story list
 ¥ Shorten download-URL display (just show text after last slash, maybe with easier to read date)
@@ -14,3 +15,4 @@ Done
 ¥ Fix next story not starting when previous ends 
 ¥ Change radio buttons and single download button to 2 buttons (one for each show) and a heading ("Download today's stories")
 ¥ Audio continues to play when UI not in foreground
+¥ Seekbar shows story playback progress

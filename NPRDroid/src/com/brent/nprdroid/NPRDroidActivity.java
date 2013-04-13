@@ -18,6 +18,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -47,6 +48,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	private int mInterval = 1000; // 1 second updates
 	private Handler mHandler;
 	private SeekBar seekBar;
+	SharedPreferences pref;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -64,6 +66,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		nextButton.setOnClickListener(this);
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
 		mHandler = new Handler();
+		pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
 	}
 
 	@Override
@@ -79,6 +82,15 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	protected void onResume() {
 		super.onResume();
 		startRepeatingTask();
+		// Highlight currently playing or paused item in list 
+		ListView listView = getListView();
+		if (musicService != null) {
+			int listPosition = musicService.mRetriever.listPosition;
+			View current = listView.getChildAt(listPosition - 1); 		
+			if (current != null) {
+				((TextView) current).setTextColor(Color.YELLOW);
+			}
+		}
 	}
 
 	@Override
@@ -101,11 +113,14 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		@Override
 		public void handleMessage(Message msg) {
 			Log.i(TAG, "position from service: " + msg.arg1);
+			SharedPreferences.Editor editor = pref.edit();			
 			ListView listView = getListView();
 			View vCurrent = listView.getChildAt(msg.arg1 - 1);
-			((TextView) vCurrent).setTextColor(Color.BLUE);
-			View vPrevious = listView.getChildAt(msg.arg1 - 2);
+			((TextView) vCurrent).setTextColor(Color.YELLOW);
+			View vPrevious = listView.getChildAt(pref.getInt("listPosition", 0));	//change previously played item back to default color 
 			((TextView) vPrevious).setTextColor(Color.LTGRAY);
+			editor.putInt("listPosition", msg.arg1);	//save this position so its list item can be changed later
+			editor.commit();
 		}
 	};
 

@@ -507,6 +507,14 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             // we are *not* streaming, we want to release the lock if we were holding it before.
             if (mIsStreaming) mWifiLock.acquire();
             else if (mWifiLock.isHeld()) mWifiLock.release();
+            
+            // send message to activity so it can changed the color of the currently playing item in the list
+            Message msg = Message.obtain(null, 0, mRetriever.listPosition, 0);
+            try {
+                messenger.send(msg);
+            } catch (RemoteException e) {
+                Log.i("error", "error");
+            }
         }
         catch (IOException ex) {
             Log.e(TAG, "IOException playing next song: " + ex.getMessage());
@@ -518,12 +526,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     public void onCompletion(MediaPlayer player) {
         // The media player finished playing the current song, so we go ahead and start the next.
         playNextSong(null);
-        Message msg = Message.obtain(null, 0, mRetriever.listPosition, 0);
-        try {
-            messenger.send(msg);
-        } catch (RemoteException e) {
-            Log.i("error", "error");
-        }
     }
 
     /** Called when media player is done preparing. */

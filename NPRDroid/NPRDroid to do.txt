@@ -1,7 +1,7 @@
 ¥ Player buttons (rewind, play, pause, next)
-	- Fix next button (sometimes skips list items)
 ¥ Highlight story in list that's currently playing
 ¥ Have downloads continue when UI not in foreground
+¥ Warn user when there's no Internet connection
 ¥ Story titles instead of file names in story list
 ¥ SeekBar to show playback progress and allow for moving within story
 ¥ Make rewind button move story back X seconds (X = 10, 30?)

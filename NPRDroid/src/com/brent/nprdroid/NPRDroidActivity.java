@@ -23,6 +23,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
@@ -31,17 +33,20 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class NPRDroidActivity extends ListActivity implements OnClickListener {
+public class NPRDroidActivity extends ListActivity implements OnClickListener, OnSeekBarChangeListener {
 	private String sdPath; 
 	private List<String> songs = new ArrayList<String>();
 	private String TAG = "NPRDroidActivity";
 	private ImageButton rewindButton, playButton, pauseButton, nextButton;
-	MusicService musicService;
+	private MusicService musicService;
 	boolean mBound = false;
 	private int mInterval = 1000; // 1 second updates
 	private Handler mHandler;
+	private SeekBar seekBar;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -57,6 +62,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener {
 		playButton.setOnClickListener(this);
 		pauseButton.setOnClickListener(this);
 		nextButton.setOnClickListener(this);
+		seekBar = (SeekBar) findViewById(R.id.seekBar);
 		mHandler = new Handler();
 	}
 
@@ -65,15 +71,16 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener {
 		super.onStart();
 		// Bind to MusicService
 		Intent intent = new Intent(this, MusicService.class);
+		intent.putExtra("messenger", new Messenger(handler));
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);		
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
 		startRepeatingTask();
 	}
-	
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -89,6 +96,18 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener {
 			mBound = false;
 		}
 	}
+
+	Handler handler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			Log.i(TAG, "position from service: " + msg.arg1);
+			ListView listView = getListView();
+			View vCurrent = listView.getChildAt(msg.arg1 - 1);
+			((TextView) vCurrent).setTextColor(Color.BLUE);
+			View vPrevious = listView.getChildAt(msg.arg1 - 2);
+			((TextView) vPrevious).setTextColor(Color.LTGRAY);
+		}
+	};
 
 	/** Defines callbacks for service binding, passed to bindService() */
 	private ServiceConnection mConnection = new ServiceConnection() {
@@ -110,12 +129,17 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener {
 	Runnable mStatusChecker = new Runnable() {
 		@Override 
 		public void run() {
-			TextView statusText = (TextView) findViewById(R.id.urlText);			
+			TextView textRemaining = (TextView) findViewById(R.id.textRemaining);
+			TextView textDuration = (TextView) findViewById(R.id.textDuration);
 			mHandler.postDelayed(mStatusChecker, mInterval);
 			if (musicService != null) {
 				int playerPosition = musicService.getPlayerPosition();
 				int duration = musicService.getDuration();
-				statusText.setText(playerPosition/60 + ":" + playerPosition%60 + " " + duration/60 + ":" + duration%60);
+				seekBar.setMax(duration);
+				seekBar.setProgress(playerPosition);
+				int remaining = duration - playerPosition;				
+				textRemaining.setText(timeString(remaining));
+				textDuration.setText(timeString(duration));
 			}
 			Log.i(TAG, "musicService is NULL!");
 		}
@@ -127,6 +151,13 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener {
 
 	void stopRepeatingTask() {
 		mHandler.removeCallbacks(mStatusChecker);
+	}
+	
+	private String timeString(int totalSeconds) {
+		int minutes = (totalSeconds)/60;
+		int intSeconds = (totalSeconds)%60;
+		String seconds = intSeconds > 9 ? "" + intSeconds : "0" + intSeconds;
+		return (minutes + ":" + seconds);
 	}
 
 	private void updateSongList() {
@@ -153,6 +184,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener {
 		else if (v == pauseButton) {
 			startService(new Intent(MusicService.ACTION_PAUSE));
 			pauseButton.setImageResource(R.drawable.pause_button_pressed);
+			playButton.setImageResource(0);
 			playButton.setImageResource(R.drawable.play_button_normal);
 		}
 		else if (v == nextButton) {
@@ -237,6 +269,25 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener {
 			Log.i("NPR", URL[i]);
 		}
 		(new DownloadWebPageTask()).execute(URL);
+
+	}
+
+	@Override
+	public void onProgressChanged(SeekBar seekBar, int progress,
+			boolean fromUser) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onStartTrackingTouch(SeekBar seekBar) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onStopTrackingTouch(SeekBar seekBar) {
+		// TODO Auto-generated method stub
 
 	}
 

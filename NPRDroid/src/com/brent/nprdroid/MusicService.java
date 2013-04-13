@@ -34,8 +34,12 @@ import android.media.RemoteControlClient;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -160,6 +164,9 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             return MusicService.this;
         }
     }
+    
+    // Messenger for sending info. back to activity (e.g., which item in list is currently playing)
+    private Messenger messenger;
 
     /**
      * Makes sure the media player exists and has been reset. This will create the media player
@@ -228,7 +235,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         else if (action.equals(ACTION_STOP)) processStopRequest();
         else if (action.equals(ACTION_REWIND)) processRewindRequest();
         else if (action.equals(ACTION_URL)) processAddRequest(intent);
-
+        
         return START_NOT_STICKY; // Means we started the service, but don't want it to
                                  // restart in case it's killed.
     }
@@ -511,6 +518,12 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     public void onCompletion(MediaPlayer player) {
         // The media player finished playing the current song, so we go ahead and start the next.
         playNextSong(null);
+        Message msg = Message.obtain(null, 0, mRetriever.listPosition, 0);
+        try {
+            messenger.send(msg);
+        } catch (RemoteException e) {
+            Log.i("error", "error");
+        }
     }
 
     /** Called when media player is done preparing. */
@@ -526,7 +539,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0,
                 new Intent(getApplicationContext(), NPRDroidActivity.class),
                 PendingIntent.FLAG_UPDATE_CURRENT);
-        mNotification.setLatestEventInfo(getApplicationContext(), "Morning Things Considered", text, pi);
+        mNotification.setLatestEventInfo(getApplicationContext(), "DownLoadNPR", text, pi);
         mNotificationManager.notify(NOTIFICATION_ID, mNotification);
     }
 
@@ -543,7 +556,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         mNotification.tickerText = text;
         mNotification.icon = R.drawable.ic_stat_playing;
         mNotification.flags |= Notification.FLAG_ONGOING_EVENT;
-        mNotification.setLatestEventInfo(getApplicationContext(), "Morning Things Considered", text, pi);
+        mNotification.setLatestEventInfo(getApplicationContext(), "DownLoadNPR", text, pi);
         startForeground(NOTIFICATION_ID, mNotification);
     }
 
@@ -593,7 +606,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         }
     }
 
-
     @Override
     public void onDestroy() {
         // Service is being killed, so make sure we release our resources
@@ -603,18 +615,22 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     }
 
     @Override
-    public IBinder onBind(Intent arg0) {
+    public IBinder onBind(Intent intent) {
+    	Bundle bundle = intent.getExtras();
+        if (bundle != null) {
+            messenger = (Messenger) bundle.get("messenger");
+        }
     	return mBinder;
     }
     
     public int getPlayerPosition() {
-    	if (mPlayer != null)
+    	if (mState == State.Playing || mState == State.Paused)
     		return mPlayer.getCurrentPosition()/1000;
     	else return 0;
     }
     
     public int getDuration() {
-    	if (mPlayer != null)
+    	if (mState == State.Playing || mState == State.Paused)
     		return mPlayer.getDuration()/1000;
     	else return 0;
     }

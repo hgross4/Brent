@@ -115,11 +115,12 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 			Log.i(TAG, "position from service: " + msg.arg1);
 			SharedPreferences.Editor editor = pref.edit();			
 			ListView listView = getListView();
-			View vCurrent = listView.getChildAt(msg.arg1 - 1);
+			int newPosition = msg.arg1 - 1;
+			View vCurrent = listView.getChildAt(newPosition);
 			((TextView) vCurrent).setTextColor(Color.YELLOW);
 			View vPrevious = listView.getChildAt(pref.getInt("listPosition", 0));	//change previously played item back to default color 
 			((TextView) vPrevious).setTextColor(Color.LTGRAY);
-			editor.putInt("listPosition", msg.arg1);	//save this position so its list item can be changed later
+			editor.putInt("listPosition", newPosition);	//save this position so its list item can be changed later
 			editor.commit();
 		}
 	};
@@ -217,7 +218,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		Intent intent = new Intent(MusicService.ACTION_URL);
 		intent.putExtra("fileName", songs.get(position));
 		intent.putExtra("listPosition", position + 1);
-		((TextView) v).setTextColor(Color.BLUE);
 		playButton.setImageResource(R.drawable.play_button_pressed);
 		pauseButton.setImageResource(R.drawable.pause_button_normal);
 		startService((intent));

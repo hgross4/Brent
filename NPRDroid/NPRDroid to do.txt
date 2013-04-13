@@ -1,5 +1,4 @@
 ¥ Player buttons (rewind, play, pause, next)
-¥ Highlight story in list that's currently playing (implementation has been started but is not working correctly)
 ¥ Have downloads continue when UI not in foreground
 ¥ Warn user when there's no Internet connection
 ¥ What happens when stories downloaded while audio is playing, and how should that be handled?
@@ -9,6 +8,7 @@
 ¥ File mod dates in story list
 ¥ Shorten download-URL display (just show text after last slash, maybe with easier to read date)
 ¥ Figure out how many stories are available and only download those (download loop arbitrarily set to 25 now) 
+¥ Have app save and restore playback item and player position if app is killed or crashes
 ¥ Voice commands
 
 Done
@@ -16,3 +16,4 @@ Done
 ¥ Change radio buttons and single download button to 2 buttons (one for each show) and a heading ("Download today's stories")
 ¥ Audio continues to play when UI not in foreground
 ¥ Seekbar shows story playback progress
+¥ Highlight story in list that's currently playing or paused

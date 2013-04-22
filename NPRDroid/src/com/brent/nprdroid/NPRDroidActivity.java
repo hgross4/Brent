@@ -11,8 +11,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import com.brent.nprdroid.MusicService.LocalBinder;
-
 import android.app.ListActivity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -26,10 +24,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -38,7 +38,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class NPRDroidActivity extends ListActivity implements OnClickListener, OnSeekBarChangeListener {
+public class NPRDroidActivity extends ListActivity implements OnClickListener, OnSeekBarChangeListener {	
 	private String sdPath; 
 	private List<String> songs = new ArrayList<String>();
 	private String TAG = "NPRDroidActivity";
@@ -47,6 +47,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	boolean mBound = false;
 	private int mInterval = 1000; // 1 second updates
 	private Handler mHandler;
+	//	protected static final int NEXT_ITEM = 1;
 	private SeekBar seekBar;
 	SharedPreferences pref;
 
@@ -69,12 +70,38 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
 	}
 
+	class IconicAdapter extends ArrayAdapter<String> {
+		IconicAdapter() {
+			super(NPRDroidActivity.this, R.layout.row, songs);
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View row = super.getView(position, convertView, parent);
+			ViewHolder holder = (ViewHolder)row.getTag();
+
+			if (holder == null) {                         
+				holder = new ViewHolder(row);
+				row.setTag(holder);
+			}
+
+			if (position == pref.getInt("listPosition", 0)) {
+				holder.story.setTextColor(Color.YELLOW);
+			} 
+			else {
+				holder.story.setTextColor(Color.LTGRAY);
+			}
+			return(row);
+		}
+	}
+
 	@Override
 	protected void onStart() {
 		super.onStart();
+		Log.i(TAG, "onStart");
 		// Bind to MusicService
 		Intent intent = new Intent(this, MusicService.class);
-		intent.putExtra("messenger", new Messenger(handler));
+		//		intent.putExtra("messenger", new Messenger(handler));
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);		
 	}
 
@@ -82,15 +109,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	protected void onResume() {
 		super.onResume();
 		startRepeatingTask();
-		// Highlight currently playing or paused item in list 
-		ListView listView = getListView();
-		if (musicService != null) {
-			int listPosition = musicService.mRetriever.listPosition;
-			View current = listView.getChildAt(listPosition - 1); 		
-			if (current != null) {
-				((TextView) current).setTextColor(Color.YELLOW);
-			}
-		}
 	}
 
 	@Override
@@ -112,18 +130,27 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			Log.i(TAG, "position from service: " + msg.arg1);
-			SharedPreferences.Editor editor = pref.edit();			
-			ListView listView = getListView();
-			int newPosition = msg.arg1 - 1;
-			View vCurrent = listView.getChildAt(newPosition);
-			((TextView) vCurrent).setTextColor(Color.YELLOW);
-			View vPrevious = listView.getChildAt(pref.getInt("listPosition", 0));	//change previously played item back to default color 
-			((TextView) vPrevious).setTextColor(Color.LTGRAY);
-			editor.putInt("listPosition", newPosition);	//save this position so its list item can be changed later
-			editor.commit();
+			Log.i(TAG, "start handleMessage");
+			if (msg.what == MusicService.NEXT_ITEM) {
+				Log.i(TAG, "handler");
+				SharedPreferences.Editor editor = pref.edit();			
+				ListView listView = getListView();
+				listView.invalidateViews();			
+				int newPosition = musicService.mRetriever.listPosition - 1;			
+				View vCurrent = listView.getChildAt(newPosition);
+				Log.i(TAG, "handleMessage new position: " + newPosition);
+				((TextView) vCurrent).setTextColor(Color.YELLOW);
+				Log.i(TAG, "handleMessage previous position: " + pref.getInt("listPosition", 0));
+				View vPrevious = listView.getChildAt(pref.getInt("listPosition", 0));	//change previously played item back to default color 
+				((TextView) vPrevious).setTextColor(Color.LTGRAY);
+				editor.putInt("listPosition", newPosition);	//save this position so its list item can be changed later
+				editor.commit();
+				listView.invalidateViews();
+			}
 		}
 	};
+
+	final Messenger mMessenger = new Messenger(handler);
 
 	/** Defines callbacks for service binding, passed to bindService() */
 	private ServiceConnection mConnection = new ServiceConnection() {
@@ -131,9 +158,17 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		public void onServiceConnected(ComponentName className,	IBinder service) {
 			// We've bound to MusicService, cast the IBinder and get MusicService instance
 			Log.i(TAG, "onServiceConnected");
-			LocalBinder binder = (LocalBinder) service;
-			musicService = binder.getService();
-			mBound = true;
+			//			LocalBinder binder = (LocalBinder) service;
+			musicService = MusicService.getService();
+			mBound = true;			
+			try {
+				Message msg = Message.obtain(null, MusicService.MSG_REGISTER_CLIENT);
+				msg.replyTo = mMessenger;
+				(new Messenger(service)).send(msg);
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		@Override
@@ -157,7 +192,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 				textRemaining.setText(timeString(remaining));
 				textDuration.setText(timeString(duration));
 			}
-			Log.i(TAG, "musicService is NULL!");
+			else Log.i(TAG, "musicService is NULL!");
 		}
 	};
 
@@ -168,7 +203,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	void stopRepeatingTask() {
 		mHandler.removeCallbacks(mStatusChecker);
 	}
-	
+
 	private String timeString(int totalSeconds) {
 		int minutes = (totalSeconds)/60;
 		int intSeconds = (totalSeconds)%60;
@@ -177,6 +212,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	}
 
 	private void updateSongList() {
+		songs.clear();
 		sdPath = getExternalFilesDir(null).getAbsolutePath() + "/";
 		Log.i(TAG , sdPath);
 		File sdPathFile = new File(sdPath);
@@ -185,7 +221,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 			for (File file : files) {
 				songs.add(file.getName());
 			}
-			ArrayAdapter<String> songList = new ArrayAdapter<String>(this, R.layout.song_item, songs);
+			IconicAdapter songList = new IconicAdapter();
 			setListAdapter(songList);
 		}
 	}
@@ -271,7 +307,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		int year = calNow.get(Calendar.YEAR);
 		int intMonth = calNow.get(Calendar.MONTH) + 1;
 		String month = intMonth > 9 ? "" + intMonth : "0" + intMonth;
-		int intDay = calNow.get(Calendar.DATE);
+		int intDay = calNow.get(Calendar.DATE) - 1;
 		String day = intDay > 9 ? "" + intDay : "0" + intDay;
 		String prepend;
 		String URL[] = new String[25];
@@ -284,7 +320,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 			Log.i("NPR", URL[i]);
 		}
 		(new DownloadWebPageTask()).execute(URL);
-
 	}
 
 	@Override

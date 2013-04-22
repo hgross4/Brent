@@ -34,7 +34,7 @@ import android.media.RemoteControlClient;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Binder;
-import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
@@ -51,6 +51,10 @@ import java.io.IOException;
  * the user's media. Then, it waits for Intents (which come from our main activity,
  * {@link MainActivity}, which signal the service to perform specific operations: Play, Pause,
  * Rewind, Skip, etc.
+ */
+/**
+ * @author woolvish-miscshopping
+ *
  */
 public class MusicService extends Service implements OnCompletionListener, OnPreparedListener,
                 OnErrorListener, MusicFocusable,
@@ -165,8 +169,18 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         }
     }
     
-    // Messenger for sending info. back to activity (e.g., which item in list is currently playing)
+    protected static MusicService getService() {
+        // Return this instance of LocalService so clients can call public methods
+        return musicService;
+    }
+    
+    // Messenger and argument for sending info. back to activity (e.g., which item in list is currently playing)
     private Messenger messenger;
+
+	private static MusicService musicService;
+	static final int NEXT_ITEM = 1;
+
+	protected static final int MSG_REGISTER_CLIENT = 0;
 
     /**
      * Makes sure the media player exists and has been reset. This will create the media player
@@ -217,6 +231,8 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 //        mDummyAlbumArt = BitmapFactory.decodeResource(getResources(), R.drawable.dummy_album_art);
 
         mMediaButtonReceiverComponent = new ComponentName(this, MusicIntentReceiver.class);
+        
+        musicService = this;
     }
 
     /**
@@ -419,7 +435,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     void playNextSong(String fileName) {
         mState = State.Stopped;
         relaxResources(false); // release everything except MediaPlayer
-
+        Log.i(TAG, "playNextSong");
         try {
             MusicRetriever.Item playingItem = null;
             if (fileName != null) {
@@ -509,8 +525,9 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             else if (mWifiLock.isHeld()) mWifiLock.release();
             
             // send message to activity so it can changed the color of the currently playing item in the list
-            Message msg = Message.obtain(null, 0, mRetriever.listPosition, 0);
+            Message msg = Message.obtain(null, NEXT_ITEM, mRetriever.listPosition, 0);
             try {
+            	Log.i(TAG, "Next what: " + msg.what);
                 messenger.send(msg);
             } catch (RemoteException e) {
                 Log.i("error", "error");
@@ -615,14 +632,28 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         relaxResources(true);
         giveUpAudioFocus();
     }
+    
+    /**
+     * Handler for incoming messages from activity
+     * (which will consist only of Messenger for 
+     *  messages from service to activity)
+     */
+    Handler handler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			Log.i(TAG, "start handleMessage");
+			if (msg.what == MSG_REGISTER_CLIENT) {
+				messenger = msg.replyTo;
+			}
+		}
+	};
+	
+	final Messenger mMessenger = new Messenger(handler);
 
     @Override
-    public IBinder onBind(Intent intent) {
-    	Bundle bundle = intent.getExtras();
-        if (bundle != null) {
-            messenger = (Messenger) bundle.get("messenger");
-        }
-    	return mBinder;
+    public IBinder onBind(Intent intent) {    	
+    	return mMessenger.getBinder();
+//    	return mBinder;
     }
     
     public int getPlayerPosition() {

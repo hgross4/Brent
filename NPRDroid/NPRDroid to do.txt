@@ -1,10 +1,10 @@
 ¥ Player buttons (rewind, play, pause, next)
 ¥ Have downloads continue when UI not in foreground
+¥ Make rewind button move story back X seconds (X = 10, 30?)
 ¥ Warn user when there's no Internet connection
 ¥ What happens when stories downloaded while audio is playing, and how should that be handled?
 ¥ Story titles instead of file names in story list
 ¥ SeekBar to allow for moving within story
-¥ Make rewind button move story back X seconds (X = 10, 30?)
 ¥ File mod dates in story list
 ¥ Shorten download-URL display (just show text after last slash, maybe with easier to read date)
 ¥ Figure out how many stories are available and only download those (download loop arbitrarily set to 25 now) 
@@ -17,3 +17,4 @@ Done
 ¥ Audio continues to play when UI not in foreground
 ¥ Seekbar shows story playback progress
 ¥ Highlight story in list that's currently playing or paused
+¥ Moved CustomAdapter class to its own file

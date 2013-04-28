@@ -40,14 +40,13 @@ import android.widget.TextView;
 
 public class NPRDroidActivity extends ListActivity implements OnClickListener, OnSeekBarChangeListener {	
 	private String sdPath; 
-	private List<String> songs = new ArrayList<String>();
+	private ArrayList<String> songs = new ArrayList<String>();
 	private String TAG = "NPRDroidActivity";
 	private ImageButton rewindButton, playButton, pauseButton, nextButton;
 	private MusicService musicService;
 	boolean mBound = false;
 	private int mInterval = 1000; // 1 second updates
 	private Handler mHandler;
-	//	protected static final int NEXT_ITEM = 1;
 	private SeekBar seekBar;
 	SharedPreferences pref;
 
@@ -68,31 +67,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
 		mHandler = new Handler();
 		pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
-	}
-
-	class IconicAdapter extends ArrayAdapter<String> {
-		IconicAdapter() {
-			super(NPRDroidActivity.this, R.layout.row, songs);
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			View row = super.getView(position, convertView, parent);
-			ViewHolder holder = (ViewHolder)row.getTag();
-
-			if (holder == null) {                         
-				holder = new ViewHolder(row);
-				row.setTag(holder);
-			}
-
-			if (position == pref.getInt("listPosition", 0)) {
-				holder.story.setTextColor(Color.YELLOW);
-			} 
-			else {
-				holder.story.setTextColor(Color.LTGRAY);
-			}
-			return(row);
-		}
 	}
 
 	@Override
@@ -140,9 +114,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 				View vCurrent = listView.getChildAt(newPosition);
 				Log.i(TAG, "handleMessage new position: " + newPosition);
 				((TextView) vCurrent).setTextColor(Color.YELLOW);
-				Log.i(TAG, "handleMessage previous position: " + pref.getInt("listPosition", 0));
-				View vPrevious = listView.getChildAt(pref.getInt("listPosition", 0));	//change previously played item back to default color 
-				((TextView) vPrevious).setTextColor(Color.LTGRAY);
 				editor.putInt("listPosition", newPosition);	//save this position so its list item can be changed later
 				editor.commit();
 				listView.invalidateViews();
@@ -221,7 +192,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 			for (File file : files) {
 				songs.add(file.getName());
 			}
-			IconicAdapter songList = new IconicAdapter();
+			CustomAdapter songList = new CustomAdapter(this, R.layout.row, songs);
 			setListAdapter(songList);
 		}
 	}
@@ -307,7 +278,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		int year = calNow.get(Calendar.YEAR);
 		int intMonth = calNow.get(Calendar.MONTH) + 1;
 		String month = intMonth > 9 ? "" + intMonth : "0" + intMonth;
-		int intDay = calNow.get(Calendar.DATE) - 1;
+		int intDay = calNow.get(Calendar.DATE);
 		String day = intDay > 9 ? "" + intDay : "0" + intDay;
 		String prepend;
 		String URL[] = new String[25];

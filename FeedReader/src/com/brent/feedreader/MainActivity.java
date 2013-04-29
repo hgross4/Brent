@@ -229,7 +229,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 			BufferedReader reader=null;
 			String rawXML = null;
 
-
+			// Make the connection to the URL and get the xml as one big string
 			try {
 				URL url = new URL(urls[0]);
 				HttpURLConnection connection = (HttpURLConnection)url.openConnection();
@@ -238,13 +238,13 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 				connection.connect();
 
 				reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-				StringBuilder buf = new StringBuilder();
+				StringBuilder stringBuilder = new StringBuilder();
 				String line = null;
 
 				while ((line=reader.readLine()) != null) {
-					buf.append(line + "\n");
+					stringBuilder.append(line + "\n");
 				}
-				rawXML = buf.toString();
+				rawXML = stringBuilder.toString();
 
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
@@ -261,9 +261,13 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 				}
 			}
 
+			// Parse the xml and create 3 lists holding article titles, contents (bodies), and external links
 			articleTitles = new ArrayList<String>();
 			articleBodies = new ArrayList<String>();
 			articleLinks = new ArrayList<String>();
+			articleTitles.add("Reader Instructions");
+			articleBodies.add("Touch the screen to display the article-selection list at the bottom.");
+			articleLinks.add("");
 			DocumentBuilder builder;
 			Document doc = null;
 			try {
@@ -309,6 +313,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
 		@Override
 		protected void onPostExecute(String string) {
+			// Populate the spinner with the article titles
 			ArrayAdapter<String> aa = new ArrayAdapter<String>(MainActivity.this, 
 					android.R.layout.simple_spinner_item, articleTitles);
 			aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -319,6 +324,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
 	@Override
 	public void onItemSelected(AdapterView<?> arg0, View view, int position, long id) {
+		// Load the article bodies and external links into the WebView for display
 		String article = "<br>" + "<br>" + articleLinks.get(position) + "<br>" + articleBodies.get(position);
 		articleBodyView.loadData(article, "text/html", "UTF-8");
 	}

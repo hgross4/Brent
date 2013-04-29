@@ -22,6 +22,9 @@ import org.xml.sax.SAXException;
 import com.brent.feedreader.util.SystemUiHider;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,6 +38,7 @@ import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -96,18 +100,21 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 		articleBodyView.setWebChromeClient(new WebChromeClient() { 
 			//Show progress when loading page, since it takes a little while
 			public void onProgressChanged(WebView view, int progress) {
-				//				articleBodyView.loadData("Loading page...", "text/html", "UTF-8");
 				MainActivity.this.setTitle("Loading page...");
 				MainActivity.this.setProgress(progress * 100);
 				if(progress == 100) {
 					MainActivity.this.setTitle(appTitle);
-					//					articleBodyView.loadData(articleBodies.get(0), "text/html", "UTF-8");
 				}
 			}
 		});
 		
 		// Get the articles. Network "stuff" needs to be done outside of the UI thread:
-		(new FetchArticlesTask()).execute("http://feeds2.feedburner.com/TheTechnologyEdge");
+		if (isOnline()) {
+			(new FetchArticlesTask()).execute("http://feeds2.feedburner.com/TheTechnologyEdge");
+		}
+		else {
+			Toast.makeText(getApplicationContext(), "No Internet connection.", Toast.LENGTH_LONG).show();
+		}
 
 		// Code from here to "end" generated automatically when project created,
 		// to hide and show title and status bars (i.e., run app full screen)
@@ -221,6 +228,16 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 	@Override
 	public void onResume() {
 		super.onResume();
+	}
+	
+	public boolean isOnline() {
+	    ConnectivityManager cm =
+	        (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+	    NetworkInfo netInfo = cm.getActiveNetworkInfo();
+	    if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+	        return true;
+	    }
+	    return false;
 	}
 
 	private class FetchArticlesTask extends AsyncTask<String, Void, String> {

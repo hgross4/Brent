@@ -262,7 +262,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 				}
 			}
 
-			// Parse the xml and create 3 lists holding article titles, contents (bodies), and external links
+			// Parse the xml and create 4 lists holding article titles, contents (bodies), external links, and timestamps
 			articleTitles = new ArrayList<String>();
 			articleBodies = new ArrayList<String>();
 			articleLinks = new ArrayList<String>();
@@ -283,39 +283,39 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 				e.printStackTrace();
 			} catch (IOException e) {				
 				e.printStackTrace();
-			}			
-
-			NodeList titles = doc.getElementsByTagName("title");
-			for (int i = 0; i < titles.getLength(); i++) {
-				Element title = (Element)titles.item(i);
-				if (i == 0) {
-					appTitle = title.getFirstChild().getNodeValue();
-				}
-				else articleTitles.add(title.getFirstChild().getNodeValue());
-			}
-
-			NodeList bodies = doc.getElementsByTagName("content");
-			for (int i = 0; i < bodies.getLength(); i++) {
-				Element body = (Element)bodies.item(i);
-				articleBodies.add(body.getFirstChild().getNodeValue());
-			}
-
-			NodeList links = doc.getElementsByTagName("link");			
-			for (int i = 0; i < links.getLength(); i++) {
-				Element link = (Element)links.item(i);
-				if (link == null) Log.i(TAG, i + " is null");
-				if (link.getAttribute("rel").equals("alternate") && link.getAttribute("title").length() > 0) {
-					String articleLink = ("<a href=" + "`" + link.getAttribute("href") + "`" + "target=" + "`"+ "_blank" + "`" + ">" + link.getAttribute("title") + "</a>").replace('`', '"');
-					if (i == 0 || i == 1 || i == 2) Log.i(TAG, i + " " + articleLink);
-					articleLinks.add(articleLink);
+			}	
+			
+			NodeList entries = doc.getElementsByTagName("entry");
+			for (int i = 0; i < entries.getLength(); i++) {
+				Element entry = (Element)entries.item(i);
+				NodeList children = entry.getChildNodes();
+				for (int j = 0; j < children.getLength(); j++) {
+					Element child = (Element) children.item(j);
+					if (child.getNodeName().equals("title")) {
+//						if (child.getFirstChild().getNodeValue() != null) Log.i(TAG, child.getFirstChild().getNodeValue());
+						articleTitles.add(child.getFirstChild().getNodeValue());
+					}
+					else if (child.getNodeName().equals("link") && child.getAttribute("rel").equals("alternate")) {						
+						String articleLink = ("<a href=" + "`" + child.getAttribute("href") + "`" + "target=" + "`"+ "_blank" 
+								+ "`" + ">" + child.getAttribute("title") + "</a>").replace('`', '"');
+						articleLinks.add(articleLink);
+					}
+					else if (child.getNodeName().equals("content")) {
+						articleBodies.add(child.getFirstChild().getNodeValue());
+					}
+					else if (child.getNodeName().equals("updated")) {
+						articleTimeStamps.add(child.getFirstChild().getNodeValue());
+					}
 				}
 			}
 			
-			NodeList timeStamps = doc.getElementsByTagName("updated");
-			Log.i(TAG, "timestamps length: " + timeStamps.getLength());
-			for (int i = 1; i < timeStamps.getLength(); i++) {
-				Element timeStamp = (Element)timeStamps.item(i);
-				articleTimeStamps.add(timeStamp.getFirstChild().getNodeValue());
+			Element feed = (Element) doc.getElementsByTagName("feed").item(0);
+			NodeList feedChildren = feed.getChildNodes();
+			for (int i = 0; i < feedChildren.getLength(); i++) {
+				Element child = (Element) feedChildren.item(i);
+				if (child.getNodeName().equals("title")) {
+					appTitle = child.getFirstChild().getNodeValue();
+				}
 			}
 
 			return null;
@@ -335,7 +335,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 	@Override
 	public void onItemSelected(AdapterView<?> arg0, View view, int position, long id) {
 		// Load the article bodies and external links into the WebView for display
-		String article = "<br>" + "<br>" + articleLinks.get(position) + "<br>" + articleTimeStamps.get(position)+ "<p>" + articleBodies.get(position);
+		String article = "<br><br>" + articleLinks.get(position) + "<br>" + articleTimeStamps.get(position)+ "<p>" + articleBodies.get(position) + "<br><br>";
 		articleBodyView.loadData(article, "text/html", "UTF-8");
 	}
 

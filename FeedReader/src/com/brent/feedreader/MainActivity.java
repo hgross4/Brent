@@ -77,7 +77,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
 	public static final String TAG = "FeedReader";	
 	private Spinner titleSpinner;
-	WebView articleBodyView;
+	private WebView articleBodyView;
 	private ArrayList<String> articleTitles;
 	private ArrayList<String> articleLinks;
 	public ArrayList<String> articleTimeStamps;
@@ -94,8 +94,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
 		final View controlsView = findViewById(R.id.fullscreen_content_controls);
 		articleBodyView = (WebView) findViewById(R.id.article_body_webview);
-		articleBodyView.getSettings().setSupportZoom(true);	//this line and next allow zooming in and out of view
-		articleBodyView.getSettings().setBuiltInZoomControls(true);
+		articleBodyView.getSettings().setBuiltInZoomControls(true); //this line allows zooming in and out of view
+		articleBodyView.getSettings().setDisplayZoomControls(false);
 		articleBodyView.getSettings().setJavaScriptEnabled(true);	//needed for progress indication
 		articleBodyView.setWebChromeClient(new WebChromeClient() { 
 			//Show progress when loading page, since it takes a little while
@@ -113,11 +113,13 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 			(new FetchArticlesTask()).execute("http://feeds2.feedburner.com/TheTechnologyEdge");
 		}
 		else {
-			Toast.makeText(getApplicationContext(), "No Internet connection.", Toast.LENGTH_LONG).show();
+			Toast.makeText(getApplicationContext(), "No Internet connection. FeedReader has terminated.", Toast.LENGTH_LONG).show();
+			finish();
 		}
 
 		// Code from here to "end" generated automatically when project created,
-		// to hide and show title and status bars (i.e., run app full screen)
+		// to hide and show title and status bars (i.e., run app full screen).
+		// All code in com.brent.feedreader.util package also automatically generated.
 
 		// Set up an instance of SystemUiHider to control the system UI for
 		// this activity.
@@ -286,7 +288,9 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 			articleTimeStamps = new ArrayList<String>();
 			
 			articleTitles.add("Reader Instructions");
-			articleBodies.add("Touch the screen to display the article-selection list at the bottom.");
+			articleBodies.add("Touch screen to display article-selection list at bottom." +
+					"<br><br>NOTE:<br>Video not supported. To play video, touch title link at top of article " +
+					" to view article, and play its video, in your browser.<br><br>");
 			articleLinks.add("");
 			articleTimeStamps.add("");
 			DocumentBuilder builder;

@@ -11,16 +11,12 @@
          TextureView, etc.
     -->
 
-    <TextView
-        android:id="@+id/fullscreen_content"
+    <WebView
+        android:id="@+id/article_body_webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:keepScreenOn="true"
-        android:text="@string/dummy_content"
-        android:textColor="#33b5e5"
-        android:textSize="50sp"
-        android:textStyle="bold" />
+        android:keepScreenOn="true" />
 
     <!--
          This FrameLayout insets its children based on system windows using

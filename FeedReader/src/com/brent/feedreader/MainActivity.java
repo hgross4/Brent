@@ -29,6 +29,9 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
@@ -70,24 +73,47 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
 	public static final String TAG = "FeedReader";	
 	private Spinner titleSpinner;
-	
+	WebView articleBodyView;
+	private ArrayList<String> articleTitles;
+	private ArrayList<String> articleLinks;
+	private ArrayList<String> articleBodies;
+	private String appTitle;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		getWindow().requestFeature(Window.FEATURE_PROGRESS);
 		setContentView(R.layout.activity_main);
 		titleSpinner = (Spinner)findViewById(R.id.title_spinner); 
 		titleSpinner.setOnItemSelectedListener(this);
 
+		final View controlsView = findViewById(R.id.fullscreen_content_controls);
+		articleBodyView = (WebView) findViewById(R.id.article_body_webview);
+		articleBodyView.getSettings().setSupportZoom(true);	//this line and next allow zooming in and out of view
+		articleBodyView.getSettings().setBuiltInZoomControls(true);
+		articleBodyView.getSettings().setJavaScriptEnabled(true);	//needed for progress indication
+		articleBodyView.setWebChromeClient(new WebChromeClient() { 
+			//Show progress when loading page, since it takes a little while
+			public void onProgressChanged(WebView view, int progress) {
+				//				articleBodyView.loadData("Loading page...", "text/html", "UTF-8");
+				MainActivity.this.setTitle("Loading page...");
+				MainActivity.this.setProgress(progress * 100);
+				if(progress == 100) {
+					MainActivity.this.setTitle(appTitle);
+					//					articleBodyView.loadData(articleBodies.get(0), "text/html", "UTF-8");
+				}
+			}
+		});
+		
+		// Get the articles. Network "stuff" needs to be done outside of the UI thread:
+		(new FetchArticlesTask()).execute("http://feeds2.feedburner.com/TheTechnologyEdge");
+
 		// Code from here to "end" generated automatically when project created,
 		// to hide and show title and status bars (i.e., run app full screen)
 
-		final View controlsView = findViewById(R.id.fullscreen_content_controls);
-		final View contentView = findViewById(R.id.fullscreen_content);
-
 		// Set up an instance of SystemUiHider to control the system UI for
 		// this activity.
-		mSystemUiHider = SystemUiHider.getInstance(this, contentView, HIDER_FLAGS);
+		mSystemUiHider = SystemUiHider.getInstance(this, articleBodyView, HIDER_FLAGS);
 		mSystemUiHider.setup();
 		mSystemUiHider.setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
 			// Cached values.
@@ -129,7 +155,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 		});
 
 		// Set up the user interaction to manually show or hide the system UI.
-		contentView.setOnClickListener(new View.OnClickListener() {
+		articleBodyView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				if (TOGGLE_ON_CLICK) {
@@ -194,18 +220,15 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 	@Override
 	public void onResume() {
 		super.onResume();
-		(new FetchArticlesTask()).execute("http://feeds2.feedburner.com/TheTechnologyEdge");
 	}
 
 	private class FetchArticlesTask extends AsyncTask<String, Void, String> {
-		ArrayList<String> articleTitles;
-		ArrayList<String> articleBodies;
-			
+
 		@Override
 		protected String doInBackground(String... urls) {
 			BufferedReader reader=null;
 			String rawXML = null;
-			
+
 
 			try {
 				URL url = new URL(urls[0]);
@@ -240,32 +263,45 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
 			articleTitles = new ArrayList<String>();
 			articleBodies = new ArrayList<String>();
+			articleLinks = new ArrayList<String>();
 			DocumentBuilder builder;
 			Document doc = null;
 			try {
 				builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 				doc = builder.parse(new InputSource(new StringReader(rawXML)));
-			} catch (ParserConfigurationException e) {
-				// TODO Auto-generated catch block
+			} catch (ParserConfigurationException e) {				
 				e.printStackTrace();
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
+			} catch (SAXException e) {				
 				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
+			} catch (IOException e) {				
 				e.printStackTrace();
 			}			
 
 			NodeList titles = doc.getElementsByTagName("title");
 			for (int i = 0; i < titles.getLength(); i++) {
 				Element title = (Element)titles.item(i);
-				articleTitles.add(title.getFirstChild().getNodeValue());
+				if (i == 0) {
+					appTitle = title.getFirstChild().getNodeValue();
+				}
+				else articleTitles.add(title.getFirstChild().getNodeValue());
 			}
 
 			NodeList bodies = doc.getElementsByTagName("content");
 			for (int i = 0; i < bodies.getLength(); i++) {
 				Element body = (Element)bodies.item(i);
 				articleBodies.add(body.getFirstChild().getNodeValue());
+			}
+
+			NodeList links = doc.getElementsByTagName("link");
+			Log.i(TAG, "links length: " + links.getLength());
+			for (int i = 0; i < links.getLength(); i++) {
+				Element link = (Element)links.item(i);
+				if (link == null) Log.i(TAG, i + " is null");
+				if (link.getAttribute("rel").equals("alternate") && link.getAttribute("title").length() > 0) {
+					String articleLink = ("<a href=" + "`" + link.getAttribute("href") + "`" + "target=" + "`"+ "_blank" + "`" + ">" + link.getAttribute("title") + "</a>").replace('`', '"');
+					if (i == 0 || i == 1 || i == 2) Log.i(TAG, i + " " + articleLink);
+					articleLinks.add(articleLink);
+				}
 			}
 
 			return null;
@@ -277,16 +313,14 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 					android.R.layout.simple_spinner_item, articleTitles);
 			aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			titleSpinner.setAdapter(aa);
+			MainActivity.this.setTitle(appTitle);
 		}
 	}
 
-
-
 	@Override
-	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
-			long arg3) {
-		// TODO Auto-generated method stub
-
+	public void onItemSelected(AdapterView<?> arg0, View view, int position, long id) {
+		String article = "<br>" + "<br>" + articleLinks.get(position) + "<br>" + articleBodies.get(position);
+		articleBodyView.loadData(article, "text/html", "UTF-8");
 	}
 
 	@Override

@@ -313,7 +313,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 			
 			NodeList timeStamps = doc.getElementsByTagName("updated");
 			Log.i(TAG, "timestamps length: " + timeStamps.getLength());
-			for (int i = 0; i < timeStamps.getLength(); i++) {
+			for (int i = 1; i < timeStamps.getLength(); i++) {
 				Element timeStamp = (Element)timeStamps.item(i);
 				articleTimeStamps.add(timeStamp.getFirstChild().getNodeValue());
 			}

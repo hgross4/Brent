@@ -76,8 +76,9 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 	WebView articleBodyView;
 	private ArrayList<String> articleTitles;
 	private ArrayList<String> articleLinks;
-	private ArrayList<String> articleBodies;
-	private String appTitle;
+	public ArrayList<String> articleTimeStamps;
+	private ArrayList<String> articleBodies;	
+	private String appTitle;	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -265,9 +266,12 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 			articleTitles = new ArrayList<String>();
 			articleBodies = new ArrayList<String>();
 			articleLinks = new ArrayList<String>();
+			articleTimeStamps = new ArrayList<String>();
+			
 			articleTitles.add("Reader Instructions");
 			articleBodies.add("Touch the screen to display the article-selection list at the bottom.");
 			articleLinks.add("");
+			articleTimeStamps.add("");
 			DocumentBuilder builder;
 			Document doc = null;
 			try {
@@ -296,8 +300,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 				articleBodies.add(body.getFirstChild().getNodeValue());
 			}
 
-			NodeList links = doc.getElementsByTagName("link");
-			Log.i(TAG, "links length: " + links.getLength());
+			NodeList links = doc.getElementsByTagName("link");			
 			for (int i = 0; i < links.getLength(); i++) {
 				Element link = (Element)links.item(i);
 				if (link == null) Log.i(TAG, i + " is null");
@@ -306,6 +309,13 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 					if (i == 0 || i == 1 || i == 2) Log.i(TAG, i + " " + articleLink);
 					articleLinks.add(articleLink);
 				}
+			}
+			
+			NodeList timeStamps = doc.getElementsByTagName("updated");
+			Log.i(TAG, "timestamps length: " + timeStamps.getLength());
+			for (int i = 0; i < timeStamps.getLength(); i++) {
+				Element timeStamp = (Element)timeStamps.item(i);
+				articleTimeStamps.add(timeStamp.getFirstChild().getNodeValue());
 			}
 
 			return null;
@@ -325,7 +335,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 	@Override
 	public void onItemSelected(AdapterView<?> arg0, View view, int position, long id) {
 		// Load the article bodies and external links into the WebView for display
-		String article = "<br>" + "<br>" + articleLinks.get(position) + "<br>" + articleBodies.get(position);
+		String article = "<br>" + "<br>" + articleLinks.get(position) + "<br>" + articleTimeStamps.get(position)+ "<p>" + articleBodies.get(position);
 		articleBodyView.loadData(article, "text/html", "UTF-8");
 	}
 

@@ -3,5 +3,6 @@
     <string name="app_name">NPRDroid</string>
     <string name="me">Morning \n Edition</string>
     <string name="atc">All Things Considered</string>
+    <string name="downloads_complete">Stories download complete</string>
 
 </resources>

@@ -4,20 +4,23 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
-import java.util.List;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.app.DownloadManager;
 import android.app.ListActivity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,26 +32,27 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class NPRDroidActivity extends ListActivity implements OnClickListener, OnSeekBarChangeListener {	
 	private String sdPath; 
 	private ArrayList<String> songs = new ArrayList<String>();
 	private String TAG = "NPRDroidActivity";
 	private ImageButton rewindButton, playButton, pauseButton, nextButton;
+	private Button me, atc;
 	private MusicService musicService;
 	boolean mBound = false;
 	private int mInterval = 1000; // 1 second updates
 	private Handler mHandler;
 	private SeekBar seekBar;
 	SharedPreferences pref;
+	private DownloadManager downloadManager = null;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -56,6 +60,8 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		updateSongList();
+		me = (Button) findViewById(R.id.me);
+		atc = (Button) findViewById(R.id.atc);
 		rewindButton = (ImageButton) findViewById(R.id.rewindButton);
 		playButton = (ImageButton) findViewById(R.id.playButton);
 		pauseButton = (ImageButton) findViewById(R.id.pauseButton);
@@ -67,6 +73,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
 		mHandler = new Handler();
 		pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
+		downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
 	}
 
 	@Override
@@ -82,6 +89,9 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	@Override
 	protected void onResume() {
 		super.onResume();
+		IntentFilter f = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+		f.addAction(DownloadManager.ACTION_NOTIFICATION_CLICKED);
+		registerReceiver(onDownloadEvent, f);
 		startRepeatingTask();
 	}
 
@@ -89,6 +99,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	protected void onPause() {
 		super.onPause();
 		stopRepeatingTask();
+		unregisterReceiver(onDownloadEvent);
 	}
 
 	@Override
@@ -188,6 +199,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		Log.i(TAG , sdPath);
 		File sdPathFile = new File(sdPath);
 		File[] files = sdPathFile.listFiles();
+		Arrays.sort(files);
 		if (files.length > 0) {
 			for (File file : files) {
 				songs.add(file.getName());
@@ -268,7 +280,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 			updateSongList();
 		}
 	}
-
+	
 	public void readWebpage(View view) {	
 		String showChoice;
 		if (view.getId() == R.id.me) showChoice = "me";
@@ -281,18 +293,50 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		int intDay = calNow.get(Calendar.DATE);
 		String day = intDay > 9 ? "" + intDay : "0" + intDay;
 		String prepend;
-		String URL[] = new String[25];
+		String urls[] = new String[25];
 		for (int i = 0; i < 25; ++i) {
 			if (i < 9) 
 				prepend = "_0";
 			else
 				prepend = "_";
-			URL[i] = "http://pd.npr.org/anon.npr-mp3/npr/" + showChoice + "/" + year + "/" + month + "/" + year + month + day + "_" + showChoice + prepend + (i + 1) + ".mp3";
-			Log.i("NPR", URL[i]);
+			urls[i] = "http://pd.npr.org/anon.npr-mp3/npr/" + showChoice + "/" + year + "/" + month + "/" + year + month + day + "_" + showChoice + prepend + (i + 1) + ".mp3";
+			Log.i("NPR", urls[i]);
 		}
-		(new DownloadWebPageTask()).execute(URL);
+//		(new DownloadWebPageTask()).execute(URL);
+		downloadStories(view, urls);
 	}
 
+	private void downloadStories(View v, String[] urls) {
+		for (String url : urls) {
+			String[] urlSegments = url.split("/");
+			String fileName = urlSegments[8];
+			Uri uri=Uri.parse(url);
+			DownloadManager.Request req=new DownloadManager.Request(uri);
+			req.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI
+					| DownloadManager.Request.NETWORK_MOBILE)
+					.setAllowedOverRoaming(false)
+					.setTitle(fileName)
+					.setDescription("NPRDownload")
+					.setDestinationInExternalFilesDir(this, null, fileName);
+			downloadManager.enqueue(req);
+			v.setEnabled(false);
+			updateSongList();
+		}
+	}
+	
+	private BroadcastReceiver onDownloadEvent = new BroadcastReceiver() {
+		public void onReceive(Context ctxt, Intent i) {
+			if (DownloadManager.ACTION_NOTIFICATION_CLICKED.equals(i.getAction())) {
+//				Toast.makeText(ctxt, R.string.hi, Toast.LENGTH_LONG).show();
+			}
+			else {
+				me.setEnabled(true);
+				atc.setEnabled(true);
+				Toast.makeText(ctxt, R.string.downloads_complete, Toast.LENGTH_LONG).show();
+			}
+		}
+	};
+	
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress,
 			boolean fromUser) {

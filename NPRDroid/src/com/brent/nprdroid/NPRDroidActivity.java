@@ -19,7 +19,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -43,6 +42,7 @@ import android.widget.Toast;
 public class NPRDroidActivity extends ListActivity implements OnClickListener, OnSeekBarChangeListener {	
 	private String sdPath; 
 	private ArrayList<String> songs = new ArrayList<String>();
+	private CustomAdapter songList;
 	private String TAG = "NPRDroidActivity";
 	private ImageButton rewindButton, playButton, pauseButton, nextButton;
 	private Button me, atc;
@@ -52,7 +52,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	private Handler mHandler;
 	private SeekBar seekBar;
 	SharedPreferences pref;
-	private DownloadManager downloadManager = null;
+	private DownloadManager downloadManager[] = new DownloadManager[25];
 
 	/** Called when the activity is first created. */
 	@Override
@@ -73,7 +73,9 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
 		mHandler = new Handler();
 		pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
-		downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
+		for (int i = 0; i < 25; ++i) {			
+			downloadManager[i] = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
+		}
 	}
 
 	@Override
@@ -115,19 +117,12 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			Log.i(TAG, "start handleMessage");
 			if (msg.what == MusicService.NEXT_ITEM) {
-				Log.i(TAG, "handler");
-				SharedPreferences.Editor editor = pref.edit();			
-				ListView listView = getListView();
-				listView.invalidateViews();			
-				int newPosition = musicService.mRetriever.listPosition - 1;			
-				View vCurrent = listView.getChildAt(newPosition);
-				Log.i(TAG, "handleMessage new position: " + newPosition);
-				((TextView) vCurrent).setTextColor(Color.YELLOW);
+				SharedPreferences.Editor editor = pref.edit();	
+				int newPosition = musicService.mRetriever.listPosition - 1;
+				songList.notifyDataSetChanged();	//make newly playing story highlighted in list, others default color
 				editor.putInt("listPosition", newPosition);	//save this position so its list item can be changed later
-				editor.commit();
-				listView.invalidateViews();
+				editor.commit();				
 			}
 		}
 	};
@@ -177,7 +172,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 			else Log.i(TAG, "musicService is NULL!");
 		}
 	};
-
+	
 	void startRepeatingTask() {
 		mStatusChecker.run(); 
 	}
@@ -204,7 +199,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 			for (File file : files) {
 				songs.add(file.getName());
 			}
-			CustomAdapter songList = new CustomAdapter(this, R.layout.row, songs);
+			songList = new CustomAdapter(this, R.layout.row, songs);
 			setListAdapter(songList);
 		}
 	}
@@ -262,7 +257,8 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 					InputStream content = execute.getEntity().getContent();
 					byte[] buffer = new byte[1024];
 					int length;
-					File audioFile = new File(getExternalFilesDir(null), index + ".mp3");
+					String fileName = index > 9 ? "" + index + ".mp3" : "0" + index + ".mp3";
+					File audioFile = new File(getExternalFilesDir(null), fileName);
 					FileOutputStream out = new FileOutputStream(audioFile);
 					while ((length = content.read(buffer)) > 0) {
 						out.write(buffer, 0, length);
@@ -302,11 +298,13 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 			urls[i] = "http://pd.npr.org/anon.npr-mp3/npr/" + showChoice + "/" + year + "/" + month + "/" + year + month + day + "_" + showChoice + prepend + (i + 1) + ".mp3";
 			Log.i("NPR", urls[i]);
 		}
-//		(new DownloadWebPageTask()).execute(URL);
-		downloadStories(view, urls);
+		(new DownloadWebPageTask()).execute(urls);
+//		downloadStories(view, urls);
 	}
 
 	private void downloadStories(View v, String[] urls) {
+		v.setEnabled(false);
+		int index = 0;
 		for (String url : urls) {
 			String[] urlSegments = url.split("/");
 			String fileName = urlSegments[8];
@@ -318,9 +316,8 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 					.setTitle(fileName)
 					.setDescription("NPRDownload")
 					.setDestinationInExternalFilesDir(this, null, fileName);
-			downloadManager.enqueue(req);
-			v.setEnabled(false);
-			updateSongList();
+			downloadManager[index].enqueue(req);			
+			songs.add(fileName);
 		}
 	}
 	

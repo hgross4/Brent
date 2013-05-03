@@ -1,7 +1,9 @@
 ¥ Player buttons (rewind, play, pause, next)
+	- Implement next button pressed (so user knows that it's been pressed)
+	- Activate and change graphic for rewind button, and make it move story back X seconds (X = 10, 30?)
 ¥ Figure out how to handle saved position between app uses (set to 0 when a download is performed? have play button play highlighted story otherwise (right now play button just starts from first story when app started up fresh))
 ¥ Use Download Manager (have it notify only after all stories downloaded)
-¥ Make rewind button move story back X seconds (X = 10, 30?)
+¥ Have paused story stay in notification bar and be available to be restarted at paused position at any time (the way ES handles this)
 ¥ Warn user when there's no Internet connection
 ¥ What happens when stories downloaded while audio is playing, and how should that be handled?
 ¥ Story titles instead of file names in story list

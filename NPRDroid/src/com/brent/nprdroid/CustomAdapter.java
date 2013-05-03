@@ -19,8 +19,7 @@ class CustomAdapter extends ArrayAdapter<String> {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View row = super.getView(position, convertView, parent);
-		ViewHolder holder = (ViewHolder)row.getTag();
-		
+		ViewHolder holder = (ViewHolder)row.getTag();		
 
 		if (holder == null) {                         
 			holder = new ViewHolder(row);

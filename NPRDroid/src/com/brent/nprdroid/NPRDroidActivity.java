@@ -91,9 +91,9 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	@Override
 	protected void onResume() {
 		super.onResume();
-		IntentFilter f = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-		f.addAction(DownloadManager.ACTION_NOTIFICATION_CLICKED);
-		registerReceiver(onDownloadEvent, f);
+		IntentFilter filter = new IntentFilter(DownloadService.broadcast);
+		filter.addAction(DownloadManager.ACTION_NOTIFICATION_CLICKED);
+		registerReceiver(onDownloadEvent, filter);
 		startRepeatingTask();
 	}
 
@@ -289,17 +289,19 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		int intDay = calNow.get(Calendar.DATE);
 		String day = intDay > 9 ? "" + intDay : "0" + intDay;
 		String prepend;
-		String urls[] = new String[25];
+		ArrayList<String> urls = new ArrayList<String>();
 		for (int i = 0; i < 25; ++i) {
 			if (i < 9) 
 				prepend = "_0";
 			else
 				prepend = "_";
-			urls[i] = "http://pd.npr.org/anon.npr-mp3/npr/" + showChoice + "/" + year + "/" + month + "/" + year + month + day + "_" + showChoice + prepend + (i + 1) + ".mp3";
-			Log.i("NPR", urls[i]);
+			urls.add("http://pd.npr.org/anon.npr-mp3/npr/" + showChoice + "/" + year + "/" + month + "/" + year + month + day + "_" + showChoice + prepend + (i + 1) + ".mp3");
 		}
-		(new DownloadWebPageTask()).execute(urls);
+//		(new DownloadWebPageTask()).execute(urls);
 //		downloadStories(view, urls);
+		Intent intent = new Intent(this, DownloadService.class);
+        intent.putStringArrayListExtra("urls", urls);
+        startService(intent);
 	}
 
 	private void downloadStories(View v, String[] urls) {
@@ -323,14 +325,17 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	
 	private BroadcastReceiver onDownloadEvent = new BroadcastReceiver() {
 		public void onReceive(Context ctxt, Intent i) {
-			if (DownloadManager.ACTION_NOTIFICATION_CLICKED.equals(i.getAction())) {
-//				Toast.makeText(ctxt, R.string.hi, Toast.LENGTH_LONG).show();
-			}
-			else {
+//			if (DownloadManager.ACTION_NOTIFICATION_CLICKED.equals(i.getAction())) {
+////				Toast.makeText(ctxt, R.string.hi, Toast.LENGTH_LONG).show();
+//			}
+//			else {
 				me.setEnabled(true);
 				atc.setEnabled(true);
-				Toast.makeText(ctxt, R.string.downloads_complete, Toast.LENGTH_LONG).show();
-			}
+				Toast.makeText(ctxt, "Downloading " + i.getStringExtra(DownloadService.urlFileName), Toast.LENGTH_LONG).show();
+//				TextView urlText = (TextView) findViewById(R.id.urlText);
+//				urlText.setText(i.getStringExtra(DownloadService.urlFileName));
+				songList.notifyDataSetChanged();	//highlight first item in story list
+//			}
 		}
 	};
 	

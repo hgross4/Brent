@@ -47,6 +47,8 @@
             </intent-filter>
         </receiver>
         
+        <service android:name=".DownloadService"></service>
+        
     </application>
 
 </manifest>

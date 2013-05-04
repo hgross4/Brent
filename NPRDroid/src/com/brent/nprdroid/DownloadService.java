@@ -11,7 +11,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.IntentService;
 import android.app.Notification;
-import android.app.Notification.Builder;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;

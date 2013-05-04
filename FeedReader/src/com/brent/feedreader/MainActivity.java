@@ -57,7 +57,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 	 * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
 	 * user interaction before hiding the system UI.
 	 */
-	private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+	private static final int AUTO_HIDE_DELAY_MILLIS = 5000;
 
 	/**
 	 * If set, will toggle the system UI visibility upon interaction. Otherwise,
@@ -79,9 +79,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 	private Spinner titleSpinner;
 	private WebView articleBodyView;
 	private ArrayList<String> articleTitles;
-	private ArrayList<String> articleLinks;
-	public ArrayList<String> articleTimeStamps;
-	private ArrayList<String> articleBodies;	
+	private ArrayList<Article> articles;
 	private String appTitle;	
 
 	@Override
@@ -107,7 +105,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 				}
 			}
 		});
-		
+
 		// Get the articles. Network "stuff" needs to be done outside of the UI thread:
 		if (isOnline()) {
 			(new FetchArticlesTask()).execute("http://feeds2.feedburner.com/TheTechnologyEdge");
@@ -231,15 +229,15 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 	public void onResume() {
 		super.onResume();
 	}
-	
+
 	public boolean isOnline() {
-	    ConnectivityManager cm =
-	        (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-	    NetworkInfo netInfo = cm.getActiveNetworkInfo();
-	    if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-	        return true;
-	    }
-	    return false;
+		ConnectivityManager cm =
+			(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo netInfo = cm.getActiveNetworkInfo();
+		if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+			return true;
+		}
+		return false;
 	}
 
 	private class FetchArticlesTask extends AsyncTask<String, Void, String> {
@@ -281,18 +279,19 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 				}
 			}
 
-			// Parse the xml and create 4 lists holding article titles, contents (bodies), external links, and timestamps
+			// Parse the xml and populate the lists articleTitles (for the spinner) and articles (to store all article content)
 			articleTitles = new ArrayList<String>();
-			articleBodies = new ArrayList<String>();
-			articleLinks = new ArrayList<String>();
-			articleTimeStamps = new ArrayList<String>();
-			
-			articleTitles.add("Reader Instructions");
-			articleBodies.add("Touch screen to display article-selection list at bottom." +
+			articles = new ArrayList<Article>();
+
+			Article article = new Article();
+			article.setTitle("Reader Instructions");
+			article.setLink("");
+			article.setTimestamp("");
+			article.setBody("Touch screen to display article-selection list at bottom." +
 					"<br><br>NOTE:<br>Video not supported. To play video, touch title link at top of article " +
-					" to view article, and play its video, in your browser.<br><br>");
-			articleLinks.add("");
-			articleTimeStamps.add("");
+			" to view article, and play its video, in your browser.<br><br>");
+			articles.add(article);
+			articleTitles.add("Reader Instructions");
 			DocumentBuilder builder;
 			Document doc = null;
 			try {
@@ -305,31 +304,35 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 			} catch (IOException e) {				
 				e.printStackTrace();
 			}	
-			
+
 			NodeList entries = doc.getElementsByTagName("entry");
 			for (int i = 0; i < entries.getLength(); i++) {
 				Element entry = (Element)entries.item(i);
 				NodeList children = entry.getChildNodes();
+				article = new Article();
 				for (int j = 0; j < children.getLength(); j++) {
-					Element child = (Element) children.item(j);
+					Element child = (Element) children.item(j);					
 					if (child.getNodeName().equals("title")) {
-//						if (child.getFirstChild().getNodeValue() != null) Log.i(TAG, child.getFirstChild().getNodeValue());
-						articleTitles.add(child.getFirstChild().getNodeValue());
+						String title = child.getFirstChild().getNodeValue();
+						articleTitles.add(title);
+						article.setTitle(title);
 					}
 					else if (child.getNodeName().equals("link") && child.getAttribute("rel").equals("alternate")) {						
 						String articleLink = ("<a href=" + "`" + child.getAttribute("href") + "`" + "target=" + "`"+ "_blank" 
 								+ "`" + ">" + child.getAttribute("title") + "</a>").replace('`', '"');
-						articleLinks.add(articleLink);
+						article.setLink(articleLink);
 					}
 					else if (child.getNodeName().equals("content")) {
-						articleBodies.add(child.getFirstChild().getNodeValue());
+						article.setBody(child.getFirstChild().getNodeValue());
 					}
 					else if (child.getNodeName().equals("updated")) {
-						articleTimeStamps.add(child.getFirstChild().getNodeValue());
+						article.setTimestamp(child.getFirstChild().getNodeValue());
 					}
 				}
+				articles.add(article);
+				Log.i(TAG, "title: " + articles.get(i + 1).getTitle());
 			}
-			
+
 			Element feed = (Element) doc.getElementsByTagName("feed").item(0);
 			NodeList feedChildren = feed.getChildNodes();
 			for (int i = 0; i < feedChildren.getLength(); i++) {
@@ -356,8 +359,9 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 	@Override
 	public void onItemSelected(AdapterView<?> arg0, View view, int position, long id) {
 		// Load the article bodies and external links into the WebView for display
-		String article = "<br><br>" + articleLinks.get(position) + "<br>" + articleTimeStamps.get(position)+ "<p>" + articleBodies.get(position) + "<br><br>";
-		articleBodyView.loadData(article, "text/html", "UTF-8");
+		String articleContent = "<br><br>" + articles.get(position).getLink() + "<br>" 
+		+ articles.get(position).getTimestamp() + "<p>" + articles.get(position).getBody() + "<br><br>";
+		articleBodyView.loadData(articleContent, "text/html", "UTF-8");
 	}
 
 	@Override

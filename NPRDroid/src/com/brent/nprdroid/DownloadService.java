@@ -12,13 +12,18 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 public class DownloadService extends IntentService {
 	public static final String broadcast = "nprdownload.broadcast";
 	public static final String urlFileName = "file name from url";
+	private static final int FOREGROUND_NOTIFICATION_ID = 1;
+	private static final String TAG = "DownloadService";
+	private Notification.Builder mBuilder;
 	SharedPreferences pref;
 
 	public DownloadService() {
@@ -27,12 +32,12 @@ public class DownloadService extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		NotificationManager mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		Notification.Builder mBuilder = new Notification.Builder(this);
-		mBuilder.setContentTitle("NPR Stories download")
-	    .setContentText("Download in progress")
+		Log.i(TAG, "onHandleIntent");
+		mBuilder = new Notification.Builder(this);
+		mBuilder.setContentTitle("NPR stories download")
+	    .setTicker("Starting NPR stories download")
 	    .setSmallIcon(android.R.drawable.stat_sys_download);
-		Intent progressIntent = new Intent(broadcast);
+		startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.getNotification());
 		int index = 1;
 		ArrayList<String> urls = intent.getStringArrayListExtra("urls");
 		for (String url : urls) {
@@ -51,24 +56,23 @@ public class DownloadService extends IntentService {
 				}
 				String fileNameFromUrl = url.split("/")[8];
 				mBuilder.setProgress(25, index, false)
-				.setContentText(fileNameFromUrl);                
-                mNotifyManager.notify(0, mBuilder.getNotification());
-                progressIntent.putExtra(urlFileName, fileNameFromUrl);
-                sendBroadcast(progressIntent);
+				.setTicker("Downloading " + fileNameFromUrl)
+				.setContentText(fileNameFromUrl);
+				startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.getNotification());
 				++index;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		mBuilder.setContentText("NPR Stories download complete")
-		.setProgress(0, 0, false); //remove the progress bar
-        mNotifyManager.notify(0, mBuilder.getNotification());
+		mBuilder.setContentText("NPR stories download complete")
+		.setProgress(0, 0, false) //remove the progress bar
+		.setTicker("NPR stories download complete")
+		.setSmallIcon(android.R.drawable.stat_sys_download_done);
+		startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.getNotification());
 		pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = pref.edit();	
 		editor.putInt("listPosition", 0);	//save this position so its list item can be changed later
 		editor.commit();
-		progressIntent.putExtra(urlFileName, "complete");
-		sendBroadcast(progressIntent);
 	}
 
 }

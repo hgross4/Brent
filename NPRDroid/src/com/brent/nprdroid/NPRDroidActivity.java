@@ -91,9 +91,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	@Override
 	protected void onResume() {
 		super.onResume();
-		IntentFilter filter = new IntentFilter(DownloadService.broadcast);
-		filter.addAction(DownloadManager.ACTION_NOTIFICATION_CLICKED);
-		registerReceiver(onDownloadEvent, filter);
 		startRepeatingTask();
 	}
 
@@ -101,7 +98,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	protected void onPause() {
 		super.onPause();
 		stopRepeatingTask();
-		unregisterReceiver(onDownloadEvent);
 	}
 
 	@Override
@@ -237,46 +233,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		startService((intent));
 	}
 
-	private class DownloadWebPageTask extends AsyncTask<String, Void, String> {
-		@Override
-		protected String doInBackground(String... urls) {
-			int index = 1;
-			for (String url : urls) {
-				DefaultHttpClient client = new DefaultHttpClient();
-				HttpGet httpGet = new HttpGet(url);
-				final String urlCopy = url;
-				runOnUiThread(new Runnable() {
-					public void run() {
-						TextView urlText = (TextView) findViewById(R.id.urlText);
-						urlText.setMovementMethod(new ScrollingMovementMethod());
-						urlText.setText(urlCopy);
-					}
-				});						
-				try {
-					HttpResponse execute = client.execute(httpGet);
-					InputStream content = execute.getEntity().getContent();
-					byte[] buffer = new byte[1024];
-					int length;
-					String fileName = index > 9 ? "" + index + ".mp3" : "0" + index + ".mp3";
-					File audioFile = new File(getExternalFilesDir(null), fileName);
-					FileOutputStream out = new FileOutputStream(audioFile);
-					while ((length = content.read(buffer)) > 0) {
-						out.write(buffer, 0, length);
-					}
-					++index;
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(String result) {
-			updateSongList();
-		}
-	}
-	
 	public void readWebpage(View view) {	
 		String showChoice;
 		if (view.getId() == R.id.me) showChoice = "me";
@@ -304,40 +260,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
         startService(intent);
 	}
 
-	private void downloadStories(View v, String[] urls) {
-		v.setEnabled(false);
-		int index = 0;
-		for (String url : urls) {
-			String[] urlSegments = url.split("/");
-			String fileName = urlSegments[8];
-			Uri uri=Uri.parse(url);
-			DownloadManager.Request req=new DownloadManager.Request(uri);
-			req.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI
-					| DownloadManager.Request.NETWORK_MOBILE)
-					.setAllowedOverRoaming(false)
-					.setTitle(fileName)
-					.setDescription("NPRDownload")
-					.setDestinationInExternalFilesDir(this, null, fileName);
-			downloadManager[index].enqueue(req);			
-			songs.add(fileName);
-		}
-	}
-	
-	private BroadcastReceiver onDownloadEvent = new BroadcastReceiver() {
-		public void onReceive(Context ctxt, Intent i) {
-//			if (DownloadManager.ACTION_NOTIFICATION_CLICKED.equals(i.getAction())) {
-////				Toast.makeText(ctxt, R.string.hi, Toast.LENGTH_LONG).show();
-//			}
-//			else {
-				me.setEnabled(true);
-				atc.setEnabled(true);
-				Toast.makeText(ctxt, "Downloading " + i.getStringExtra(DownloadService.urlFileName), Toast.LENGTH_LONG).show();
-//				TextView urlText = (TextView) findViewById(R.id.urlText);
-//				urlText.setText(i.getStringExtra(DownloadService.urlFileName));
-				songList.notifyDataSetChanged();	//highlight first item in story list
-//			}
-		}
-	};
 	
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress,

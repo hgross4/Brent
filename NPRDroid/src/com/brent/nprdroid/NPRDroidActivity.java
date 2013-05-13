@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
@@ -45,7 +46,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	private CustomAdapter songList;
 	private String TAG = "NPRDroidActivity";
 	private ImageButton rewindButton, playButton, pauseButton, nextButton;
-	private Button me, atc;
 	private MusicService musicService;
 	boolean mBound = false;
 	private int mInterval = 1000; // 1 second updates
@@ -60,8 +60,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		updateSongList();
-		me = (Button) findViewById(R.id.me);
-		atc = (Button) findViewById(R.id.atc);
 		rewindButton = (ImageButton) findViewById(R.id.rewindButton);
 		playButton = (ImageButton) findViewById(R.id.playButton);
 		pauseButton = (ImageButton) findViewById(R.id.pauseButton);
@@ -92,12 +90,15 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	protected void onResume() {
 		super.onResume();
 		startRepeatingTask();
+		IntentFilter filter = new IntentFilter(DownloadService.downloadDone);
+		LocalBroadcastManager.getInstance(this).registerReceiver(afterDownload, filter);
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
 		stopRepeatingTask();
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(afterDownload);
 	}
 
 	@Override
@@ -187,13 +188,12 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	private void updateSongList() {
 		songs.clear();
 		sdPath = getExternalFilesDir(null).getAbsolutePath() + "/";
-		Log.i(TAG , sdPath);
 		File sdPathFile = new File(sdPath);
 		File[] files = sdPathFile.listFiles();
 		Arrays.sort(files);
 		if (files.length > 0) {
 			for (File file : files) {
-				songs.add(file.getName());
+				songs.add(file.getName() + ": " + file.length()/1000 + " KB");
 			}
 			songList = new CustomAdapter(this, R.layout.row, songs);
 			setListAdapter(songList);
@@ -226,7 +226,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		Log.i(TAG, "onListItemClick");
 		Intent intent = new Intent(MusicService.ACTION_URL);
-		intent.putExtra("fileName", songs.get(position));
+		intent.putExtra("fileName", songs.get(position).split(":")[0]);
 		intent.putExtra("listPosition", position + 1);
 		playButton.setImageResource(R.drawable.play_button_pressed);
 		pauseButton.setImageResource(R.drawable.pause_button_normal);
@@ -259,6 +259,12 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
         intent.putStringArrayListExtra("urls", urls);
         startService(intent);
 	}
+
+	private BroadcastReceiver afterDownload = new BroadcastReceiver() { 
+		public void onReceive(Context ctxt, Intent i) {
+			updateSongList();
+		}
+	};
 
 	
 	@Override

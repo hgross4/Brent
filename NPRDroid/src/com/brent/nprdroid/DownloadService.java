@@ -4,27 +4,26 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.IntentService;
 import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.support.v4.content.LocalBroadcastManager;
 
 public class DownloadService extends IntentService {
-	public static final String broadcast = "nprdownload.broadcast";
 	public static final String urlFileName = "file name from url";
-	private static final int FOREGROUND_NOTIFICATION_ID = 1;
+	private static final int FOREGROUND_NOTIFICATION_ID = 10;
 	private static final String TAG = "DownloadService";
 	private Notification.Builder mBuilder;
 	SharedPreferences pref;
+	public static final String downloadDone = "downloadDone"; 
+	private static Intent downloadBroadcast = new Intent(downloadDone);
 
 	public DownloadService() {
 		super("DownloadService");
@@ -33,6 +32,15 @@ public class DownloadService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		Log.i(TAG, "onHandleIntent");
+		// Delete the files currently in the directory
+		String sdPath = getExternalFilesDir(null).getAbsolutePath() + "/";
+		File sdPathFile = new File(sdPath);
+		File[] files = sdPathFile.listFiles();
+		if (files.length > 0) {
+			for (File file : files) {
+				file.delete();
+			}
+		}
 		mBuilder = new Notification.Builder(this);
 		mBuilder.setContentTitle("NPR stories download")
 	    .setTicker("Starting NPR stories download")
@@ -48,13 +56,13 @@ public class DownloadService extends IntentService {
 				InputStream content = execute.getEntity().getContent();
 				byte[] buffer = new byte[1024];
 				int length;
-				String fileName = index > 9 ? "" + index + ".mp3" : "0" + index + ".mp3";
-				File audioFile = new File(getExternalFilesDir(null), fileName);
+				String fileNameFromUrl = url.split("/")[8];
+//				String fileName = index > 9 ? "" + index + ".mp3" : "0" + index + ".mp3";
+				File audioFile = new File(getExternalFilesDir(null), fileNameFromUrl);
 				FileOutputStream out = new FileOutputStream(audioFile);
 				while ((length = content.read(buffer)) > 0) {
 					out.write(buffer, 0, length);
-				}
-				String fileNameFromUrl = url.split("/")[8];
+				}				
 				mBuilder.setProgress(25, index, false)
 				.setTicker("Downloading " + fileNameFromUrl)
 				.setContentText(fileNameFromUrl);
@@ -73,6 +81,7 @@ public class DownloadService extends IntentService {
 		SharedPreferences.Editor editor = pref.edit();	
 		editor.putInt("listPosition", 0);	//save this position so its list item can be changed later
 		editor.commit();
+		LocalBroadcastManager.getInstance(this).sendBroadcast(downloadBroadcast);
 	}
 
 }

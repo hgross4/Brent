@@ -91,14 +91,14 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		super.onResume();
 		startRepeatingTask();
 		IntentFilter filter = new IntentFilter(DownloadService.downloadDone);
-		LocalBroadcastManager.getInstance(this).registerReceiver(afterDownload, filter);
+		registerReceiver(afterDownload, filter);
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
 		stopRepeatingTask();
-		LocalBroadcastManager.getInstance(this).unregisterReceiver(afterDownload);
+		unregisterReceiver(afterDownload);
 	}
 
 	@Override

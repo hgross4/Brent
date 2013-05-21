@@ -50,6 +50,7 @@ public class MusicRetriever {
      * blocking the main thread.
      */
     public void prepare() {
+    	mItems.clear();
     	String sdPath = "/sdcard/Android/data/com.brent.nprdroid/files/";
 		Log.i(TAG , sdPath);
 		File sdPathFile = new File(sdPath);

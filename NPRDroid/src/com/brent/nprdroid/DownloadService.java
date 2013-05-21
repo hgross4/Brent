@@ -68,6 +68,7 @@ public class DownloadService extends IntentService {
 				.setContentText(fileNameFromUrl);
 				startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.getNotification());
 				++index;
+				sendBroadcast(downloadBroadcast);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -81,7 +82,7 @@ public class DownloadService extends IntentService {
 		SharedPreferences.Editor editor = pref.edit();	
 		editor.putInt("listPosition", 0);	//save this position so its list item can be changed later
 		editor.commit();
-		LocalBroadcastManager.getInstance(this).sendBroadcast(downloadBroadcast);
+		sendStickyBroadcast(downloadBroadcast);
 	}
 
 }

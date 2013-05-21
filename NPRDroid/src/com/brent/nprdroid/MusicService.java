@@ -449,7 +449,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             }
             else {
                 mIsStreaming = false; // playing a locally available song
-
+                mRetriever.prepare(); // if not called, mRetriever won't have correct file names while download is happening
                 playingItem = mRetriever.getNextItem(); //mRetriever.getRandomItem();
                 if (playingItem == null) {
                     Toast.makeText(this,

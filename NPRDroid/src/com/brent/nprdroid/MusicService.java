@@ -317,6 +317,11 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
                     .setPlaybackState(RemoteControlClient.PLAYSTATE_PAUSED);
         }
     }
+    
+    void processSeekRequest(int msec) {
+    	if (mState == State.Playing || mState == State.Paused)
+    		mPlayer.seekTo(msec);
+    }
 
     void processRewindRequest() {
         if (mState == State.Playing || mState == State.Paused)

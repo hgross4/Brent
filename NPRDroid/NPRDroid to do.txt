@@ -1,4 +1,3 @@
-¥ Troubleshoot why list doesn't update after download done when activity not in foreground (intent not "sticking around"?) 
 ¥ Player buttons (rewind, play, pause, next)
 	- Implement next button pressed (so user knows that it's been pressed)
 	- Activate and change graphic for rewind button, and make it move story back X seconds (X = 10, 30?)
@@ -9,9 +8,7 @@
 ¥ Story titles instead of file names in story list
 ¥ SeekBar to allow for moving within story
 ¥ File mod dates in story list
-¥ Shorten download-URL display (just show text after last slash, maybe with easier to read date)
 ¥ Figure out how many stories are available and only download those (download loop arbitrarily set to 25 now) 
-¥ Have app save and restore playback item and player position if app is killed or crashes
 ¥ Voice commands
 
 Done
@@ -21,3 +18,4 @@ Done
 ¥ Seekbar shows story playback progress
 ¥ Highlight story in list that's currently playing or paused
 ¥ Moved CustomAdapter class to its own file
+¥ Troubleshoot why list doesn't update after download done when activity not in foreground (intent not "sticking around"?) 

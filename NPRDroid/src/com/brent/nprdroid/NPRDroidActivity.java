@@ -69,6 +69,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		pauseButton.setOnClickListener(this);
 		nextButton.setOnClickListener(this);
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
+		seekBar.setOnSeekBarChangeListener(this);
 		mHandler = new Handler();
 		pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
 		for (int i = 0; i < 25; ++i) {			
@@ -132,7 +133,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		public void onServiceConnected(ComponentName className,	IBinder service) {
 			// We've bound to MusicService, cast the IBinder and get MusicService instance
 			Log.i(TAG, "onServiceConnected");
-			//			LocalBinder binder = (LocalBinder) service;
 			musicService = MusicService.getService();
 			mBound = true;			
 			try {
@@ -263,15 +263,16 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	private BroadcastReceiver afterDownload = new BroadcastReceiver() { 
 		public void onReceive(Context ctxt, Intent i) {
 			updateSongList();
+			removeStickyBroadcast(i);
 		}
 	};
 
 	
 	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress,
-			boolean fromUser) {
-		// TODO Auto-generated method stub
-
+	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+		Log.i(TAG, "progress: " + progress + " fromUser: " + fromUser);
+		if (fromUser == true)
+			musicService.processSeekRequest(progress*1000);
 	}
 
 	@Override
@@ -282,6 +283,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
+		Log.i(TAG, "onStopTrackingTouch");
 		// TODO Auto-generated method stub
 
 	}

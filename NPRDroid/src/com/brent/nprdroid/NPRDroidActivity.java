@@ -3,9 +3,13 @@ package com.brent.nprdroid;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Locale;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -53,6 +57,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	private SeekBar seekBar;
 	SharedPreferences pref;
 	private DownloadManager downloadManager[] = new DownloadManager[25];
+	private int playerPosition;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -91,7 +96,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	protected void onResume() {
 		super.onResume();
 		startRepeatingTask();
-		IntentFilter filter = new IntentFilter(DownloadService.downloadDone);
+		IntentFilter filter = new IntentFilter(DownloadService.downloading);
 		registerReceiver(afterDownload, filter);
 	}
 
@@ -158,7 +163,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 			TextView textDuration = (TextView) findViewById(R.id.textDuration);
 			mHandler.postDelayed(mStatusChecker, mInterval);
 			if (musicService != null) {
-				int playerPosition = musicService.getPlayerPosition();
+				playerPosition = musicService.getPlayerPosition();
 				int duration = musicService.getDuration();
 				seekBar.setMax(duration);
 				seekBar.setProgress(playerPosition);
@@ -193,7 +198,23 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		Arrays.sort(files);
 		if (files.length > 0) {
 			for (File file : files) {
-				songs.add(file.getName() + ": " + file.length()/1000 + " KB");
+				long fileSize = file.length()/1000;
+				if (fileSize > 0) {
+					int fileDuration = (int)fileSize*8/64;						
+					String[] fileParse = file.getName().split("_");
+					Log.i(TAG, "filename: " + fileParse[0] + " " + fileParse[1].toUpperCase(Locale.US) + " " + (fileParse[2]));
+					SimpleDateFormat fromFileName = new SimpleDateFormat("yyyyMMdd", Locale.US);
+					SimpleDateFormat newFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
+					String newDate = null;
+					try {
+					    newDate = newFormat.format(fromFileName.parse(fileParse[0]));
+					    Log.i(TAG, "newDate: " + newDate);
+					} catch (ParseException e) {
+					    e.printStackTrace();
+					}	
+					String show = fileParse[1].equalsIgnoreCase("me") ? "Morning Edition" : "All Things Considered";
+					songs.add(fileParse[2].split("\\.")[0] + " " + show + /*" " + newDate +*/ " " + timeString(fileDuration));
+				}
 			}
 			songList = new CustomAdapter(this, R.layout.row, songs);
 			setListAdapter(songList);
@@ -213,6 +234,9 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 			playButton.setImageResource(0);
 			playButton.setImageResource(R.drawable.play_button_normal);
 		}
+		else if (v == rewindButton) {
+			musicService.processSeekRequest((playerPosition - 30)*1000);
+		}
 		else if (v == nextButton) {
 			startService(new Intent(MusicService.ACTION_SKIP));
 			nextButton.setImageResource(R.drawable.next_button_pressed);
@@ -226,8 +250,8 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		Log.i(TAG, "onListItemClick");
 		Intent intent = new Intent(MusicService.ACTION_URL);
-		intent.putExtra("fileName", songs.get(position).split(":")[0]);
-		intent.putExtra("listPosition", position + 1);
+		intent.putExtra("fileName", songs.get(position).split(" ")[0]);
+		intent.putExtra("listPosition", position);
 		playButton.setImageResource(R.drawable.play_button_pressed);
 		pauseButton.setImageResource(R.drawable.pause_button_normal);
 		startService((intent));
@@ -246,7 +270,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		String day = intDay > 9 ? "" + intDay : "0" + intDay;
 		String prepend;
 		ArrayList<String> urls = new ArrayList<String>();
-		for (int i = 0; i < 25; ++i) {
+		for (int i = 0; i < 30; ++i) {
 			if (i < 9) 
 				prepend = "_0";
 			else
@@ -257,12 +281,18 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 //		downloadStories(view, urls);
 		Intent intent = new Intent(this, DownloadService.class);
         intent.putStringArrayListExtra("urls", urls);
+        ((Button) findViewById(R.id.me)).setEnabled(false);
+        ((Button) findViewById(R.id.atc)).setEnabled(false);
         startService(intent);
 	}
 
 	private BroadcastReceiver afterDownload = new BroadcastReceiver() { 
 		public void onReceive(Context ctxt, Intent i) {
 			updateSongList();
+			if (i.getBooleanExtra(DownloadService.downloadDone, false)) {
+				((Button) findViewById(R.id.me)).setEnabled(true);
+				((Button) findViewById(R.id.atc)).setEnabled(true);
+			}
 			removeStickyBroadcast(i);
 		}
 	};
@@ -270,7 +300,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		Log.i(TAG, "progress: " + progress + " fromUser: " + fromUser);
 		if (fromUser == true)
 			musicService.processSeekRequest(progress*1000);
 	}

@@ -422,7 +422,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         else if (mState == State.Playing || mState == State.Paused || mState == State.Stopped) {
             Log.i(TAG, "About to play: " + fileName);
             tryToGetAudioFocus();
-            playNextSong(fileName);
+            playNextSong(null);
         }
     }
 
@@ -455,7 +455,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             else {
                 mIsStreaming = false; // playing a locally available song
                 mRetriever.prepare(); // if not called, mRetriever won't have correct file names while download is happening
-                playingItem = mRetriever.getNextItem(); //mRetriever.getRandomItem();
+                playingItem = mRetriever.getNextItem(); 
                 if (playingItem == null) {
                     Toast.makeText(this,
                             "No available music to play. Place some music on your external storage "
@@ -529,7 +529,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             if (mIsStreaming) mWifiLock.acquire();
             else if (mWifiLock.isHeld()) mWifiLock.release();
             
-            // send message to activity so it can changed the color of the currently playing item in the list
+            // send message to activity so it can change the color of the currently playing item in the list
             Message msg = Message.obtain(null, NEXT_ITEM, mRetriever.listPosition, 0);
             try {
             	Log.i(TAG, "Next what: " + msg.what);

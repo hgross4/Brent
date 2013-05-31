@@ -22,8 +22,9 @@ public class DownloadService extends IntentService {
 	private static final String TAG = "DownloadService";
 	private Notification.Builder mBuilder;
 	SharedPreferences pref;
+	public static final String downloading = "downloading"; 
 	public static final String downloadDone = "downloadDone"; 
-	private static Intent downloadBroadcast = new Intent(downloadDone);
+	private static Intent downloadBroadcast = new Intent(downloading);
 
 	public DownloadService() {
 		super("DownloadService");
@@ -82,6 +83,7 @@ public class DownloadService extends IntentService {
 		SharedPreferences.Editor editor = pref.edit();	
 		editor.putInt("listPosition", 0);	//save this position so its list item can be changed later
 		editor.commit();
+		downloadBroadcast.putExtra(downloadDone, true);
 		sendStickyBroadcast(downloadBroadcast);
 	}
 

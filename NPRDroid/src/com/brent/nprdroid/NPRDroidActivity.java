@@ -192,33 +192,37 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 
 	private void updateSongList() {
 		songs.clear();
-		sdPath = getExternalFilesDir(null).getAbsolutePath() + "/";
-		File sdPathFile = new File(sdPath);
-		File[] files = sdPathFile.listFiles();
-		Arrays.sort(files);
-		if (files.length > 0) {
-			for (File file : files) {
-				long fileSize = file.length()/1000;
-				if (fileSize > 0) {
-					int fileDuration = (int)fileSize*8/64;						
-					String[] fileParse = file.getName().split("_");
-					Log.i(TAG, "filename: " + fileParse[0] + " " + fileParse[1].toUpperCase(Locale.US) + " " + (fileParse[2]));
-					SimpleDateFormat fromFileName = new SimpleDateFormat("yyyyMMdd", Locale.US);
-					SimpleDateFormat newFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
-					String newDate = null;
-					try {
-					    newDate = newFormat.format(fromFileName.parse(fileParse[0]));
-					    Log.i(TAG, "newDate: " + newDate);
-					} catch (ParseException e) {
-					    e.printStackTrace();
-					}	
-					String show = fileParse[1].equalsIgnoreCase("me") ? "Morning Edition" : "All Things Considered";
-					songs.add(fileParse[2].split("\\.")[0] + " " + show + /*" " + newDate +*/ " " + timeString(fileDuration));
-				}
-			}
-			songList = new CustomAdapter(this, R.layout.row, songs);
-			setListAdapter(songList);
+//		sdPath = getExternalFilesDir(null).getAbsolutePath() + "/";
+//		File sdPathFile = new File(sdPath);
+//		File[] files = sdPathFile.listFiles();
+//		Arrays.sort(files);
+//		if (files.length > 0) {
+//			for (File file : files) {
+//				long fileSize = file.length()/1000;
+//				if (fileSize > 0) {
+//					int fileDuration = (int)fileSize*8/64;						
+//					String[] fileParse = file.getName().split("_");
+//					Log.i(TAG, "filename: " + fileParse[0] + " " + fileParse[1].toUpperCase(Locale.US) + " " + (fileParse[2]));
+//					SimpleDateFormat fromFileName = new SimpleDateFormat("yyyyMMdd", Locale.US);
+//					SimpleDateFormat newFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
+//					String newDate = null;
+//					try {
+//					    newDate = newFormat.format(fromFileName.parse(fileParse[0]));
+//					    Log.i(TAG, "newDate: " + newDate);
+//					} catch (ParseException e) {
+//					    e.printStackTrace();
+//					}	
+//					String show = fileParse[1].equalsIgnoreCase("me") ? "Morning Edition" : "All Things Considered";
+//					songs.add(fileParse[2].split("\\.")[0] + " " + show + /*" " + newDate +*/ " " + timeString(fileDuration));
+//				}
+//			}
+//			
+//		}
+		for (int i = 0; i < MyApplication.stories.size(); ++i) {
+			songs.add(MyApplication.stories.get(i).getTitle());
 		}
+		songList = new CustomAdapter(this, R.layout.row, songs);
+		setListAdapter(songList);
 	}
 
 	@Override
@@ -261,26 +265,24 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		String showChoice;
 		if (view.getId() == R.id.me) showChoice = "me";
 		else showChoice = "atc";
-		Log.i(TAG, "button text: " + ((Button)view).getText());
-		Calendar calNow = Calendar.getInstance();
-		int year = calNow.get(Calendar.YEAR);
-		int intMonth = calNow.get(Calendar.MONTH) + 1;
-		String month = intMonth > 9 ? "" + intMonth : "0" + intMonth;
-		int intDay = calNow.get(Calendar.DATE);
-		String day = intDay > 9 ? "" + intDay : "0" + intDay;
-		String prepend;
-		ArrayList<String> urls = new ArrayList<String>();
-		for (int i = 0; i < 30; ++i) {
-			if (i < 9) 
-				prepend = "_0";
-			else
-				prepend = "_";
-			urls.add("http://pd.npr.org/anon.npr-mp3/npr/" + showChoice + "/" + year + "/" + month + "/" + year + month + day + "_" + showChoice + prepend + (i + 1) + ".mp3");
-		}
-//		(new DownloadWebPageTask()).execute(urls);
-//		downloadStories(view, urls);
+//		Calendar calNow = Calendar.getInstance();
+//		int year = calNow.get(Calendar.YEAR);
+//		int intMonth = calNow.get(Calendar.MONTH) + 1;
+//		String month = intMonth > 9 ? "" + intMonth : "0" + intMonth;
+//		int intDay = calNow.get(Calendar.DATE);
+//		String day = intDay > 9 ? "" + intDay : "0" + intDay;
+//		String prepend;
+//		ArrayList<String> urls = new ArrayList<String>();
+//		for (int i = 0; i < 30; ++i) {
+//			if (i < 9) 
+//				prepend = "_0";
+//			else
+//				prepend = "_";
+//			urls.add("http://pd.npr.org/anon.npr-mp3/npr/" + showChoice + "/" + year + "/" + month + "/" + year + month + day + "_" + showChoice + prepend + (i + 1) + ".mp3");
+//		}
 		Intent intent = new Intent(this, DownloadService.class);
-        intent.putStringArrayListExtra("urls", urls);
+//        intent.putStringArrayListExtra("urls", urls);
+		intent.putExtra(DownloadService.whichShow, showChoice);
         ((Button) findViewById(R.id.me)).setEnabled(false);
         ((Button) findViewById(R.id.atc)).setEnabled(false);
         startService(intent);

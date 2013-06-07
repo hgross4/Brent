@@ -56,7 +56,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	private Handler mHandler;
 	private SeekBar seekBar;
 	SharedPreferences pref;
-	private DownloadManager downloadManager[] = new DownloadManager[25];
+//	private DownloadManager downloadManager[] = new DownloadManager[25];
 	private int playerPosition;
 
 	/** Called when the activity is first created. */
@@ -64,6 +64,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
 		updateSongList();
 		rewindButton = (ImageButton) findViewById(R.id.rewindButton);
 		playButton = (ImageButton) findViewById(R.id.playButton);
@@ -75,11 +76,10 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		nextButton.setOnClickListener(this);
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
 		seekBar.setOnSeekBarChangeListener(this);
-		mHandler = new Handler();
-		pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
-		for (int i = 0; i < 25; ++i) {			
-			downloadManager[i] = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
-		}
+		mHandler = new Handler();		
+//		for (int i = 0; i < 25; ++i) {			
+//			downloadManager[i] = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
+//		}
 	}
 
 	@Override
@@ -216,11 +216,14 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 //					songs.add(fileParse[2].split("\\.")[0] + " " + show + /*" " + newDate +*/ " " + timeString(fileDuration));
 //				}
 //			}
-//			
+//		
 //		}
-		for (int i = 0; i < MyApplication.stories.size(); ++i) {
-			songs.add(MyApplication.stories.get(i).getTitle());
-		}
+		Log.i(TAG, "updateSongList");
+		String[] titles = pref.getString(DownloadService.storyTitles, "").split("\\|");		
+		for (int i = 0; i < titles.length; ++i) {
+			if (titles[i] != null)
+				songs.add(titles[i]);
+		}	
 		songList = new CustomAdapter(this, R.layout.row, songs);
 		setListAdapter(songList);
 	}

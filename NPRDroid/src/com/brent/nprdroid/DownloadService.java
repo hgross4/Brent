@@ -44,6 +44,7 @@ public class DownloadService extends IntentService {
 	private static Intent downloadBroadcast = new Intent(downloading);
 	public static final String whichShow = "whichShow";
 	private static final String queryUrl = "http://api.npr.org/query?fields=title,audio&date=current&dateType=story&sort=assigned&output=NPRML&numResults=30&apiKey=MDA5NDM4NDA3MDEzMzY1MTMyNjA2NjIyMg001&id=";
+	public static final String storyTitles = "storyTitles";
 
 	public DownloadService() {
 		super("DownloadService");
@@ -54,6 +55,8 @@ public class DownloadService extends IntentService {
 		Log.i(TAG, "onHandleIntent");
 		BufferedReader reader=null;
 		String rawXML = null;
+		pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = pref.edit();	
 		// Make the connection to the URL and get the xml as one big string
 		try {
 			int showID = intent.getExtras().getString(whichShow).equalsIgnoreCase("atc") ? 2 : 3;
@@ -84,7 +87,7 @@ public class DownloadService extends IntentService {
 				}
 			}
 		}
-		
+
 		// Parse the xml and populate the stories global list
 		DocumentBuilder builder;
 		Document doc = null;
@@ -99,42 +102,42 @@ public class DownloadService extends IntentService {
 			e.printStackTrace();
 		}	
 
-		NodeList storyNodes = doc.getElementsByTagName("story");
-		Story story;
-		for (int i = 0; i < storyNodes.getLength(); i++) {
-			Element entry = (Element)storyNodes.item(i);
-			NodeList children = entry.getChildNodes();
-			story = new Story();
-			for (int j = 0; j < children.getLength(); j++) {
-				if (children.item(j).getNodeType() == Node.ELEMENT_NODE) {
-					Element child = (Element) children.item(j);	
-					Log.i(TAG, "child: " + child.getNodeName());
-					if (child.getNodeName().equals("title")) {
-						String title = child.getFirstChild().getNodeValue();
-						story.setTitle(title);
-					}
-				}
-			}
-			MyApplication.stories.add(story);
-		}
-		
-		NodeList formatNodes = doc.getElementsByTagName("format");
-		for (int i = 0; i < formatNodes.getLength(); i++) {
-			Element entry = (Element)formatNodes.item(i);
-			NodeList children = entry.getChildNodes();
-			for (int j = 0; j < children.getLength(); j++) {
-				if (children.item(j).getNodeType() == Node.ELEMENT_NODE) {
-					Element child = (Element) children.item(j);	
-					Log.i(TAG, "child: " + child.getNodeName());
-					if (child.getNodeName().equals("mp4")) {
-						String audioLink = child.getFirstChild().getNodeValue();
-						MyApplication.stories.get(i).setAudioLink(audioLink);
-					}
-				}
-			}			
-			Log.i(TAG, "title: " + MyApplication.stories.get(i).getTitle() + " audioLink: " + MyApplication.stories.get(i).getAudioLink());
-		}
-		
+		//		NodeList storyNodes = doc.getElementsByTagName("story");
+		//		Story story;
+		//		for (int i = 0; i < storyNodes.getLength(); i++) {
+		//			Element entry = (Element)storyNodes.item(i);
+		//			NodeList children = entry.getChildNodes();
+		//			story = new Story();
+		//			for (int j = 0; j < children.getLength(); j++) {
+		//				if (children.item(j).getNodeType() == Node.ELEMENT_NODE) {
+		//					Element child = (Element) children.item(j);	
+		//					Log.i(TAG, "child: " + child.getNodeName());
+		//					if (child.getNodeName().equals("title")) {
+		//						String title = child.getFirstChild().getNodeValue();
+		//						story.setTitle(title);
+		//					}
+		//				}
+		//			}
+		//			MyApplication.stories.add(story);
+		//		}
+		//		
+		//		NodeList formatNodes = doc.getElementsByTagName("format");
+		//		for (int i = 0; i < formatNodes.getLength(); i++) {
+		//			Element entry = (Element)formatNodes.item(i);
+		//			NodeList children = entry.getChildNodes();
+		//			for (int j = 0; j < children.getLength(); j++) {
+		//				if (children.item(j).getNodeType() == Node.ELEMENT_NODE) {
+		//					Element child = (Element) children.item(j);	
+		//					Log.i(TAG, "child: " + child.getNodeName());
+		//					if (child.getNodeName().equals("mp4")) {
+		//						String audioLink = child.getFirstChild().getNodeValue();
+		//						MyApplication.stories.get(i).setAudioLink(audioLink);
+		//					}
+		//				}
+		//			}			
+		//			Log.i(TAG, "title: " + MyApplication.stories.get(i).getTitle() + " audioLink: " + MyApplication.stories.get(i).getAudioLink());
+		//		}
+
 		// Delete the files currently in the directory
 		String sdPath = getExternalFilesDir(null).getAbsolutePath() + "/";
 		File sdPathFile = new File(sdPath);
@@ -144,40 +147,66 @@ public class DownloadService extends IntentService {
 				file.delete();
 			}
 		}
-		
+
 		mBuilder = new Notification.Builder(this);
 		mBuilder.setContentTitle("NPR stories download")
-	    .setTicker("Starting NPR stories download")
-	    .setSmallIcon(android.R.drawable.stat_sys_download);
+		.setTicker("Starting NPR stories download")
+		.setSmallIcon(android.R.drawable.stat_sys_download);
 		startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.getNotification());
-		int index = 1;
-//		ArrayList<String> urls = intent.getStringArrayListExtra("urls");
-		for (int i = 0; i < MyApplication.stories.size(); ++i) {
-			DefaultHttpClient client = new DefaultHttpClient();
-			String url = MyApplication.stories.get(i).getAudioLink();
-			Log.i(TAG, "url: " + url);
-			HttpGet httpGet = new HttpGet(url);
-			try {
-				HttpResponse execute = client.execute(httpGet);
-				InputStream content = execute.getEntity().getContent();
-				byte[] buffer = new byte[1024];
-				int length;
-				String fileNameFromUrl = url.split("/")[8].split("\\?")[0];
-				Log.i(TAG, "fileNameFromUrl: " + fileNameFromUrl);
-//				String fileName = index > 9 ? "" + index + ".mp3" : "0" + index + ".mp3";
-				File audioFile = new File(getExternalFilesDir(null), fileNameFromUrl);
-				FileOutputStream out = new FileOutputStream(audioFile);
-				while ((length = content.read(buffer)) > 0) {
-					out.write(buffer, 0, length);
-				}				
-				mBuilder.setProgress(25, index, false)
-				.setTicker("Downloading " + fileNameFromUrl)
-				.setContentText(fileNameFromUrl);
-				startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.getNotification());
-				++index;
-				sendBroadcast(downloadBroadcast);
-			} catch (Exception e) {
-				e.printStackTrace();
+//		int index = 1;
+		NodeList storyNodes = doc.getElementsByTagName("story");
+		NodeList formatNodes = doc.getElementsByTagName("format");
+		Story story;
+		DefaultHttpClient client = new DefaultHttpClient();
+		HttpGet httpGet;
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < storyNodes.getLength(); i++) {
+			Element storyEntry = (Element)storyNodes.item(i);
+			NodeList storyChildren = storyEntry.getChildNodes();
+			Element formatEntry = (Element)formatNodes.item(i);
+			NodeList formatChildren = formatEntry.getChildNodes();
+			story = new Story();
+			for (int j = 0; j < formatChildren.getLength(); j++) {
+				if (storyChildren.item(j).getNodeType() == Node.ELEMENT_NODE) {
+					Element child = (Element) storyChildren.item(j);	
+					Log.i(TAG, "child: " + child.getNodeName());
+					if (child.getNodeName().equals("title")) {
+						String title = child.getFirstChild().getNodeValue();
+						story.setTitle(title);						
+						sb.append(title + "|");
+						Log.i(TAG, "titles: " + sb.toString());
+						editor.putString(storyTitles, sb.toString());
+					}
+				}
+				if (formatChildren.item(j).getNodeType() == Node.ELEMENT_NODE) {
+					Element child = (Element) formatChildren.item(j);	
+					Log.i(TAG, "child: " + child.getNodeName());
+					if (child.getNodeName().equals("mp4")) {
+						String audioLink = child.getFirstChild().getNodeValue();	
+						httpGet = new HttpGet(audioLink);
+						try {
+							HttpResponse execute = client.execute(httpGet);
+							InputStream content = execute.getEntity().getContent();
+							byte[] buffer = new byte[1024];
+							int length;
+							String fileNameFromUrl = audioLink.split("/")[8].split("\\?")[0];
+							Log.i(TAG, "fileNameFromUrl: " + fileNameFromUrl);
+							File audioFile = new File(getExternalFilesDir(null), fileNameFromUrl);
+							FileOutputStream out = new FileOutputStream(audioFile);
+							while ((length = content.read(buffer)) > 0) {
+								out.write(buffer, 0, length);
+							}				
+							mBuilder.setProgress(25, j, false)
+							.setTicker("Downloading " + fileNameFromUrl)
+							.setContentText(fileNameFromUrl);
+							startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.getNotification());
+//							++index;
+							sendBroadcast(downloadBroadcast);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
 			}
 		}
 		mBuilder.setContentText("NPR stories download complete")
@@ -185,9 +214,8 @@ public class DownloadService extends IntentService {
 		.setTicker("NPR stories download complete")
 		.setSmallIcon(android.R.drawable.stat_sys_download_done);
 		startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.getNotification());
-		pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = pref.edit();	
-		editor.putInt("listPosition", 0);	//save this position so its list item can be changed later
+		
+		editor.putInt("listPosition", 0);
 		editor.commit();
 		downloadBroadcast.putExtra(downloadDone, true);
 		sendStickyBroadcast(downloadBroadcast);

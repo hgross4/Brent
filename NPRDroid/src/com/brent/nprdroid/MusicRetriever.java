@@ -74,7 +74,7 @@ public class MusicRetriever {
     }
     
     public Item getNextItem() {
-    	if (mItems.size() <= 0 || listPosition == (mItems.size() - 1)) return null;
+    	if (mItems.size() <= 0 || listPosition == mItems.size()) return null;
         return mItems.get(listPosition++);
     }
 

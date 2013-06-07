@@ -1,20 +1,6 @@
 package com.brent.nprdroid;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Locale;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-import android.app.DownloadManager;
 import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -23,16 +9,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.support.v4.content.LocalBroadcastManager;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -42,7 +24,6 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class NPRDroidActivity extends ListActivity implements OnClickListener, OnSeekBarChangeListener {	
 	private String sdPath; 
@@ -65,6 +46,8 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
+		songList = new CustomAdapter(this, R.layout.row, songs);
+		setListAdapter(songList);
 		updateSongList();
 		rewindButton = (ImageButton) findViewById(R.id.rewindButton);
 		playButton = (ImageButton) findViewById(R.id.playButton);
@@ -224,8 +207,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 			if (titles[i] != null)
 				songs.add(titles[i]);
 		}	
-		songList = new CustomAdapter(this, R.layout.row, songs);
-		setListAdapter(songList);
+		songList.notifyDataSetChanged();
 	}
 
 	@Override

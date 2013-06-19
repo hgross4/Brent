@@ -1,10 +1,11 @@
+¥ Change "Download today's stories" to "Download available stories" (or something to that effect)
 ¥ Player buttons (rewind, play, pause, next)
 	- Implement next button pressed (so user knows that it's been pressed)
-	- Activate and change graphic for rewind button, and make it move story back X seconds (X = 10, 30?)
-	- Combine play and pause buttons into 1 button that toggles between the play and pause button images appropriately
-¥ Ability to abort download
-¥ Format each list entry better (show, well-formatted date, size or duration)
-¥ Don't add story to list if size is 0 KB
+	- Activate and change graphic for rewind button, and make it move story back X seconds (X = 10, 30?) DONE (though needs to change when pressed)
+	- Combine play and pause buttons into 1 button that toggles between images appropriately
+¥ Ability to abort download ("cancel download" button and stopservice command?)
+¥ Check that available stories are newer than those already downloaded?
+¥ Format each list entry better (show, title, well-formatted date, duration--maybe make each entry expandable?)
 ¥ Put more space between stories in list
 ¥ Change app title
 ¥ Change app icon
@@ -12,8 +13,6 @@
 ¥ Have paused story stay in notification bar and be available to be restarted at paused position at any time (the way ES handles this)
 ¥ Warn user when there's no Internet connection (take them to settings?)
 ¥ What happens when stories downloaded while audio is playing, and how should that be handled?
-¥ Story titles instead of file names in story list
-¥ Figure out how many stories are available and only download those (download loop arbitrarily set to 25 now) 
 ¥ Voice commands
 
 Done
@@ -25,3 +24,4 @@ Done
 ¥ Moved CustomAdapter class to its own file
 ¥ Troubleshoot why list doesn't update after download done when activity not in foreground (intent not "sticking around"?) 
 ¥ SeekBar to allow for moving within story
+¥ Story titles instead of file names in story list

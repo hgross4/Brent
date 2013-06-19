@@ -158,6 +158,7 @@ public class DownloadService extends IntentService {
 							.setTicker("Downloading " + fileNameFromUrl)
 							.setContentText(fileNameFromUrl);
 							startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.getNotification());
+							downloadBroadcast.putExtra(downloadDone, false);
 							sendBroadcast(downloadBroadcast);
 						} catch (Exception e) {
 							e.printStackTrace();

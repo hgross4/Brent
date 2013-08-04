@@ -237,11 +237,11 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 			if (i.getBooleanExtra(DownloadService.downloadDone, false)) {
 				((Button) findViewById(R.id.me)).setEnabled(true);
 				((Button) findViewById(R.id.atc)).setEnabled(true);
-				downloading = false;
-				SharedPreferences.Editor editor = pref.edit();	
-				editor.putInt("listPosition", 0);
-				editor.commit();
+				downloading = false;				
 			}
+			SharedPreferences.Editor editor = pref.edit();	
+			editor.putInt("listPosition", 0);
+			editor.commit();
 			removeStickyBroadcast(i);
 		}
 	};

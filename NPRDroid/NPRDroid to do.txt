@@ -1,9 +1,12 @@
+¥ Fix player resetting to beginning of first story sometimes (after activity has lost focus?)
+¥ Have player pause when it loses audio focus ("ducks") vs. being drowned out.
 ¥ Change "Download today's stories" to "Download available stories" (or something to that effect)
 ¥ Player buttons (rewind, play, pause, next)
 	- Implement next button pressed (so user knows that it's been pressed)
 	- Activate and change graphic for rewind button, and make it move story back X seconds (X = 10, 30?) DONE (though needs to change when pressed)
 	- Combine play and pause buttons into 1 button that toggles between images appropriately
 ¥ Ability to abort download ("cancel download" button and stopservice command?)
+¥ Check for data connection (see how FeedReader does this)
 ¥ Check that available stories are newer than those already downloaded?
 ¥ Format each list entry better (show, title, well-formatted date, duration--maybe make each entry expandable?)
 ¥ Put more space between stories in list

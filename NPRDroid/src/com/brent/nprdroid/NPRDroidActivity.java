@@ -76,7 +76,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		super.onResume();
 		startRepeatingTask();
 		IntentFilter filter = new IntentFilter(DownloadService.downloading);
-		registerReceiver(afterDownload, filter);
+		registerReceiver(download, filter);
 		if (downloading)
 			updateSongList();
 	}
@@ -85,7 +85,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	protected void onPause() {
 		super.onPause();
 		stopRepeatingTask();
-		unregisterReceiver(afterDownload);
+		unregisterReceiver(download);
 	}
 
 	@Override
@@ -227,10 +227,11 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
         ((Button) findViewById(R.id.me)).setEnabled(false);
         ((Button) findViewById(R.id.atc)).setEnabled(false);
         downloading = true;
+        updateSongList();
         startService(intent);
 	}
 
-	private BroadcastReceiver afterDownload = new BroadcastReceiver() { 
+	private BroadcastReceiver download = new BroadcastReceiver() { 
 		public void onReceive(Context ctxt, Intent i) {
 			updateSongList();
 			if (i.getBooleanExtra(DownloadService.downloadDone, false)) {

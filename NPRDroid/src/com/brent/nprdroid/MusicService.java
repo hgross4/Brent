@@ -394,15 +394,17 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
      * you have to do so from a context where you are sure this is the case.
      */
     void configAndStartMediaPlayer() {
-        if (mAudioFocus == AudioFocus.NoFocusNoDuck) {
+        if (mAudioFocus == AudioFocus.NoFocusNoDuck || mAudioFocus == AudioFocus.NoFocusCanDuck) {
             // If we don't have audio focus and can't duck, we have to pause, even if mState
             // is State.Playing. But we stay in the Playing state so that we know we have to resume
             // playback once we get the focus back.
+        	// 8/2013: Now pausing whenever audio focus is lost, 
+        	// so that none of story is missed by being drowned out.
             if (mPlayer.isPlaying()) mPlayer.pause();
             return;
         }
-        else if (mAudioFocus == AudioFocus.NoFocusCanDuck)
-            mPlayer.setVolume(DUCK_VOLUME, DUCK_VOLUME);  // we'll be relatively quiet
+//        else if (mAudioFocus == AudioFocus.NoFocusCanDuck)
+//            mPlayer.setVolume(DUCK_VOLUME, DUCK_VOLUME);  // we'll be relatively quiet
         else
             mPlayer.setVolume(1.0f, 1.0f); // we can be loud
 

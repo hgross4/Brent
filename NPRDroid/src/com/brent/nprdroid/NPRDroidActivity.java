@@ -238,6 +238,9 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 				((Button) findViewById(R.id.me)).setEnabled(true);
 				((Button) findViewById(R.id.atc)).setEnabled(true);
 				downloading = false;
+				SharedPreferences.Editor editor = pref.edit();	
+				editor.putInt("listPosition", 0);
+				editor.commit();
 			}
 			removeStickyBroadcast(i);
 		}

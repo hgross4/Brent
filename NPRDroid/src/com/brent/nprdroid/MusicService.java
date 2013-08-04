@@ -23,6 +23,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
@@ -279,6 +280,8 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 
         if (mState == State.Stopped) {
             // If we're stopped, just go ahead to the next song and start playing
+        	SharedPreferences pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
+        	mRetriever.listPosition = pref.getInt("listPosition", 0);
             playNextSong(null);
         }
         else if (mState == State.Paused) {

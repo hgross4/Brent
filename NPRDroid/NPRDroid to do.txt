@@ -1,5 +1,5 @@
-¥ Fix player resetting to beginning of first story sometimes (after activity has lost focus?)
-¥ Have player pause when it loses audio focus ("ducks") vs. being drowned out.
+¥ Fix player sometimes resetting to beginning of first story when play button pressed, instead of remembering its place in the list.
+¥ Have player pause when it loses audio focus ("ducks") so audio isn't drowned out. DONE (needs testing)
 ¥ Change "Download today's stories" to "Download available stories" (or something to that effect)
 ¥ Player buttons (rewind, play, pause, next)
 	- Implement next button pressed (so user knows that it's been pressed)

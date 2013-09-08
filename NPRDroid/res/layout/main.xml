@@ -54,7 +54,7 @@
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="25dp"
+            android:layout_marginRight="30dp"
             android:background="@drawable/rew_30_normal"
             android:text="" />
 
@@ -63,17 +63,7 @@
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
             android:background="@drawable/play_button_normal"
-            android:text="" />
-
-        <ImageButton
-            android:id="@+id/pauseButton"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:background="@drawable/pause_button_normal"
             android:text="" />
 
         <ImageButton
@@ -81,7 +71,7 @@
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="25dp"
+            android:layout_marginLeft="30dp"
             android:background="@drawable/next_button_normal"
             android:text="" />
     </LinearLayout>

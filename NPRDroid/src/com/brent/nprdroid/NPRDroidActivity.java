@@ -1,6 +1,9 @@
 package com.brent.nprdroid;
 
 import java.util.ArrayList;
+
+import com.brent.nprdroid.MusicService.State;
+
 import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -26,11 +29,10 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 public class NPRDroidActivity extends ListActivity implements OnClickListener, OnSeekBarChangeListener {	
-	private String sdPath; 
 	private ArrayList<String> songs = new ArrayList<String>();
 	private CustomAdapter songList;
 	private String TAG = "NPRDroidActivity";
-	private ImageButton rewindButton, playButton, pauseButton, nextButton;
+	private ImageButton rewindButton, playButton, nextButton;
 	private MusicService musicService;
 	boolean mBound = false, downloading = false;
 	private int mInterval = 1000; // 1 second updates
@@ -50,11 +52,9 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		updateSongList();
 		rewindButton = (ImageButton) findViewById(R.id.rewindButton);
 		playButton = (ImageButton) findViewById(R.id.playButton);
-		pauseButton = (ImageButton) findViewById(R.id.pauseButton);
 		nextButton = (ImageButton) findViewById(R.id.nextButton);
 		rewindButton.setOnClickListener(this);
 		playButton.setOnClickListener(this);
-		pauseButton.setOnClickListener(this);
 		nextButton.setOnClickListener(this);
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
 		seekBar.setOnSeekBarChangeListener(this);
@@ -64,7 +64,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	@Override
 	protected void onStart() {
 		super.onStart();
-		Log.i(TAG, "onStart");
 		// Bind to MusicService
 		Intent intent = new Intent(this, MusicService.class);
 		//		intent.putExtra("messenger", new Messenger(handler));
@@ -118,7 +117,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		@Override
 		public void onServiceConnected(ComponentName className,	IBinder service) {
 			// We've bound to MusicService, cast the IBinder and get MusicService instance
-			Log.i(TAG, "onServiceConnected");
 			musicService = MusicService.getService();
 			mBound = true;			
 			try {
@@ -144,6 +142,20 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 			TextView textDuration = (TextView) findViewById(R.id.textDuration);
 			mHandler.postDelayed(mStatusChecker, mInterval);
 			if (musicService != null) {
+				switch(musicService.mState) {
+				case Playing:
+					playButton.setImageResource(R.drawable.pause_button_normal);
+					break;
+				case Paused:
+					playButton.setImageResource(R.drawable.play_button_normal);
+					break;
+				case Preparing:
+					playButton.setImageResource(R.drawable.play_button_pressed);
+					break;
+				default:
+					playButton.setImageResource(R.drawable.play_button_normal);
+					break;
+				}
 				playerPosition = musicService.getPlayerPosition();
 				int duration = musicService.getDuration();
 				seekBar.setMax(duration);
@@ -173,7 +185,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 
 	private void updateSongList() {
 		songs.clear();
-		Log.i(TAG, "updateSongList");
 		String[] titles = pref.getString(DownloadService.storyTitles, "").split("\\|");		
 		for (int i = 0; i < titles.length; ++i) {
 			if (titles[i] != null)
@@ -185,15 +196,10 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	@Override
 	public void onClick(View v) {
 		if (v == playButton) {
-			startService(new Intent(MusicService.ACTION_PLAY));			
-			playButton.setImageResource(R.drawable.play_button_pressed);   
-			pauseButton.setImageResource(R.drawable.pause_button_normal);
-		}
-		else if (v == pauseButton) {
-			startService(new Intent(MusicService.ACTION_PAUSE));
-			pauseButton.setImageResource(R.drawable.pause_button_pressed);
-			playButton.setImageResource(0);
-			playButton.setImageResource(R.drawable.play_button_normal);
+			if (musicService.mState == State.Playing) {
+				startService(new Intent(MusicService.ACTION_PAUSE));
+			}
+			else startService(new Intent(MusicService.ACTION_PLAY));
 		}
 		else if (v == rewindButton) {
 			musicService.processSeekRequest((playerPosition - 30)*1000);
@@ -203,18 +209,15 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 			nextButton.setImageResource(R.drawable.next_button_pressed);
 			nextButton.setImageResource(0); //restores button to "normal", where R.drawable.next_button_normal produces weird effects
 			playButton.setImageResource(R.drawable.play_button_pressed);
-			pauseButton.setImageResource(R.drawable.pause_button_normal);
 		}	
 	}
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		Log.i(TAG, "onListItemClick");
 		Intent intent = new Intent(MusicService.ACTION_URL);
 		intent.putExtra("fileName", songs.get(position).split(" ")[0]);
 		intent.putExtra("listPosition", position);
 		playButton.setImageResource(R.drawable.play_button_pressed);
-		pauseButton.setImageResource(R.drawable.pause_button_normal);
 		startService((intent));
 	}
 
@@ -258,7 +261,6 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
-		Log.i(TAG, "onStopTrackingTouch");
 		// TODO Auto-generated method stub
 
 	}

@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="Download today&apos;s stories"
+        android:text="@string/latest_stories"
         android:textSize="18sp" />
 
     <LinearLayout

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">NPRDroid</string>
-    <string name="me">Morning \n Edition</string>
+    <string name="me">Morning Edition</string>
     <string name="atc">All Things Considered</string>
     <string name="downloads_complete">Stories download complete</string>
+    <string name="latest_stories">Download latest stories</string>
 
 </resources>

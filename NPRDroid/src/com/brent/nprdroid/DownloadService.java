@@ -166,15 +166,17 @@ public class DownloadService extends IntentService {
 					}
 				}
 			}
+			// Set highlighted story to first story
+			if (i == 0) {
+				editor.putInt("listPosition", 0);
+				editor.commit();
+			}
 		}
 		mBuilder.setContentText("NPR stories download complete")
 		.setProgress(0, 0, false) //remove the progress bar
 		.setTicker("NPR stories download complete")
 		.setSmallIcon(android.R.drawable.stat_sys_download_done);
 		startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.getNotification());
-		
-		editor.putInt("listPosition", 0);
-		editor.commit();
 		downloadBroadcast.putExtra(downloadDone, true);
 		sendStickyBroadcast(downloadBroadcast);
 	}

@@ -1,10 +1,4 @@
-¥ Fix player sometimes resetting to beginning of first story when play button pressed, instead of remembering its place in the list.
-¥ Have player pause when it loses audio focus ("ducks") so audio isn't drowned out. DONE (needs testing)
-¥ Change "Download today's stories" to "Download available stories" (or something to that effect)
-¥ Player buttons (rewind, play, pause, next)
-	- Implement next button pressed (so user knows that it's been pressed)
-	- Activate and change graphic for rewind button, and make it move story back X seconds (X = 10, 30?) DONE (though needs to change when pressed)
-	- Combine play and pause buttons into 1 button that toggles between images appropriately
+¥ Fix player sometimes resetting to beginning of first story when play button pressed, instead of remembering its place in the list. (Done?)
 ¥ Ability to abort download ("cancel download" button and stopservice command?)
 ¥ Check for data connection (see how FeedReader does this)
 ¥ Check that available stories are newer than those already downloaded?
@@ -28,3 +22,9 @@ Done
 ¥ Troubleshoot why list doesn't update after download done when activity not in foreground (intent not "sticking around"?) 
 ¥ SeekBar to allow for moving within story
 ¥ Story titles instead of file names in story list
+¥ Have player pause when it loses audio focus ("ducks") so audio isn't drowned out.
+¥ Change "Download today's stories" to "Download available stories" (or something to that effect)
+¥ Player buttons (rewind, play, pause, next)
+	- Implement next button pressed (so user knows that it's been pressed)
+	- Activate and change graphic for rewind button, and make it move story back X seconds (X = 10, 30?) DONE (though needs to change when pressed)
+	- Combine play and pause buttons into 1 button that toggles between images appropriately

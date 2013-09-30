@@ -55,7 +55,7 @@ public class MusicRetriever {
 		Log.i(TAG , sdPath);
 		File sdPathFile = new File(sdPath);
 		File[] files = sdPathFile.listFiles();
-		if (files.length > 0) {
+		if (files != null && files.length > 0) {
 			for (File file : files) {
 				Log.i(TAG, file.getName());
 				mItems.add(new Item(0, null, file.getName(), null, 0));

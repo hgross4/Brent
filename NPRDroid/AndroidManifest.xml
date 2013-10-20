@@ -4,28 +4,35 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <uses-sdk android:minSdkVersion="15" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-sdk
+        android:minSdkVersion="10"
+        android:targetSdkVersion="18" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.BROADCAST_STICKY"/>
+    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:name=".MyApplication"
+        android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <activity
             android:name=".NPRDroidActivity"
-            android:label="@string/app_name"
-            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize" >
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize"
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
-        <service android:exported="false" android:name=".MusicService">
+
+        <service
+            android:name=".MusicService"
+            android:exported="false" >
             <intent-filter>
                 <action android:name="com.brent.nprdroid.action.TOGGLE_PLAYBACK" />
                 <action android:name="com.brent.nprdroid.action.PLAY" />
@@ -36,11 +43,10 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="com.brent.nprdroid.action.URL" />
-                
             </intent-filter>
         </service>
 
-        <receiver android:name=".MusicIntentReceiver">
+        <receiver android:name=".MusicIntentReceiver" >
             <intent-filter>
                 <action android:name="android.media.AUDIO_BECOMING_NOISY" />
             </intent-filter>
@@ -48,9 +54,9 @@
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
-        
-        <service android:name=".DownloadService"></service>
-        
+
+        <service android:name=".DownloadService" >
+        </service>
     </application>
 
 </manifest>

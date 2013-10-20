@@ -12,6 +12,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -25,10 +27,12 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class NPRDroidActivity extends ListActivity implements OnClickListener, OnSeekBarChangeListener {	
+public class NPRDroidActivity extends ListActivity implements OnClickListener,
+		OnSeekBarChangeListener {
 	private ArrayList<String> songs = new ArrayList<String>();
 	private CustomAdapter songList;
 	private String TAG = "NPRDroidActivity";
@@ -46,7 +50,8 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
+		pref = getSharedPreferences("NPRDownloadPreferences",
+				Context.MODE_PRIVATE);
 		songList = new CustomAdapter(this, R.layout.row, songs);
 		setListAdapter(songList);
 		updateSongList();
@@ -58,7 +63,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		nextButton.setOnClickListener(this);
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
 		seekBar.setOnSeekBarChangeListener(this);
-		mHandler = new Handler();		
+		mHandler = new Handler();
 	}
 
 	@Override
@@ -66,8 +71,8 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		super.onStart();
 		// Bind to MusicService
 		Intent intent = new Intent(this, MusicService.class);
-		//		intent.putExtra("messenger", new Messenger(handler));
-		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);		
+		// intent.putExtra("messenger", new Messenger(handler));
+		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
@@ -101,11 +106,16 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		@Override
 		public void handleMessage(Message msg) {
 			if (msg.what == MusicService.NEXT_ITEM) {
-				SharedPreferences.Editor editor = pref.edit();	
+				SharedPreferences.Editor editor = pref.edit();
 				int newPosition = musicService.mRetriever.listPosition - 1;
-				songList.notifyDataSetChanged();	//make newly playing story highlighted in list, others default color
-				editor.putInt("listPosition", newPosition);	//save this position so its list item can be changed later
-				editor.commit();				
+				songList.notifyDataSetChanged(); // make newly playing story
+													// highlighted in list,
+													// others default color
+				editor.putInt("listPosition", newPosition); // save this
+															// position so its
+															// list item can be
+															// changed later
+				editor.commit();
 			}
 		}
 	};
@@ -115,12 +125,14 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	/** Defines callbacks for service binding, passed to bindService() */
 	private ServiceConnection mConnection = new ServiceConnection() {
 		@Override
-		public void onServiceConnected(ComponentName className,	IBinder service) {
-			// We've bound to MusicService, cast the IBinder and get MusicService instance
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			// We've bound to MusicService, cast the IBinder and get
+			// MusicService instance
 			musicService = MusicService.getService();
-			mBound = true;			
+			mBound = true;
 			try {
-				Message msg = Message.obtain(null, MusicService.MSG_REGISTER_CLIENT);
+				Message msg = Message.obtain(null,
+						MusicService.MSG_REGISTER_CLIENT);
 				msg.replyTo = mMessenger;
 				(new Messenger(service)).send(msg);
 			} catch (RemoteException e) {
@@ -136,13 +148,13 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	};
 
 	Runnable mStatusChecker = new Runnable() {
-		@Override 
+		@Override
 		public void run() {
 			TextView textRemaining = (TextView) findViewById(R.id.textRemaining);
 			TextView textDuration = (TextView) findViewById(R.id.textDuration);
 			mHandler.postDelayed(mStatusChecker, mInterval);
 			if (musicService != null) {
-				switch(musicService.mState) {
+				switch (musicService.mState) {
 				case Playing:
 					playButton.setImageResource(R.drawable.pause_button_normal);
 					break;
@@ -160,16 +172,16 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 				int duration = musicService.getDuration();
 				seekBar.setMax(duration);
 				seekBar.setProgress(playerPosition);
-				int remaining = duration - playerPosition;				
+				int remaining = duration - playerPosition;
 				textRemaining.setText(timeString(remaining));
 				textDuration.setText(timeString(duration));
-			}
-			else Log.i(TAG, "musicService is NULL!");
+			} else
+				Log.i(TAG, "musicService is NULL!");
 		}
 	};
-	
+
 	void startRepeatingTask() {
-		mStatusChecker.run(); 
+		mStatusChecker.run();
 	}
 
 	void stopRepeatingTask() {
@@ -177,19 +189,20 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 	}
 
 	private String timeString(int totalSeconds) {
-		int minutes = (totalSeconds)/60;
-		int intSeconds = (totalSeconds)%60;
+		int minutes = (totalSeconds) / 60;
+		int intSeconds = (totalSeconds) % 60;
 		String seconds = intSeconds > 9 ? "" + intSeconds : "0" + intSeconds;
 		return (minutes + ":" + seconds);
 	}
 
 	private void updateSongList() {
 		songs.clear();
-		String[] titles = pref.getString(DownloadService.storyTitles, "").split("\\|");		
+		String[] titles = pref.getString(DownloadService.storyTitles, "")
+				.split("\\|");
 		for (int i = 0; i < titles.length; ++i) {
 			if (titles[i] != null)
 				songs.add(titles[i]);
-		}	
+		}
 		songList.notifyDataSetChanged();
 	}
 
@@ -198,18 +211,19 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		if (v == playButton) {
 			if (musicService.mState == State.Playing) {
 				startService(new Intent(MusicService.ACTION_PAUSE));
-			}
-			else startService(new Intent(MusicService.ACTION_PLAY));
-		}
-		else if (v == rewindButton) {
-			musicService.processSeekRequest((playerPosition - 30)*1000);
-		}
-		else if (v == nextButton) {
+			} else
+				startService(new Intent(MusicService.ACTION_PLAY));
+		} else if (v == rewindButton) {
+			musicService.processSeekRequest((playerPosition - 30) * 1000);
+		} else if (v == nextButton) {
 			startService(new Intent(MusicService.ACTION_SKIP));
 			nextButton.setImageResource(R.drawable.next_button_pressed);
-			nextButton.setImageResource(0); //restores button to "normal", where R.drawable.next_button_normal produces weird effects
+			nextButton.setImageResource(0); // restores button to "normal",
+											// where
+											// R.drawable.next_button_normal
+											// produces weird effects
 			playButton.setImageResource(R.drawable.play_button_pressed);
-		}	
+		}
 	}
 
 	@Override
@@ -221,36 +235,53 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener, O
 		startService((intent));
 	}
 
-	public void readWebpage(View view) {	
-		String showChoice;
-		if (view.getId() == R.id.me) showChoice = "me";
-		else showChoice = "atc";
-		Intent intent = new Intent(this, DownloadService.class);
-		intent.putExtra(DownloadService.whichShow, showChoice);
-        ((Button) findViewById(R.id.me)).setEnabled(false);
-        ((Button) findViewById(R.id.atc)).setEnabled(false);
-        downloading = true;
-        updateSongList();
-        startService(intent);
+	public void readWebpage(View view) {
+		if (isOnline()) {
+			String showChoice;
+			if (view.getId() == R.id.me)
+				showChoice = "me";
+			else
+				showChoice = "atc";
+			Intent intent = new Intent(this, DownloadService.class);
+			intent.putExtra(DownloadService.whichShow, showChoice);
+			((Button) findViewById(R.id.me)).setEnabled(false);
+			((Button) findViewById(R.id.atc)).setEnabled(false);
+			downloading = true;
+			updateSongList();
+			startService(intent);
+		}
+		else {
+			Toast.makeText(getApplicationContext(), "No Internet connection. DownloadNPR has terminated.", Toast.LENGTH_LONG).show();
+			finish();
+		}
 	}
 
-	private BroadcastReceiver download = new BroadcastReceiver() { 
+	private boolean isOnline() {
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo netInfo = cm.getActiveNetworkInfo();
+		if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+			return true;
+		}
+		return false;
+	}
+
+	private BroadcastReceiver download = new BroadcastReceiver() {
 		public void onReceive(Context ctxt, Intent i) {
 			updateSongList();
 			if (i.getBooleanExtra(DownloadService.downloadDone, false)) {
 				((Button) findViewById(R.id.me)).setEnabled(true);
 				((Button) findViewById(R.id.atc)).setEnabled(true);
-				downloading = false;				
+				downloading = false;
 			}
 			removeStickyBroadcast(i);
 		}
 	};
 
-	
 	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+	public void onProgressChanged(SeekBar seekBar, int progress,
+			boolean fromUser) {
 		if (fromUser == true)
-			musicService.processSeekRequest(progress*1000);
+			musicService.processSeekRequest(progress * 1000);
 	}
 
 	@Override

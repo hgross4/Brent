@@ -10,8 +10,6 @@ import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,16 +26,18 @@ import org.xml.sax.SAXException;
 
 import android.app.IntentService;
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat.Builder;
 
 public class DownloadService extends IntentService {
 	public static final String urlFileName = "file name from url";
 	private static final int FOREGROUND_NOTIFICATION_ID = 10;
 	private static final String TAG = "DownloadService";
-	private Notification.Builder mBuilder;
+	private Builder mBuilder;
 	SharedPreferences pref;
 	public static final String downloading = "downloading"; 
 	public static final String downloadDone = "downloadDone"; 
@@ -110,11 +110,15 @@ public class DownloadService extends IntentService {
 			}
 		}
 
-		mBuilder = new Notification.Builder(this);
+		mBuilder = new NotificationCompat.Builder(this);
 		mBuilder.setContentTitle("NPR stories download")
 		.setTicker("Starting NPR stories download")
 		.setSmallIcon(android.R.drawable.stat_sys_download);
-		startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.getNotification());
+		final Intent notificationIntent = new Intent(this, NPRDroidActivity.class);
+        final PendingIntent pi = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        mBuilder.setContentIntent(pi);
+        final Notification notification = mBuilder.build();
+		startForeground(FOREGROUND_NOTIFICATION_ID, notification);
 		NodeList storyNodes = doc.getElementsByTagName("story");
 		NodeList formatNodes = doc.getElementsByTagName("format");
 		Story story;

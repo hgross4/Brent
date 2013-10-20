@@ -1,4 +1,5 @@
 ¥ Fix player sometimes resetting to beginning of first story when play button pressed, instead of remembering its place in the list. (Done?)
+¥ Save story files to internal storage (confirm this is best thing to do).
 ¥ Ability to abort download ("cancel download" button and stopservice command?)
 ¥ Check for data connection (see how FeedReader does this)
 ¥ Check that available stories are newer than those already downloaded?

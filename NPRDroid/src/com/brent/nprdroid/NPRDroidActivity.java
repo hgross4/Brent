@@ -197,8 +197,7 @@ public class NPRDroidActivity extends ListActivity implements OnClickListener,
 
 	private void updateSongList() {
 		songs.clear();
-		String[] titles = pref.getString(DownloadService.storyTitles, "")
-				.split("\\|");
+		String[] titles = pref.getString(DownloadService.storyTitles, "").split("\\|");
 		for (int i = 0; i < titles.length; ++i) {
 			if (titles[i] != null)
 				songs.add(titles[i]);

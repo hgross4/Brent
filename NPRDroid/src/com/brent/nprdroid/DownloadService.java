@@ -161,7 +161,7 @@ public class DownloadService extends IntentService {
 							mBuilder.setProgress(25, j, false)
 							.setTicker("Downloading " + fileNameFromUrl)
 							.setContentText(fileNameFromUrl);
-							startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.getNotification());
+							startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.build());
 							downloadBroadcast.putExtra(downloadDone, false);
 							sendBroadcast(downloadBroadcast);
 						} catch (Exception e) {
@@ -180,7 +180,7 @@ public class DownloadService extends IntentService {
 		.setProgress(0, 0, false) //remove the progress bar
 		.setTicker("NPR stories download complete")
 		.setSmallIcon(android.R.drawable.stat_sys_download_done);
-		startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.getNotification());
+		startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.build());
 		downloadBroadcast.putExtra(downloadDone, true);
 		sendStickyBroadcast(downloadBroadcast);
 	}

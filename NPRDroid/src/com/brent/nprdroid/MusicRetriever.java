@@ -19,9 +19,11 @@ package com.brent.nprdroid;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.net.Uri;
+import android.os.Environment;
 import android.util.Log;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -51,10 +53,11 @@ public class MusicRetriever {
      */
     public void prepare() {
     	mItems.clear();
-    	String sdPath = "/sdcard/Android/data/com.brent.nprdroid/files/";
+    	String sdPath = Environment.getExternalStorageDirectory().getPath() + "/Android/data/com.brent.nprdroid/files/";
 		Log.i(TAG , sdPath);
 		File sdPathFile = new File(sdPath);
 		File[] files = sdPathFile.listFiles();
+		Arrays.sort(files);
 		if (files != null && files.length > 0) {
 			for (File file : files) {
 				Log.i(TAG, file.getName());

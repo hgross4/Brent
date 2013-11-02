@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.brent.nprdroid;
+package com.brentgrossman.downloadNPR;
 
 import android.media.AudioManager;
 import android.util.Log;

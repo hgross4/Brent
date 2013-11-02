@@ -1,4 +1,4 @@
-package com.brent.nprdroid;
+package com.brentgrossman.downloadNPR;
 
 public class Story {
 

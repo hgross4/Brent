@@ -1,4 +1,4 @@
-package com.brent.nprdroid;
+package com.brentgrossman.downloadNPR;
 
 import android.view.View;
 import android.widget.TextView;

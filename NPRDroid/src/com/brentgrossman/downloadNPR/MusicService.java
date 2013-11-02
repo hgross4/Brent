@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.brent.nprdroid;
+package com.brentgrossman.downloadNPR;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -68,14 +68,13 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     // constants exist in our class is a mere convenience: what really defines the actions our
     // service can handle are the <action> tags in the <intent-filters> tag for our service in
     // AndroidManifest.xml.
-    public static final String ACTION_TOGGLE_PLAYBACK =
-            "com.brent.nprdroid.action.TOGGLE_PLAYBACK";
-    public static final String ACTION_PLAY = "com.brent.nprdroid.action.PLAY";
-    public static final String ACTION_PAUSE = "com.brent.nprdroid.action.PAUSE";
-    public static final String ACTION_STOP = "com.brent.nprdroid.action.STOP";
-    public static final String ACTION_SKIP = "com.brent.nprdroid.action.SKIP";
-    public static final String ACTION_REWIND = "com.brent.nprdroid.action.REWIND";
-    public static final String ACTION_URL = "com.brent.nprdroid.action.URL";
+    public static final String ACTION_TOGGLE_PLAYBACK = "com.brentgrossman.downloadNPR.action.TOGGLE_PLAYBACK";
+    public static final String ACTION_PLAY = "com.brentgrossman.downloadNPR.action.PLAY";
+    public static final String ACTION_PAUSE = "com.brentgrossman.downloadNPR.action.PAUSE";
+    public static final String ACTION_STOP = "com.brentgrossman.downloadNPR.action.STOP";
+    public static final String ACTION_SKIP = "com.brentgrossman.downloadNPR.action.SKIP";
+    public static final String ACTION_REWIND = "com.brentgrossman.downloadNPR.action.REWIND";
+    public static final String ACTION_URL = "com.brentgrossman.downloadNPR.action.URL";
 
     // The volume we set the media player to when we lose audio focus, but are allowed to reduce
     // the volume instead of stopping playback.
@@ -566,7 +565,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     /** Updates the notification. */
     void updateNotification(String text) {
         PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0,
-                new Intent(getApplicationContext(), NPRDroidActivity.class),
+                new Intent(getApplicationContext(), DownloadNPRActivity.class),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         mNotification.setLatestEventInfo(getApplicationContext(), "DownLoadNPR", text, pi);
         mNotificationManager.notify(NOTIFICATION_ID, mNotification);
@@ -579,7 +578,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
      */
     void setUpAsForeground(String text) {
         PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0,
-                new Intent(getApplicationContext(), NPRDroidActivity.class),
+                new Intent(getApplicationContext(), DownloadNPRActivity.class),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         mNotification = new Notification();
         mNotification.tickerText = text;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.brent.nprdroid"
+    package="com.brentgrossman.downloadNPR"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -20,7 +20,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <activity
-            android:name=".NPRDroidActivity"
+            android:name=".DownloadNPRActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize"
             android:label="@string/app_name" >
             <intent-filter>
@@ -34,15 +34,15 @@
             android:name=".MusicService"
             android:exported="false" >
             <intent-filter>
-                <action android:name="com.brent.nprdroid.action.TOGGLE_PLAYBACK" />
-                <action android:name="com.brent.nprdroid.action.PLAY" />
-                <action android:name="com.brent.nprdroid.action.PAUSE" />
-                <action android:name="com.brent.nprdroid.action.SKIP" />
-                <action android:name="com.brent.nprdroid.action.REWIND" />
-                <action android:name="com.brent.nprdroid.action.STOP" />
+                <action android:name="com.brentgrossman.downloadNPR.action.TOGGLE_PLAYBACK" />
+                <action android:name="com.brentgrossman.downloadNPR.action.PLAY" />
+                <action android:name="com.brentgrossman.downloadNPR.action.PAUSE" />
+                <action android:name="com.brentgrossman.downloadNPR.action.SKIP" />
+                <action android:name="com.brentgrossman.downloadNPR.action.REWIND" />
+                <action android:name="com.brentgrossman.downloadNPR.action.STOP" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.brent.nprdroid.action.URL" />
+                <action android:name="com.brentgrossman.downloadNPR.action.URL" />
             </intent-filter>
         </service>
 

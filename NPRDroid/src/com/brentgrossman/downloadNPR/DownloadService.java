@@ -1,4 +1,4 @@
-package com.brent.nprdroid;
+package com.brentgrossman.downloadNPR;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -114,7 +114,7 @@ public class DownloadService extends IntentService {
 		mBuilder.setContentTitle("NPR stories download")
 		.setTicker("Starting NPR stories download")
 		.setSmallIcon(android.R.drawable.stat_sys_download);
-		final Intent notificationIntent = new Intent(this, NPRDroidActivity.class);
+		final Intent notificationIntent = new Intent(this, DownloadNPRActivity.class);
         final PendingIntent pi = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         mBuilder.setContentIntent(pi);
         final Notification notification = mBuilder.build();

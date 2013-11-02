@@ -1,8 +1,8 @@
-package com.brent.nprdroid;
+package com.brentgrossman.downloadNPR;
 
 import java.util.ArrayList;
 
-import com.brent.nprdroid.MusicService.State;
+import com.brentgrossman.downloadNPR.MusicService.State;
 
 import android.app.ListActivity;
 import android.content.BroadcastReceiver;
@@ -31,11 +31,11 @@ import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class NPRDroidActivity extends ListActivity implements OnClickListener,
+public class DownloadNPRActivity extends ListActivity implements OnClickListener,
 		OnSeekBarChangeListener {
 	private ArrayList<String> songs = new ArrayList<String>();
 	private CustomAdapter songList;
-	private String TAG = "NPRDroidActivity";
+	private String TAG = this.getClass().getSimpleName();
 	private ImageButton rewindButton, playButton, nextButton;
 	private MusicService musicService;
 	boolean mBound = false, downloading = false;

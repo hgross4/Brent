@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.brent.nprdroid;
+package com.brentgrossman.downloadNPR;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -53,12 +53,12 @@ public class MusicRetriever {
      */
     public void prepare() {
     	mItems.clear();
-    	String sdPath = Environment.getExternalStorageDirectory().getPath() + "/Android/data/com.brent.nprdroid/files/";
+    	String sdPath = Environment.getExternalStorageDirectory().getPath() + "/Android/data/com.brentgrossman.downloadNPR/files/";
 		Log.i(TAG , sdPath);
 		File sdPathFile = new File(sdPath);
 		File[] files = sdPathFile.listFiles();
-		Arrays.sort(files);
 		if (files != null && files.length > 0) {
+			Arrays.sort(files);
 			for (File file : files) {
 				Log.i(TAG, file.getName());
 				mItems.add(new Item(0, null, file.getName(), null, 0));

@@ -461,10 +461,10 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
                 mRetriever.prepare(); // if not called, mRetriever won't have correct file names while download is happening
                 playingItem = mRetriever.getNextItem(); 
                 if (playingItem == null) {
-                    Toast.makeText(this,
-                            "No available music to play. Place some music on your external storage "
-                            + "device (e.g. your SD card) and try again.",
-                            Toast.LENGTH_LONG).show();
+                	if (mRetriever.listPosition != mRetriever.mItems.size()) {
+                		Toast.makeText(this, "No available music to play. Place some music on your external storage "
+                				+ "device (e.g. your SD card) and try again.", Toast.LENGTH_LONG).show();
+                	}
                     processStopRequest(true); // stop everything!
                     return;
                 }
@@ -604,7 +604,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     }
 
     public void onGainedAudioFocus() {
-        Toast.makeText(getApplicationContext(), "gained audio focus.", Toast.LENGTH_SHORT).show();
         mAudioFocus = AudioFocus.Focused;
 
         // restart media player with new focus settings
@@ -613,8 +612,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     }
 
     public void onLostAudioFocus(boolean canDuck) {
-        Toast.makeText(getApplicationContext(), "lost audio focus." + (canDuck ? "can duck" :
-            "no duck"), Toast.LENGTH_SHORT).show();
         mAudioFocus = canDuck ? AudioFocus.NoFocusCanDuck : AudioFocus.NoFocusNoDuck;
 
         // start/restart/pause media player with new focus settings

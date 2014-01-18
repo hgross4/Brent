@@ -108,13 +108,10 @@ public class DownloadNPRActivity extends ListActivity implements OnClickListener
 			if (msg.what == MusicService.NEXT_ITEM) {
 				SharedPreferences.Editor editor = pref.edit();
 				int newPosition = musicService.mRetriever.listPosition - 1;
-				songList.notifyDataSetChanged(); // make newly playing story
-													// highlighted in list,
-													// others default color
-				editor.putInt("listPosition", newPosition); // save this
-															// position so its
-															// list item can be
-															// changed later
+				// make newly playing story highlighted in list, others default color:
+				songList.notifyDataSetChanged();
+				// save this position so its list item can be changed later:
+				editor.putInt("listPosition", newPosition);
 				editor.commit();
 			}
 		}

@@ -30,6 +30,7 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
+import android.media.MediaPlayer.OnInfoListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.RemoteControlClient;
 import android.net.wifi.WifiManager;
@@ -58,8 +59,7 @@ import java.io.IOException;
  *
  */
 public class MusicService extends Service implements OnCompletionListener, OnPreparedListener,
-                OnErrorListener, MusicFocusable,
-                PrepareMusicRetrieverTask.MusicRetrieverPreparedListener {
+                OnErrorListener, OnInfoListener, MusicFocusable, PrepareMusicRetrieverTask.MusicRetrieverPreparedListener {
 
     // The tag we put on debug messages
     final static String TAG = "MusicService";
@@ -158,9 +158,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     NotificationManager mNotificationManager;
 
     Notification mNotification = null;
-    
-    // Binder given to clients
-    private final IBinder mBinder = new LocalBinder();
     
     public class LocalBinder extends Binder {
         MusicService getService() {
@@ -602,6 +599,12 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         giveUpAudioFocus();
         return true; // true indicates we handled the error
     }
+    
+    @Override
+    public boolean onInfo(MediaPlayer mp, int what, int extra) {
+    	Log.wtf(TAG, "what: " + what);
+    	return false;
+    }
 
     public void onGainedAudioFocus() {
         mAudioFocus = AudioFocus.Focused;
@@ -659,18 +662,17 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     @Override
     public IBinder onBind(Intent intent) {    	
     	return mMessenger.getBinder();
-//    	return mBinder;
     }
     
     public int getPlayerPosition() {
     	if (mState == State.Playing || mState == State.Paused)
-    		return mPlayer.getCurrentPosition()/1000;
+    		return mPlayer.getCurrentPosition();
     	else return 0;
     }
     
     public int getDuration() {
     	if (mState == State.Playing || mState == State.Paused)
-    		return mPlayer.getDuration()/1000;
+    		return mPlayer.getDuration();
     	else return 0;
     }
     

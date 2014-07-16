@@ -44,7 +44,11 @@ public class DownloadNPRActivity extends ListActivity implements OnClickListener
 	private SeekBar seekBar;
 	SharedPreferences pref;
 	private int playerPosition;
-
+	private int duration;
+	private TextView textRemaining; 
+	private TextView textDuration;
+	private int seekBarProgress;
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -64,6 +68,8 @@ public class DownloadNPRActivity extends ListActivity implements OnClickListener
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
 		seekBar.setOnSeekBarChangeListener(this);
 		mHandler = new Handler();
+		textRemaining = (TextView) findViewById(R.id.textRemaining);
+		textDuration = (TextView) findViewById(R.id.textDuration);
 	}
 
 	@Override
@@ -128,8 +134,7 @@ public class DownloadNPRActivity extends ListActivity implements OnClickListener
 			musicService = MusicService.getService();
 			mBound = true;
 			try {
-				Message msg = Message.obtain(null,
-						MusicService.MSG_REGISTER_CLIENT);
+				Message msg = Message.obtain(null, MusicService.MSG_REGISTER_CLIENT);
 				msg.replyTo = mMessenger;
 				(new Messenger(service)).send(msg);
 			} catch (RemoteException e) {
@@ -145,10 +150,9 @@ public class DownloadNPRActivity extends ListActivity implements OnClickListener
 	};
 
 	Runnable mStatusChecker = new Runnable() {
+
 		@Override
 		public void run() {
-			TextView textRemaining = (TextView) findViewById(R.id.textRemaining);
-			TextView textDuration = (TextView) findViewById(R.id.textDuration);
 			mHandler.postDelayed(mStatusChecker, mInterval);
 			if (musicService != null) {
 				switch (musicService.mState) {
@@ -165,15 +169,15 @@ public class DownloadNPRActivity extends ListActivity implements OnClickListener
 					playButton.setImageResource(R.drawable.play_button_normal);
 					break;
 				}
-				playerPosition = musicService.getPlayerPosition();
-				int duration = musicService.getDuration();
+				duration = musicService.getDuration();
 				seekBar.setMax(duration);
+				playerPosition = musicService.getPlayerPosition();
 				seekBar.setProgress(playerPosition);
-				int remaining = duration - playerPosition;
+				int remaining = (duration - playerPosition)/1000;
 				textRemaining.setText(timeString(remaining));
-				textDuration.setText(timeString(duration));
+				textDuration.setText(timeString(duration/1000));
 			} else
-				Log.i(TAG, "musicService is NULL!");
+				Log.e(TAG, "musicService is NULL!");
 		}
 	};
 
@@ -210,7 +214,7 @@ public class DownloadNPRActivity extends ListActivity implements OnClickListener
 			} else
 				startService(new Intent(MusicService.ACTION_PLAY));
 		} else if (v == rewindButton) {
-			musicService.processSeekRequest((playerPosition - 30) * 1000);
+			musicService.processSeekRequest((playerPosition - 30000));
 		} else if (v == nextButton) {
 			startService(new Intent(MusicService.ACTION_SKIP));
 			nextButton.setImageResource(R.drawable.next_button_pressed);
@@ -274,10 +278,12 @@ public class DownloadNPRActivity extends ListActivity implements OnClickListener
 	};
 
 	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress,
-			boolean fromUser) {
-		if (fromUser == true)
-			musicService.processSeekRequest(progress * 1000);
+	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+		if (fromUser == true) {
+			seekBarProgress = progress;
+			int remaining = (duration - progress)/1000;
+			textRemaining.setText(timeString(remaining));
+        }
 	}
 
 	@Override
@@ -288,8 +294,7 @@ public class DownloadNPRActivity extends ListActivity implements OnClickListener
 
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
-		// TODO Auto-generated method stub
-
+		musicService.processSeekRequest(seekBarProgress);	// Was causing mediaplayer to "hiccough" when in onProgressChanged
 	}
 
 }

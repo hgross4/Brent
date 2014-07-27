@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">DownloadNPR</string>
+    <string name="app_name">Download NPR</string>
     <string name="me">Morning\nEdition</string>
     <string name="atc">All Things\nConsidered</string>
     <string name="downloads_complete">Stories download complete</string>

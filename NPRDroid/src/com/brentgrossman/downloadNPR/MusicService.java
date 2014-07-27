@@ -46,6 +46,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 /**
  * Service that handles media playback. This is the Service through which we perform all the media
@@ -172,7 +173,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     }
     
     // Messenger and argument for sending info. back to activity (e.g., which item in list is currently playing)
-    private Messenger messenger;
+    private static Messenger messenger;
 
 	private static MusicService musicService;
 	static final int NEXT_ITEM = 1;
@@ -206,8 +207,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 
     @Override
     public void onCreate() {
-        Log.i(TAG, "debug: Creating service");
-
+    	
         // Create the Wifi lock (this does not acquire the lock, this just creates it)
         mWifiLock = ((WifiManager) getSystemService(Context.WIFI_SERVICE))
                         .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
@@ -239,7 +239,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-//    	Log.i(TAG, "onStart");
+
         String action = intent.getAction();
         if (action.equals(ACTION_TOGGLE_PLAYBACK)) processTogglePlaybackRequest();
         else if (action.equals(ACTION_PLAY)) processPlayRequest();
@@ -412,7 +412,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 
     void processAddRequest(Intent intent) {
         //Called when an item from the list is selected by touching on it
-    	Log.i(TAG, "processAddRequest");
     	mRetriever.listPosition = intent.getIntExtra("listPosition", 0);
     	String fileName = intent.getStringExtra("fileName");
         if (mState == State.Retrieving) {
@@ -421,7 +420,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             mStartPlayingAfterRetrieve = true;
         }
         else if (mState == State.Playing || mState == State.Paused || mState == State.Stopped) {
-            Log.i(TAG, "About to play: " + fileName);
             tryToGetAudioFocus();
             playNextSong(null);
         }
@@ -441,7 +439,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     void playNextSong(String fileName) {
         mState = State.Stopped;
         relaxResources(false); // release everything except MediaPlayer
-        Log.i(TAG, "playNextSong");
         try {
             MusicRetriever.Item playingItem = null;
             if (fileName != null) {
@@ -465,7 +462,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
                     processStopRequest(true); // stop everything!
                     return;
                 }
-                Log.i(TAG, playingItem.getTitle());
                 // set the source of the media player to a path and file name
                 createMediaPlayerIfNeeded();
                 mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -533,10 +529,9 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             // send message to activity so it can change the color of the currently playing item in the list
             Message msg = Message.obtain(null, NEXT_ITEM, mRetriever.listPosition, 0);
             try {
-            	Log.i(TAG, "Next what: " + msg.what);
                 messenger.send(msg);
             } catch (RemoteException e) {
-                Log.i("error", "error");
+                Log.e("error", e.getLocalizedMessage());
             }
         }
         catch (IOException ex) {
@@ -602,7 +597,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
-    	Log.wtf(TAG, "what: " + what);
+    	Log.i(TAG, "what: " + what+ ", extra=" + String.valueOf(extra));
     	return false;
     }
 
@@ -647,20 +642,19 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
      * (which will consist only of Messenger for 
      *  messages from service to activity)
      */
-    Handler handler = new Handler() {
-		@Override
+    static class messageHandler extends Handler {
+        @Override
 		public void handleMessage(Message msg) {
-			Log.i(TAG, "start handleMessage");
 			if (msg.what == MSG_REGISTER_CLIENT) {
 				messenger = msg.replyTo;
 			}
 		}
-	};
+    }
 	
-	final Messenger mMessenger = new Messenger(handler);
+	final Messenger mMessenger = new Messenger(new messageHandler());
 
     @Override
-    public IBinder onBind(Intent intent) {    	
+    public IBinder onBind(Intent intent) {
     	return mMessenger.getBinder();
     }
     

@@ -86,7 +86,7 @@ public class DownloadService extends IntentService {
 			}
 		}
 
-		// Parse the xml and populate the stories global list
+		// Parse the xml
 		DocumentBuilder builder;
 		Document doc = null;
 		try {

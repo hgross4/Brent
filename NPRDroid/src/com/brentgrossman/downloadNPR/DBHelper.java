@@ -20,7 +20,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	    try {
 	      if (c.getCount()==0) {
 	        db.execSQL("CREATE TABLE stories (_id INTEGER PRIMARY KEY AUTOINCREMENT, "
-	        		+ "title TEXT, audio_link TEXT, file_name TEXT, downloaded INTEGER);");
+	        		+ "title TEXT UNIQUE, audio_link TEXT, file_name TEXT, downloaded INTEGER);");
 	      }
 	    }
 	    finally {

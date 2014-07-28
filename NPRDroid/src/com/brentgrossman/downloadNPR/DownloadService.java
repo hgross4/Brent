@@ -158,7 +158,8 @@ public class DownloadService extends IntentService {
 							FileOutputStream out = new FileOutputStream(audioFile);
 							while ((length = content.read(buffer)) > 0) {
 								out.write(buffer, 0, length);
-							}				
+							}
+							out.close();
 							mBuilder.setProgress(25, j, false)
 							.setTicker("Downloading " + fileNameFromUrl)
 							.setContentText(fileNameFromUrl);

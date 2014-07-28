@@ -1,300 +1,118 @@
 package com.brentgrossman.downloadNPR;
 
-import java.util.ArrayList;
-
-import com.brentgrossman.downloadNPR.MusicService.State;
-
-import android.app.ListActivity;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.app.ActionBar;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
-import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.SeekBar;
-import android.widget.Toast;
-import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.TextView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 
-public class DownloadNPRActivity extends ListActivity implements OnClickListener,
-		OnSeekBarChangeListener {
-	private ArrayList<String> songs = new ArrayList<String>();
-	private CustomAdapter songList;
-	private String TAG = this.getClass().getSimpleName();
-	private ImageButton rewindButton, playButton, nextButton;
-	private MusicService musicService;
-	boolean mBound = false, downloading = false;
-	private int mInterval = 1000; // 1 second updates
-	private Handler mHandler;
-	private SeekBar seekBar;
-	SharedPreferences pref;
-	private int playerPosition;
-	private int duration;
-	private TextView textRemaining; 
-	private TextView textDuration;
-	private int seekBarProgress;
+public class DownloadNPRActivity extends FragmentActivity implements ActionBar.TabListener {
 	
-	/** Called when the activity is first created. */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
-		pref = getSharedPreferences("NPRDownloadPreferences",
-				Context.MODE_PRIVATE);
-		songList = new CustomAdapter(this, R.layout.row, songs);
-		setListAdapter(songList);
-		updateSongList();
-		rewindButton = (ImageButton) findViewById(R.id.rewindButton);
-		playButton = (ImageButton) findViewById(R.id.playButton);
-		nextButton = (ImageButton) findViewById(R.id.nextButton);
-		rewindButton.setOnClickListener(this);
-		playButton.setOnClickListener(this);
-		nextButton.setOnClickListener(this);
-		seekBar = (SeekBar) findViewById(R.id.seekBar);
-		seekBar.setOnSeekBarChangeListener(this);
-		mHandler = new Handler();
-		textRemaining = (TextView) findViewById(R.id.textRemaining);
-		textDuration = (TextView) findViewById(R.id.textDuration);
-	}
+	AppSectionsPagerAdapter mAppSectionsPagerAdapter;
 
-	@Override
-	protected void onStart() {
-		super.onStart();
-		// Bind to MusicService
-		Intent intent = new Intent(this, MusicService.class);
-		// intent.putExtra("messenger", new Messenger(handler));
-		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-	}
+    /**
+     * The {@link ViewPager} that will display the three primary sections of the app, one at a
+     * time.
+     */
+    ViewPager mViewPager;
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		startRepeatingTask();
-		IntentFilter filter = new IntentFilter(DownloadService.downloading);
-		registerReceiver(download, filter);
-		if (downloading)
-			updateSongList();
-	}
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		stopRepeatingTask();
-		unregisterReceiver(download);
-	}
+        // Create the adapter that will return a fragment for each of the three primary sections
+        // of the app.
+        mAppSectionsPagerAdapter = new AppSectionsPagerAdapter(getSupportFragmentManager());
 
-	@Override
-	protected void onStop() {
-		super.onStop();
-		// Unbind from the service
-		if (mBound) {
-			unbindService(mConnection);
-			mBound = false;
-		}
-	}
+        // Set up the action bar.
+        final ActionBar actionBar = getActionBar();
 
-	Handler handler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			if (msg.what == MusicService.NEXT_ITEM) {
-				SharedPreferences.Editor editor = pref.edit();
-				int newPosition = musicService.mRetriever.listPosition - 1;
-				// make newly playing story highlighted in list, others default color:
-				songList.notifyDataSetChanged();
-				// save this position so its list item can be changed later:
-				editor.putInt("listPosition", newPosition);
-				editor.commit();
-			}
-		}
-	};
+        // Specify that the Home/Up button should not be enabled, since there is no hierarchical
+        // parent.
+        actionBar.setHomeButtonEnabled(false);
 
-	final Messenger mMessenger = new Messenger(handler);
+        // Specify that we will be displaying tabs in the action bar.
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-	/** Defines callbacks for service binding, passed to bindService() */
-	private ServiceConnection mConnection = new ServiceConnection() {
-		@Override
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			// We've bound to MusicService, cast the IBinder and get
-			// MusicService instance
-			musicService = MusicService.getService();
-			mBound = true;
-			try {
-				Message msg = Message.obtain(null, MusicService.MSG_REGISTER_CLIENT);
-				msg.replyTo = mMessenger;
-				(new Messenger(service)).send(msg);
-			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+        // Set up the ViewPager, attaching the adapter and setting up a listener for when the
+        // user swipes between sections.
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager.setAdapter(mAppSectionsPagerAdapter);
+        mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                // When swiping between different app sections, select the corresponding tab.
+                // We can also use ActionBar.Tab#select() to do this if we have a reference to the
+                // Tab.
+                actionBar.setSelectedNavigationItem(position);
+            }
+        });
 
-		@Override
-		public void onServiceDisconnected(ComponentName arg0) {
-			mBound = false;
-		}
-	};
-
-	Runnable mStatusChecker = new Runnable() {
-
-		@Override
-		public void run() {
-			mHandler.postDelayed(mStatusChecker, mInterval);
-			if (musicService != null) {
-				switch (musicService.mState) {
-				case Playing:
-					playButton.setImageResource(R.drawable.pause_button_normal);
-					break;
-				case Paused:
-					playButton.setImageResource(R.drawable.play_button_normal);
-					break;
-				case Preparing:
-					playButton.setImageResource(R.drawable.play_button_pressed);
-					break;
-				default:
-					playButton.setImageResource(R.drawable.play_button_normal);
-					break;
-				}
-				duration = musicService.getDuration();
-				seekBar.setMax(duration);
-				playerPosition = musicService.getPlayerPosition();
-				seekBar.setProgress(playerPosition);
-				int remaining = (duration - playerPosition)/1000;
-				textRemaining.setText(timeString(remaining));
-				textDuration.setText(timeString(duration/1000));
-			} else
-				Log.e(TAG, "musicService is NULL!");
-		}
-	};
-
-	void startRepeatingTask() {
-		mStatusChecker.run();
-	}
-
-	void stopRepeatingTask() {
-		mHandler.removeCallbacks(mStatusChecker);
-	}
-
-	private String timeString(int totalSeconds) {
-		int minutes = (totalSeconds) / 60;
-		int intSeconds = (totalSeconds) % 60;
-		String seconds = intSeconds > 9 ? "" + intSeconds : "0" + intSeconds;
-		return (minutes + ":" + seconds);
-	}
-
-	private void updateSongList() {
-		songs.clear();
-		String[] titles = pref.getString(DownloadService.storyTitles, "").split("\\|");
-		for (int i = 0; i < titles.length; ++i) {
-			if (titles[i] != null)
-				songs.add(titles[i]);
-		}
-		songList.notifyDataSetChanged();
-	}
-
-	@Override
-	public void onClick(View v) {
-		if (v == playButton) {
-			if (musicService.mState == State.Playing) {
-				startService(new Intent(MusicService.ACTION_PAUSE));
-			} else
-				startService(new Intent(MusicService.ACTION_PLAY));
-		} else if (v == rewindButton) {
-			musicService.processSeekRequest((playerPosition - 30000));
-		} else if (v == nextButton) {
-			startService(new Intent(MusicService.ACTION_SKIP));
-			nextButton.setImageResource(R.drawable.next_button_pressed);
-			nextButton.setImageResource(0); // restores button to "normal",
-											// where
-											// R.drawable.next_button_normal
-											// produces weird effects
-			playButton.setImageResource(R.drawable.play_button_pressed);
-		}
-	}
-
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		Intent intent = new Intent(MusicService.ACTION_URL);
-		intent.putExtra("fileName", songs.get(position).split(" ")[0]);
-		intent.putExtra("listPosition", position);
-		playButton.setImageResource(R.drawable.play_button_pressed);
-		startService((intent));
-	}
-
-	public void readWebpage(View view) {
-		if (isOnline()) {
-			String showChoice;
-			if (view.getId() == R.id.me)
-				showChoice = "me";
-			else
-				showChoice = "atc";
-			Intent intent = new Intent(this, DownloadService.class);
-			intent.putExtra(DownloadService.whichShow, showChoice);
-			((Button) findViewById(R.id.me)).setEnabled(false);
-			((Button) findViewById(R.id.atc)).setEnabled(false);
-			downloading = true;
-			updateSongList();
-			startService(intent);
-		}
-		else {
-			Toast.makeText(getApplicationContext(), "No Internet connection. DownloadNPR has terminated.", Toast.LENGTH_LONG).show();
-			finish();
-		}
-	}
-
-	private boolean isOnline() {
-		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo netInfo = cm.getActiveNetworkInfo();
-		if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-			return true;
-		}
-		return false;
-	}
-
-	private BroadcastReceiver download = new BroadcastReceiver() {
-		public void onReceive(Context ctxt, Intent i) {
-			updateSongList();
-			if (i.getBooleanExtra(DownloadService.downloadDone, false)) {
-				((Button) findViewById(R.id.me)).setEnabled(true);
-				((Button) findViewById(R.id.atc)).setEnabled(true);
-				downloading = false;
-			}
-			removeStickyBroadcast(i);
-		}
-	};
-
-	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		if (fromUser == true) {
-			seekBarProgress = progress;
-			int remaining = (duration - progress)/1000;
-			textRemaining.setText(timeString(remaining));
+        // For each of the sections in the app, add a tab to the action bar.
+        for (int i = 0; i < mAppSectionsPagerAdapter.getCount(); i++) {
+            // Create a tab with text corresponding to the page title defined by the adapter.
+            // Also specify this Activity object, which implements the TabListener interface, as the
+            // listener for when this tab is selected.
+            actionBar.addTab(
+                    actionBar.newTab()
+                            .setText(mAppSectionsPagerAdapter.getPageTitle(i))
+                            .setTabListener(this));
         }
-	}
+    }
 
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-		// TODO Auto-generated method stub
+    @Override
+    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+    }
 
-	}
+    @Override
+    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+        // When the given tab is selected, switch to the corresponding page in the ViewPager.
+        mViewPager.setCurrentItem(tab.getPosition());
+    }
 
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		musicService.processSeekRequest(seekBarProgress);	// Was causing mediaplayer to "hiccough" when in onProgressChanged
-	}
+    @Override
+    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+    }
 
+    /**
+     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the primary
+     * sections of the app.
+     */
+    public static class AppSectionsPagerAdapter extends FragmentPagerAdapter {
+
+        public AppSectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int i) {
+            switch (i) {
+                case 0:
+                    return new AvailableFragment();
+
+                case 1:
+                    return new DownLoadedFragment();
+            }
+			return null;
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+            case 0:
+            	return "Available";
+			case 1:
+            	return "Downloaded";
+            }
+            return "";
+        }
+    }
 }

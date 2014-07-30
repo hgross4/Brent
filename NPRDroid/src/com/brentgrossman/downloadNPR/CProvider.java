@@ -23,6 +23,7 @@ public class CProvider extends ContentProvider {
 		public static final String TITLE = "title";
 		public static final String AUDIO_LINK = "audio_link";
 		public static final String FILE_NAME = "file_name";
+		public static final String SELECTED = "selected";
 		public static final String DOWNLOADED = "downloaded";
 	}
 

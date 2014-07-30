@@ -11,8 +11,8 @@ import android.widget.ArrayAdapter;
 
 class CustomAdapter extends ArrayAdapter<String> {
 	SharedPreferences pref;
-	CustomAdapter(Context context, int layout, ArrayList<String> list) {
-		super(context, layout, list);
+	CustomAdapter(Context context, int layout, int textView, ArrayList<String> list) {
+		super(context, layout, textView, list);
 		pref = context.getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
 	}
 

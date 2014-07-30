@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -16,6 +17,9 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v4.app.ListFragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,14 +28,16 @@ import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.brentgrossman.downloadNPR.MusicService.State;
 
-public class DownLoadedFragment extends ListFragment implements OnClickListener, OnSeekBarChangeListener {
+public class DownLoadedFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnClickListener, OnSeekBarChangeListener {
 	private ArrayList<String> stories = new ArrayList<String>();
 	private static CustomAdapter storiesList;
+	private SimpleCursorAdapter adapter = null;
 	private String TAG = this.getClass().getSimpleName();
 	private ImageButton rewindButton, playButton, nextButton;
 	private static MusicService musicService;
@@ -45,14 +51,18 @@ public class DownLoadedFragment extends ListFragment implements OnClickListener,
 	private TextView textRemaining; 
 	private TextView textDuration;
 	private int seekBarProgress;
+	private static final String[] PROJECTION = new String[] { CProvider.Stories._ID, CProvider.Stories.TITLE };
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)  {
 		View rootView = inflater.inflate(R.layout.downloaded_fragment, container, false);
 		pref = this.getActivity().getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
-		storiesList = new CustomAdapter(this.getActivity(), R.layout.row, stories);
-		setListAdapter(storiesList);
-		updateStoriesList();
+		//		storiesList = new CustomAdapter(this.getActivity(), R.layout.row, R.id.story, stories);
+		//		setListAdapter(storiesList);
+		//		updateStoriesList();
+		adapter = new SimpleCursorAdapter(getActivity(), R.layout.row, null, new String[] { CProvider.Stories.TITLE }, new int[] { R.id.story }, 0);
+		setListAdapter(adapter);
+		getLoaderManager().initLoader(0, null, this);
 		rewindButton = (ImageButton) rootView.findViewById(R.id.rewindButton);
 		playButton = (ImageButton) rootView.findViewById(R.id.playButton);
 		nextButton = (ImageButton) rootView.findViewById(R.id.nextButton);
@@ -82,8 +92,7 @@ public class DownLoadedFragment extends ListFragment implements OnClickListener,
 		startRepeatingTask();
 		IntentFilter filter = new IntentFilter(DownloadService.downloading);
 		this.getActivity().registerReceiver(download, filter);
-		if (downloading)
-			updateStoriesList();
+		//		if (downloading) updateStoriesList();
 	}
 
 	@Override
@@ -223,15 +232,22 @@ public class DownLoadedFragment extends ListFragment implements OnClickListener,
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Intent intent = new Intent(MusicService.ACTION_URL);
-		intent.putExtra("fileName", stories.get(position).split(" ")[0]);
-		intent.putExtra("listPosition", position);
-		playButton.setImageResource(R.drawable.play_button_pressed);
-		this.getActivity().startService((intent));
+		Cursor cursor = this.getActivity().getContentResolver().query(CProvider.Stories.CONTENT_URI, 
+				new String[] {CProvider.Stories.FILE_NAME}, 
+				CProvider.Stories._ID + " = ? ", new String[] {Long.toString(id)}, null);
+		if (cursor != null && cursor.moveToFirst()) {
+			String fileName = cursor.getString(cursor.getColumnIndex(CProvider.Stories.FILE_NAME));
+			Log.wtf(TAG, fileName);
+			intent.putExtra("fileName", fileName);
+			intent.putExtra("listPosition", position);
+			playButton.setImageResource(R.drawable.play_button_pressed);
+			this.getActivity().startService((intent));
+		}
 	}
 
 	private BroadcastReceiver download = new BroadcastReceiver() {
 		public void onReceive(Context ctxt, Intent i) {
-			updateStoriesList();
+			//			updateStoriesList();
 			if (i.getBooleanExtra(DownloadService.downloadDone, false)) {
 				downloading = false;
 			}
@@ -257,5 +273,24 @@ public class DownLoadedFragment extends ListFragment implements OnClickListener,
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
 		musicService.processSeekRequest(seekBarProgress);	// Was causing mediaplayer to "hiccough" when in onProgressChanged
+	}
+
+	@Override
+	public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
+		return new CursorLoader(this.getActivity(), CProvider.Stories.CONTENT_URI, PROJECTION, 
+				CProvider.Stories.DOWNLOADED + " = ? ", new String[] {"1"}, null);
+
+	}
+
+	@Override
+	public void onLoadFinished(Loader<Cursor> arg0, Cursor arg1) {
+		adapter.swapCursor(arg1);
+
+	}
+
+	@Override
+	public void onLoaderReset(Loader<Cursor> arg0) {
+		adapter.swapCursor(null);
+
 	}
 }

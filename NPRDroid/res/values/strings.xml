@@ -4,6 +4,8 @@
     <string name="me">Morning\nEdition</string>
     <string name="atc">All Things\nConsidered</string>
     <string name="downloads_complete">Stories download complete</string>
-    <string name="latest_stories">Download the latest stories</string>
+    <string name="latest_stories">Show the latest stories</string>
+    <string name="select_all">Select/deselect all</string>
+    <string name="download_selected_stories">Download selected stories</string>
 
 </resources>

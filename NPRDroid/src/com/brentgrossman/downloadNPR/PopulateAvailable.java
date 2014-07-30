@@ -22,6 +22,7 @@ import org.xml.sax.SAXException;
 import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.SQLException;
 import android.util.Log;
 
 public class PopulateAvailable extends IntentService {
@@ -110,11 +111,14 @@ public class PopulateAvailable extends IntentService {
 				}
 			}
 			if (title != null && audioLink != null) {
-				Log.wtf("PopulateAvailable", title);
 				ContentValues values = new ContentValues();
 				values.put(CProvider.Stories.TITLE, title);
 				values.put(CProvider.Stories.AUDIO_LINK, audioLink);
-				getContentResolver().insert(CProvider.Stories.CONTENT_URI, values);
+				try {
+					getContentResolver().insert(CProvider.Stories.CONTENT_URI, values);
+				} catch (SQLException e) {
+					Log.e("PopulateAvailable", "Row could not be inserted: " + e.getLocalizedMessage());
+				}
 			}
 		}
 	}

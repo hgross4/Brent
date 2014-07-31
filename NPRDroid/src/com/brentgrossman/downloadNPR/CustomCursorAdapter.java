@@ -1,18 +1,17 @@
 package com.brentgrossman.downloadNPR;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.SimpleCursorAdapter;
 
-class CustomAdapter extends ArrayAdapter<String> {
+class CustomCursorAdapter extends SimpleCursorAdapter {
 	SharedPreferences pref;
-	CustomAdapter(Context context, int layout, int textView, ArrayList<String> list) {
-		super(context, layout, textView, list);
+	CustomCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags) {
+		super(context, layout, c, from, to, flags);
 		pref = context.getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
 	}
 

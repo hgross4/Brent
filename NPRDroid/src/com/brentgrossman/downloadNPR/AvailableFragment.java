@@ -1,8 +1,6 @@
 package com.brentgrossman.downloadNPR;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -12,8 +10,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,7 +18,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 import android.support.v4.app.LoaderManager;
@@ -33,7 +28,7 @@ import android.support.v4.content.Loader;
 public class AvailableFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnClickListener {
 
 	private ArrayList<String> stories = new ArrayList<String>();
-	private static CustomAdapter storiesList;
+	private static CustomCursorAdapter storiesList;
 	static SharedPreferences pref;
 	private SimpleCursorAdapter adapter = null;
 	private static final String[] PROJECTION = new String[] { CProvider.Stories._ID, CProvider.Stories.TITLE };

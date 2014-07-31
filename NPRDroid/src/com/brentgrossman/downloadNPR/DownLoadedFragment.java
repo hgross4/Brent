@@ -36,8 +36,8 @@ import com.brentgrossman.downloadNPR.MusicService.State;
 
 public class DownLoadedFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnClickListener, OnSeekBarChangeListener {
 	private ArrayList<String> stories = new ArrayList<String>();
-	private static CustomAdapter storiesList;
-	private SimpleCursorAdapter adapter = null;
+	private static CustomCursorAdapter storiesList;
+	private static CustomCursorAdapter adapter = null;
 	private String TAG = this.getClass().getSimpleName();
 	private ImageButton rewindButton, playButton, nextButton;
 	private static MusicService musicService;
@@ -51,7 +51,6 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 	private TextView textRemaining; 
 	private TextView textDuration;
 	private int seekBarProgress;
-	private static final String[] PROJECTION = new String[] { CProvider.Stories._ID, CProvider.Stories.TITLE };
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)  {
@@ -60,7 +59,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 		//		storiesList = new CustomAdapter(this.getActivity(), R.layout.row, R.id.story, stories);
 		//		setListAdapter(storiesList);
 		//		updateStoriesList();
-		adapter = new SimpleCursorAdapter(getActivity(), R.layout.row, null, new String[] { CProvider.Stories.TITLE }, new int[] { R.id.story }, 0);
+		adapter = new CustomCursorAdapter(getActivity(), R.layout.row, null, new String[] { CProvider.Stories.TITLE }, new int[] { R.id.story }, 0);
 		setListAdapter(adapter);
 		getLoaderManager().initLoader(0, null, this);
 		rewindButton = (ImageButton) rootView.findViewById(R.id.rewindButton);
@@ -119,7 +118,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 				SharedPreferences.Editor editor = pref.edit();
 				int newPosition = musicService.mRetriever.listPosition - 1;
 				// make newly playing story highlighted in list, others default color:
-				storiesList.notifyDataSetChanged();
+				adapter.notifyDataSetChanged();
 				// save this position so its list item can be changed later:
 				editor.putInt("listPosition", newPosition);
 				editor.commit();
@@ -231,6 +230,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
+		Log.wtf(TAG, "id: " + id);
 		Intent intent = new Intent(MusicService.ACTION_URL);
 		Cursor cursor = this.getActivity().getContentResolver().query(CProvider.Stories.CONTENT_URI, 
 				new String[] {CProvider.Stories.FILE_NAME}, 
@@ -277,8 +277,9 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
-		return new CursorLoader(this.getActivity(), CProvider.Stories.CONTENT_URI, PROJECTION, 
-				CProvider.Stories.DOWNLOADED + " = ? ", new String[] {"1"}, null);
+		return new CursorLoader(this.getActivity(), CProvider.Stories.CONTENT_URI, 
+				new String[] { CProvider.Stories._ID, CProvider.Stories.TITLE }, 
+				CProvider.Stories.DOWNLOADED + " = ? ", new String[] {"1"}, CProvider.Stories._ID);
 
 	}
 

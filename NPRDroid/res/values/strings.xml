@@ -7,5 +7,6 @@
     <string name="latest_stories">Show the latest stories</string>
     <string name="select_all">Select/deselect all</string>
     <string name="download_selected_stories">Download selected stories</string>
+    <string name="delete_selected_stories">Delete selected stories</string>
 
 </resources>

@@ -48,7 +48,7 @@
             android:focusableInTouchMode="false" />
 
         <TextView
-            android:id="@+id/select_all"
+            android:id="@+id/select_all_text"
             android:layout_width="wrap_content"
             android:layout_height="24sp"
             android:layout_alignBaseline="@+id/select_all_check_box"

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.brentgrossman.downloadNPR;
+package com.brentgrossman.downloadNPR.playback;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -46,7 +46,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
+import com.brentgrossman.downloadNPR.R;
+import com.brentgrossman.downloadNPR.ui.DownloadNPRActivity;
 
 /**
  * Service that handles media playback. This is the Service through which we perform all the media
@@ -89,7 +90,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     AudioFocusHelper mAudioFocusHelper = null;
 
     // indicates the state our service:
-    enum State {
+    public enum State {
         Retrieving, // the MediaRetriever is retrieving music
         Stopped,    // media player is stopped and not prepared to play
         Preparing,  // media player is preparing...
@@ -99,7 +100,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         Paused      // playback paused (media player ready!)
     };
 
-    State mState = State.Retrieving;
+    public State mState = State.Retrieving;
 
     // if in Retrieving mode, this flag indicates whether we should start playing immediately
     // when we are ready or not.
@@ -142,7 +143,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 
     // Our instance of our MusicRetriever, which handles scanning for media and
     // providing titles and URIs as we need.
-    MusicRetriever mRetriever;
+    public MusicRetriever mRetriever;
 
     // our RemoteControlClient object, which will use remote control APIs available in
     // SDK level >= 14, if they're available.
@@ -167,7 +168,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         }
     }
     
-    protected static MusicService getService() {
+    public static MusicService getService() {
         // Return this instance of LocalService so clients can call public methods
         return musicService;
     }
@@ -176,9 +177,9 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     private static Messenger messenger;
 
 	private static MusicService musicService;
-	static final int NEXT_ITEM = 1;
+	public static final int NEXT_ITEM = 1;
 
-	protected static final int MSG_REGISTER_CLIENT = 0;
+	public static final int MSG_REGISTER_CLIENT = 0;
 
     /**
      * Makes sure the media player exists and has been reset. This will create the media player
@@ -317,7 +318,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         }
     }
     
-    void processSeekRequest(int msec) {
+    public void processSeekRequest(int msec) {
     	if (mState == State.Playing || mState == State.Paused)
     		mPlayer.seekTo(msec);
     }

@@ -1,4 +1,6 @@
-package com.brentgrossman.downloadNPR;
+package com.brentgrossman.downloadNPR.ui;
+
+import com.brentgrossman.downloadNPR.R;
 
 import android.view.View;
 import android.widget.CheckBox;

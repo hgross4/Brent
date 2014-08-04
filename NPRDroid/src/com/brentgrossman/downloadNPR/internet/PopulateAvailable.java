@@ -1,4 +1,4 @@
-package com.brentgrossman.downloadNPR;
+package com.brentgrossman.downloadNPR.internet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +18,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import com.brentgrossman.downloadNPR.data.CProvider;
 
 import android.app.IntentService;
 import android.content.ContentValues;
@@ -39,9 +41,8 @@ public class PopulateAvailable extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		
 		// Delete from database stories currently in list
-		int rowCount = getContentResolver().delete(CProvider.Stories.CONTENT_URI, 
+		getContentResolver().delete(CProvider.Stories.CONTENT_URI, 
 				CProvider.Stories.DOWNLOADED + " IS NULL OR " + CProvider.Stories.DOWNLOADED + " != ? ", new String[] {"1"});
-		Log.wtf("PopulateAvailable", "" + rowCount);
 		
 		BufferedReader reader = null;
 		String rawXML = null;

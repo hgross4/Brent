@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.brentgrossman.downloadNPR;
+package com.brentgrossman.downloadNPR.playback;
 
 import android.app.PendingIntent;
 import android.graphics.Bitmap;

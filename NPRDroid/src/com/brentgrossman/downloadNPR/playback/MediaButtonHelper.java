@@ -1,4 +1,4 @@
-package com.brentgrossman.downloadNPR;
+package com.brentgrossman.downloadNPR.playback;
 
 import android.content.ComponentName;
 import android.media.AudioManager;

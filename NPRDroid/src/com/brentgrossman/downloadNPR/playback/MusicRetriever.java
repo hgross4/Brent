@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package com.brentgrossman.downloadNPR;
+package com.brentgrossman.downloadNPR.playback;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+
+import com.brentgrossman.downloadNPR.data.CProvider;
 
 /**
  * Retrieves and organizes media to play. Before being used, you must call {@link #prepare()},
@@ -40,7 +44,7 @@ public class MusicRetriever {
 
     // the items (songs) we have queried
     List<Item> mItems = new ArrayList<Item>();
-    int listPosition = 0;
+    public int listPosition = 0;
     Random mRandom = new Random();
 
     public MusicRetriever(ContentResolver cr) {
@@ -53,13 +57,12 @@ public class MusicRetriever {
      */
     public void prepare() {
     	mItems.clear();
-    	String sdPath = Environment.getExternalStorageDirectory().getPath() + "/Android/data/com.brentgrossman.downloadNPR/files/";
-		File sdPathFile = new File(sdPath);
-		File[] files = sdPathFile.listFiles();
-		if (files != null && files.length > 0) {
-			Arrays.sort(files);
-			for (File file : files) {
-				mItems.add(new Item(0, null, file.getName(), null, 0));
+		Cursor cursor = mContentResolver.query(CProvider.Stories.CONTENT_URI, 
+				new String[] {CProvider.Stories.FILE_NAME}, 
+				CProvider.Stories.DOWNLOADED + " = ? ", new String[] {"1"}, CProvider.Stories._ID);
+		if (cursor != null) {
+			while (cursor.moveToNext()) {
+				mItems.add(new Item(0, null, cursor.getString(cursor.getColumnIndex(CProvider.Stories.FILE_NAME)), null, 0));
 			}
 		}
     }

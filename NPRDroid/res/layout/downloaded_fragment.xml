@@ -45,8 +45,7 @@
         <TextView
             android:id="@+id/textRemaining"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
+            android:layout_height="wrap_content" />
 
         <SeekBar
             android:id="@+id/seekBar"
@@ -57,16 +56,50 @@
         <TextView
             android:id="@+id/textDuration"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
+            android:layout_height="wrap_content" />
     </LinearLayout>
+    
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:orientation="horizontal" >
+
+        <CheckBox
+            android:id="@+id/select_all_check_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:focusableInTouchMode="false" />
+
+        <TextView
+            android:id="@+id/select_all_text"
+            android:layout_width="wrap_content"
+            android:layout_height="24sp"
+            android:layout_alignBaseline="@+id/select_all_check_box"
+            android:layout_alignBottom="@+id/select_all_check_box"
+            android:layout_toRightOf="@+id/select_all_check_box"
+            android:lines="1"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:text="@string/select_all" />
+        
+    </RelativeLayout>
 
     <ListView
         android:id="@+id/android:list"
         android:layout_width="fill_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:drawSelectorOnTop="false" >
+        android:drawSelectorOnTop="true"
+        android:choiceMode="multipleChoice" >
     </ListView>
+    
+    <Button 
+        android:id="@+id/delete_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/delete_selected_stories" />
 
 </LinearLayout>

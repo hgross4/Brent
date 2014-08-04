@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.brentgrossman.downloadNPR;
+package com.brentgrossman.downloadNPR.playback;
 
 /**
  * Represents something that can react to audio focus events. We implement this instead of just

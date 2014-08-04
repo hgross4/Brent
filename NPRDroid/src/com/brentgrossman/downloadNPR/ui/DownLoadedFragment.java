@@ -1,6 +1,4 @@
-package com.brentgrossman.downloadNPR;
-
-import java.util.ArrayList;
+package com.brentgrossman.downloadNPR.ui;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -10,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -25,6 +24,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
@@ -32,12 +34,14 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-import com.brentgrossman.downloadNPR.MusicService.State;
+import com.brentgrossman.downloadNPR.R;
+import com.brentgrossman.downloadNPR.data.CProvider;
+import com.brentgrossman.downloadNPR.internet.DownloadService;
+import com.brentgrossman.downloadNPR.playback.MusicService;
+import com.brentgrossman.downloadNPR.playback.MusicService.State;
 
 public class DownLoadedFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnClickListener, OnSeekBarChangeListener {
-	private ArrayList<String> stories = new ArrayList<String>();
-	private static CustomCursorAdapter storiesList;
-	private static CustomCursorAdapter adapter = null;
+	private static DownloadedCursorAdapter adapter = null;
 	private String TAG = this.getClass().getSimpleName();
 	private ImageButton rewindButton, playButton, nextButton;
 	private static MusicService musicService;
@@ -51,15 +55,14 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 	private TextView textRemaining; 
 	private TextView textDuration;
 	private int seekBarProgress;
+	private TextView selectAllText;
+	private CheckBox selectAllCheckBox;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)  {
 		View rootView = inflater.inflate(R.layout.downloaded_fragment, container, false);
 		pref = this.getActivity().getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
-		//		storiesList = new CustomAdapter(this.getActivity(), R.layout.row, R.id.story, stories);
-		//		setListAdapter(storiesList);
-		//		updateStoriesList();
-		adapter = new CustomCursorAdapter(getActivity(), R.layout.row, null, new String[] { CProvider.Stories.TITLE }, new int[] { R.id.story }, 0);
+		adapter = new DownloadedCursorAdapter(getActivity(), R.layout.row, null, new String[] { CProvider.Stories.TITLE }, new int[] { R.id.story }, 0);
 		setListAdapter(adapter);
 		getLoaderManager().initLoader(0, null, this);
 		rewindButton = (ImageButton) rootView.findViewById(R.id.rewindButton);
@@ -73,6 +76,20 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 		mHandler = new Handler();
 		textRemaining = (TextView) rootView.findViewById(R.id.textRemaining);
 		textDuration = (TextView) rootView.findViewById(R.id.textDuration);
+		Button delete = (Button) rootView.findViewById(R.id.delete_button);
+		delete.setOnClickListener(this);
+		selectAllText = (TextView) rootView.findViewById(R.id.select_all_text);
+		selectAllText.setOnClickListener(this);
+		selectAllCheckBox = (CheckBox) rootView.findViewById(R.id.select_all_check_box);
+		selectAllCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				final ListView listView = getListView();
+				for(int i=0; i < getListAdapter().getCount(); i++){
+					listView.setItemChecked(i, isChecked);
+				}
+			}
+		});
 		return rootView;
 	}
 
@@ -198,16 +215,6 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 		return (minutes + ":" + seconds);
 	}
 
-	private void updateStoriesList() {
-		stories.clear();
-		String[] titles = pref.getString(DownloadService.storyTitles, "").split("\\|");
-		for (int i = 0; i < titles.length; ++i) {
-			if (titles[i] != null)
-				stories.add(titles[i]);
-		}
-		storiesList.notifyDataSetChanged();
-	}
-
 	@Override
 	public void onClick(View v) {
 		if (v == playButton) {
@@ -226,28 +233,57 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 			// produces weird effects
 			playButton.setImageResource(R.drawable.play_button_pressed);
 		}
+		else if (v.getId() == R.id.delete_button) deleteSelectedStories();
+		else if (v == selectAllText) {
+			boolean isChecked = selectAllCheckBox.isChecked();
+			selectAllCheckBox.setChecked(!isChecked);
+		}
+	}
+
+	private void deleteSelectedStories() {
+		long[] selectedStories = getListView().getCheckedItemIds();
+		int length = selectedStories.length;
+		String[] selectedStoriesStrings = new String[length];
+		for(int i = 0; i < length; i++){
+			selectedStoriesStrings[i] = String.valueOf(selectedStories[i]);
+		}
+		this.getActivity().getContentResolver().delete(CProvider.Stories.CONTENT_URI, 
+				CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings);
+		selectAllCheckBox.setChecked(false);
+	}
+
+	private String makePlaceholders(int length) {
+		if (length < 1) {
+			// It will lead to an invalid query anyway ..
+			throw new RuntimeException("No placeholders");
+		} else {
+			StringBuilder sb = new StringBuilder(length * 2 - 1);
+			sb.append("?");
+			for (int i = 1; i < length; i++) {
+				sb.append(",?");
+			}
+			return sb.toString();
+		}
 	}
 
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
-		Log.wtf(TAG, "id: " + id);
 		Intent intent = new Intent(MusicService.ACTION_URL);
 		Cursor cursor = this.getActivity().getContentResolver().query(CProvider.Stories.CONTENT_URI, 
 				new String[] {CProvider.Stories.FILE_NAME}, 
 				CProvider.Stories._ID + " = ? ", new String[] {Long.toString(id)}, null);
 		if (cursor != null && cursor.moveToFirst()) {
 			String fileName = cursor.getString(cursor.getColumnIndex(CProvider.Stories.FILE_NAME));
-			Log.wtf(TAG, fileName);
 			intent.putExtra("fileName", fileName);
 			intent.putExtra("listPosition", position);
 			playButton.setImageResource(R.drawable.play_button_pressed);
 			this.getActivity().startService((intent));
 		}
+		getListView().setItemChecked(position, false); // selecting an item is only done for deletion, by checking the checkboxes or "select all"
 	}
 
 	private BroadcastReceiver download = new BroadcastReceiver() {
 		public void onReceive(Context ctxt, Intent i) {
-			//			updateStoriesList();
 			if (i.getBooleanExtra(DownloadService.downloadDone, false)) {
 				downloading = false;
 			}
@@ -293,5 +329,55 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 	public void onLoaderReset(Loader<Cursor> arg0) {
 		adapter.swapCursor(null);
 
+	}
+	
+	class DownloadedCursorAdapter extends SimpleCursorAdapter {
+		DownloadedCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags) {
+			super(context, layout, c, from, to, flags);
+		}
+
+		@Override
+		public View getView(final int position, View convertView, ViewGroup parent) {
+			View row = super.getView(position, convertView, parent);
+			ViewHolder holder = (ViewHolder)row.getTag();		
+			if (holder == null) {                         
+				holder = new ViewHolder(row);
+				row.setTag(holder);
+			}
+			if (position == pref.getInt("listPosition", 0)) {
+				holder.story.setTextColor(Color.YELLOW);
+			} 
+			else {
+				holder.story.setTextColor(Color.LTGRAY);
+			}
+			holder.storyCheckBox.setChecked(false);
+			long [] checkedIds = getListView().getCheckedItemIds();
+			if (checkedIds != null) {
+				for (int i = 0; i < checkedIds.length; i++) {
+					if (checkedIds[i] == getListAdapter().getItemId(position)) {
+						holder.storyCheckBox.setChecked(true);
+						break;
+					}
+				}
+			}
+			final boolean isChecked = holder.storyCheckBox.isChecked();
+			holder.storyCheckBox.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					getListView().setItemChecked(position, !isChecked);
+				}
+			});
+			return(row);
+		}
+	}
+	
+	class ViewHolder {
+		CheckBox storyCheckBox;
+		TextView story = null;
+
+		ViewHolder(View row) {
+			storyCheckBox = (CheckBox) row.findViewById(R.id.story_check_box);
+			story = (TextView) row.findViewById(R.id.story);
+		}
 	}
 }

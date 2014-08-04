@@ -1,4 +1,4 @@
-package com.brentgrossman.downloadNPR;
+package com.brentgrossman.downloadNPR.internet;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,6 +10,7 @@ import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -23,6 +24,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import com.brentgrossman.downloadNPR.ui.DownloadNPRActivity;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -121,7 +124,6 @@ public class DownloadService extends IntentService {
 		startForeground(FOREGROUND_NOTIFICATION_ID, notification);
 		NodeList storyNodes = doc.getElementsByTagName("story");
 		NodeList formatNodes = doc.getElementsByTagName("format");
-		Story story;
 		DefaultHttpClient client = new DefaultHttpClient();
 		HttpGet httpGet;
 		StringBuilder sb = new StringBuilder();
@@ -130,13 +132,11 @@ public class DownloadService extends IntentService {
 			NodeList storyChildren = storyEntry.getChildNodes();
 			Element formatEntry = (Element)formatNodes.item(i);
 			NodeList formatChildren = formatEntry.getChildNodes();
-			story = new Story();
 			for (int j = 0; j < formatChildren.getLength(); j++) {
 				if (storyChildren.item(j).getNodeType() == Node.ELEMENT_NODE) {
 					Element child = (Element) storyChildren.item(j);
 					if (child.getNodeName().equals("title")) {
 						String title = child.getFirstChild().getNodeValue();
-						story.setTitle(title);						
 						sb.append(title + "|");
 						editor.putString(storyTitles, sb.toString());
 						editor.commit();

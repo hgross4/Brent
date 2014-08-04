@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.brentgrossman.downloadNPR;
+package com.brentgrossman.downloadNPR.playback;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

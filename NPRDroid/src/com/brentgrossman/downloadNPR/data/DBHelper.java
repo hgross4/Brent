@@ -1,4 +1,4 @@
-package com.brentgrossman.downloadNPR;
+package com.brentgrossman.downloadNPR.data;
 
 import android.content.Context;
 import android.database.Cursor;

@@ -36,7 +36,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.brentgrossman.downloadNPR.R;
 import com.brentgrossman.downloadNPR.data.CProvider;
-import com.brentgrossman.downloadNPR.internet.DownloadService;
+import com.brentgrossman.downloadNPR.internet.DownloadStories;
 import com.brentgrossman.downloadNPR.playback.MusicService;
 import com.brentgrossman.downloadNPR.playback.MusicService.State;
 
@@ -106,7 +106,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 	public void onResume() {
 		super.onResume();
 		startRepeatingTask();
-		IntentFilter filter = new IntentFilter(DownloadService.downloading);
+		IntentFilter filter = new IntentFilter(DownloadStories.downloading);
 		this.getActivity().registerReceiver(download, filter);
 		//		if (downloading) updateStoriesList();
 	}
@@ -284,7 +284,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 
 	private BroadcastReceiver download = new BroadcastReceiver() {
 		public void onReceive(Context ctxt, Intent i) {
-			if (i.getBooleanExtra(DownloadService.downloadDone, false)) {
+			if (i.getBooleanExtra(DownloadStories.downloadDone, false)) {
 				downloading = false;
 			}
 			//				removeStickyBroadcast(i);

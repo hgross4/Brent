@@ -1,5 +1,7 @@
 package com.brentgrossman.downloadNPR.ui;
 
+import java.io.File;
+
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -241,16 +244,37 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 	}
 
 	private void deleteSelectedStories() {
-		long[] selectedStories = getListView().getCheckedItemIds();
-		int length = selectedStories.length;
-		String[] selectedStoriesStrings = new String[length];
-		for(int i = 0; i < length; i++){
-			selectedStoriesStrings[i] = String.valueOf(selectedStories[i]);
-		}
-		this.getActivity().getContentResolver().delete(CProvider.Stories.CONTENT_URI, 
-				CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings);
+		new DeleteTask(this.getActivity()).execute();
 		selectAllCheckBox.setChecked(false);
 	}
+	
+	class DeleteTask extends AsyncTask<Void, Void, Void> {
+		private Context context;
+		    public DeleteTask (Context context){
+		         this.context = context;
+		    }
+			@Override
+			protected Void doInBackground(Void... params) {
+				long[] selectedStories = getListView().getCheckedItemIds();
+				final int length = selectedStories.length;
+				final String[] selectedStoriesStrings = new String[length];
+				for(int i = 0; i < length; i++){
+					selectedStoriesStrings[i] = String.valueOf(selectedStories[i]);
+				}
+				Cursor cursor = context.getContentResolver().query(CProvider.Stories.CONTENT_URI, new String[] { CProvider.Stories.FILE_NAME }, 
+						CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings, null);
+				if (cursor != null) {
+					while (cursor.moveToNext()) {
+						String filePath = context.getExternalFilesDir(null).getAbsolutePath() + "/" + cursor.getString(cursor.getColumnIndex(CProvider.Stories.FILE_NAME));
+						File file = new File(filePath);
+						file.delete();
+					}
+				}
+				context.getContentResolver().delete(CProvider.Stories.CONTENT_URI, 
+						CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings);
+				return null;
+			}
+		}
 
 	private String makePlaceholders(int length) {
 		if (length < 1) {

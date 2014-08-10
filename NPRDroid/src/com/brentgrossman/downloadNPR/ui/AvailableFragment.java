@@ -149,6 +149,8 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 			if (selectedStories.length > 0) {
 				intent.putExtra("selectedStories", selectedStories);
 				this.getActivity().startService(intent);
+				selectAllCheckBox.setChecked(false);
+				selectAllText.setTextColor(Color.LTGRAY);
 			}
 			else Toast.makeText(this.getActivity(), "No stories selected.", Toast.LENGTH_LONG).show();
 		}
@@ -165,7 +167,6 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 
 		@Override
 		public View getView(final int position, View convertView, ViewGroup parent) {
-			Log.wtf(getTag(), "getView");
 			View row = super.getView(position, convertView, parent);
 			ViewHolder holder = (ViewHolder)row.getTag();		
 			if (holder == null) {                         

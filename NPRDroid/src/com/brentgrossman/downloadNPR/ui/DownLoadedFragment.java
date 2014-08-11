@@ -275,6 +275,15 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 				context.getContentResolver().delete(CProvider.Stories.CONTENT_URI, 
 						CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings);
 				if (selectAllCheckBox.isChecked()) {
+					// Delete everything in files directory, just to make sure no files are "sticking around"
+					String sdPath = context.getExternalFilesDir(null).getAbsolutePath() + "/";
+					File sdPathFile = new File(sdPath);
+					File[] files = sdPathFile.listFiles();
+					if (files.length > 0) {
+						for (File file : files) {
+							file.delete();
+						}
+					}
 					// Set list position to first story if all have been deleted, so that when new ones are downloaded, list isn't in some random position
 					SharedPreferences.Editor editor = pref.edit();
 					editor.putInt("listPosition", 0);

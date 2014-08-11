@@ -5,8 +5,10 @@ import com.brentgrossman.downloadNPR.data.CProvider;
 import com.brentgrossman.downloadNPR.internet.DownloadStories;
 import com.brentgrossman.downloadNPR.internet.PopulateAvailable;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -38,17 +40,19 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 	private static final String[] PROJECTION = new String[] { CProvider.Stories._ID, CProvider.Stories.TITLE };
 	private TextView selectAllText;
 	private CheckBox selectAllCheckBox;
+	private Button atc, me, download;
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)  {
 		View rootView = inflater.inflate(R.layout.available_fragment, container, false);
 		adapter = new AvailableCursorAdapter(getActivity(), R.layout.row, null, new String[] { CProvider.Stories.TITLE }, new int[] { R.id.story }, 0);
 		setListAdapter(adapter);
 		getLoaderManager().initLoader(0, null, this);
-		Button me = (Button) rootView.findViewById(R.id.me);
+		me = (Button) rootView.findViewById(R.id.me);
 		me.setOnClickListener(this);
-		Button atc = (Button) rootView.findViewById(R.id.atc);
+		atc = (Button) rootView.findViewById(R.id.atc);
 		atc.setOnClickListener(this);
-		Button download = (Button) rootView.findViewById(R.id.download_button);
+		download = (Button) rootView.findViewById(R.id.download_button);
 		download.setOnClickListener(this);
 		selectAllText = (TextView) rootView.findViewById(R.id.select_all_text);
 		selectAllText.setOnClickListener(this);
@@ -56,19 +60,31 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 		selectAllCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				final ListView listView = getListView();
-				for(int i=0; i < getListAdapter().getCount(); i++){
-					listView.setItemChecked(i, isChecked);
-				}
-				selectAllText.setTextColor(isChecked ? Color.WHITE : Color.LTGRAY);
+				selectAllStories(isChecked);
 			}
 		});
 		return rootView;
+	}
+	
+	private void selectAllStories(boolean yes) {
+		ListView listView = getListView();
+		for(int i=0; i < getListAdapter().getCount(); i++){
+			listView.setItemChecked(i, yes);
+		}
+		selectAllText.setTextColor(yes ? Color.WHITE : Color.LTGRAY);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
+		IntentFilter filter = new IntentFilter(DownloadStories.downloading);
+		getActivity().registerReceiver(afterDownload, filter);
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		getActivity().unregisterReceiver(afterDownload);
 	}
 
 	@Override
@@ -119,17 +135,14 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 	public void getStoriesList(View view) {
 		if (isOnline()) {
 			String showChoice;
-			if (view.getId() == R.id.me)
-				showChoice = "me";
-			else
-				showChoice = "atc";
+			showChoice = view.getId() == R.id.me ? "me" : "atc";
 			Intent intent = new Intent(this.getActivity(), PopulateAvailable.class);
 			intent.putExtra(PopulateAvailable.whichShow, showChoice);
 			this.getActivity().startService(intent);
+//			selectAllStories(true); not working because it gets executed before stories are done being retrieved
 		}
 		else {
-			Toast.makeText(this.getActivity(), "No Internet connection. DownloadNPR has terminated.", Toast.LENGTH_LONG).show();
-			this.getActivity().finish(); // This may not work or be a good idea
+			Toast.makeText(this.getActivity(), "No Internet connection.", Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -148,17 +161,30 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 			long[] selectedStories = getListView().getCheckedItemIds();
 			if (selectedStories.length > 0) {
 				intent.putExtra("selectedStories", selectedStories);
+				atc.setEnabled(false);
+				me.setEnabled(false);
+				download.setEnabled(false);
 				this.getActivity().startService(intent);
-				selectAllCheckBox.setChecked(false);
-				selectAllText.setTextColor(Color.LTGRAY);
 			}
 			else Toast.makeText(this.getActivity(), "No stories selected.", Toast.LENGTH_LONG).show();
 		}
 		else {
-			Toast.makeText(this.getActivity(), "No Internet connection. DownloadNPR has terminated.", Toast.LENGTH_LONG).show();
-			this.getActivity().finish(); // This may not work or be a good idea
+			Toast.makeText(this.getActivity(), "No Internet connection.", Toast.LENGTH_LONG).show();
 		}
 	}
+	
+	private BroadcastReceiver afterDownload = new BroadcastReceiver() { 
+		public void onReceive(Context ctxt, Intent i) {
+			if (i.getBooleanExtra(DownloadStories.downloadDone, false)) {
+				atc.setEnabled(true);
+				me.setEnabled(true);
+				download.setEnabled(true);
+				selectAllCheckBox.setChecked(false);
+				selectAllText.setTextColor(Color.LTGRAY);
+			}
+			getActivity().removeStickyBroadcast(i);
+		}
+	};
 
 	class AvailableCursorAdapter extends SimpleCursorAdapter {
 		AvailableCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags) {

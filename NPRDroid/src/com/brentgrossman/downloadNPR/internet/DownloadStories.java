@@ -86,11 +86,6 @@ public class DownloadStories extends IntentService {
 				startForeground(FOREGROUND_NOTIFICATION_ID, mBuilder.build());
 				downloadBroadcast.putExtra(downloadDone, false);
 				sendBroadcast(downloadBroadcast);
-				// Set highlighted story to first story
-				if (fileCounter == 0) {
-					editor.putInt("listPosition", 0);
-					editor.commit();
-				}
 				values.put(CProvider.Stories.FILE_NAME, fileNameFromUrl);
 				values.put(CProvider.Stories.DOWNLOADED, 1);
 				getContentResolver().update(CProvider.Stories.CONTENT_URI, values, CProvider.Stories._ID + " = ? ", 

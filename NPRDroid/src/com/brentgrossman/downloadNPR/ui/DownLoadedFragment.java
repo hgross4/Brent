@@ -35,6 +35,7 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.brentgrossman.downloadNPR.R;
@@ -247,20 +248,21 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 		new DeleteTask(this.getActivity()).execute();
 		selectAllCheckBox.setChecked(false);
 	}
-	
+
 	class DeleteTask extends AsyncTask<Void, Void, Void> {
 		private Context context;
-		    public DeleteTask (Context context){
-		         this.context = context;
-		    }
-			@Override
-			protected Void doInBackground(Void... params) {
-				long[] selectedStories = getListView().getCheckedItemIds();
-				final int length = selectedStories.length;
-				final String[] selectedStoriesStrings = new String[length];
-				for(int i = 0; i < length; i++){
-					selectedStoriesStrings[i] = String.valueOf(selectedStories[i]);
-				}
+		public DeleteTask (Context context){
+			this.context = context;
+		}
+		@Override
+		protected Void doInBackground(Void... params) {
+			long[] selectedStories = getListView().getCheckedItemIds();
+			final int length = selectedStories.length;
+			final String[] selectedStoriesStrings = new String[length];
+			for(int i = 0; i < length; i++){
+				selectedStoriesStrings[i] = String.valueOf(selectedStories[i]);
+			}
+			if (selectedStories.length > 0) {
 				Cursor cursor = context.getContentResolver().query(CProvider.Stories.CONTENT_URI, new String[] { CProvider.Stories.FILE_NAME }, 
 						CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings, null);
 				if (cursor != null) {
@@ -272,9 +274,24 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 				}
 				context.getContentResolver().delete(CProvider.Stories.CONTENT_URI, 
 						CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings);
-				return null;
+				if (selectAllCheckBox.isChecked()) {
+					// Set list position to first story if all have been deleted, so that when new ones are downloaded, list isn't in some random position
+					SharedPreferences.Editor editor = pref.edit();
+					editor.putInt("listPosition", 0);
+					editor.commit();
+				}
 			}
+			else {
+				DownLoadedFragment.this.getActivity().runOnUiThread(new Runnable() {
+					public void run() {
+						Toast.makeText(context, "No stories selected.", Toast.LENGTH_LONG).show();
+					}
+				});
+			}
+
+			return null;
 		}
+	}
 
 	private String makePlaceholders(int length) {
 		if (length < 1) {
@@ -354,7 +371,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 		adapter.swapCursor(null);
 
 	}
-	
+
 	class DownloadedCursorAdapter extends SimpleCursorAdapter {
 		DownloadedCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags) {
 			super(context, layout, c, from, to, flags);
@@ -394,7 +411,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 			return(row);
 		}
 	}
-	
+
 	class ViewHolder {
 		CheckBox storyCheckBox;
 		TextView story = null;

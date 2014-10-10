@@ -12,13 +12,18 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name" >
-        <provider android:name="com.brentgrossman.downloadNPR.data.CProvider" android:authorities="com.brentgrossman.downloadNPR" android:exported="false"/>
+        android:label="@string/app_name"
+        android:theme="@android:style/Theme.Holo.Light" >
+        <provider
+            android:name="com.brentgrossman.downloadNPR.data.CProvider"
+            android:authorities="com.brentgrossman.downloadNPR"
+            android:exported="false" />
+
         <activity
             android:name="com.brentgrossman.downloadNPR.ui.DownloadNPRActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize"
@@ -57,10 +62,8 @@
 
         <service android:name="com.brentgrossman.downloadNPR.internet.DownloadService" >
         </service>
-        
         <service android:name="com.brentgrossman.downloadNPR.internet.PopulateAvailable" >
         </service>
-        
         <service android:name="com.brentgrossman.downloadNPR.internet.DownloadStories" >
         </service>
     </application>

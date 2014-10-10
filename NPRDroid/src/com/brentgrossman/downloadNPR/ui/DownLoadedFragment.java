@@ -46,7 +46,7 @@ import com.brentgrossman.downloadNPR.playback.MusicService.State;
 
 public class DownLoadedFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnClickListener, OnSeekBarChangeListener {
 	private static DownloadedCursorAdapter adapter = null;
-	private String TAG = this.getClass().getSimpleName();
+	private static String TAG = DownLoadedFragment.class.getSimpleName();
 	private ImageButton rewindButton, playButton, nextButton;
 	private static MusicService musicService;
 	boolean mBound = false, downloading = false;
@@ -82,9 +82,9 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 		textDuration = (TextView) rootView.findViewById(R.id.textDuration);
 		Button delete = (Button) rootView.findViewById(R.id.delete_button);
 		delete.setOnClickListener(this);
-		selectAllText = (TextView) rootView.findViewById(R.id.select_all_text);
+		selectAllText = (TextView) rootView.findViewById(R.id.select_all_for_deletion_text);
 		selectAllText.setOnClickListener(this);
-		selectAllCheckBox = (CheckBox) rootView.findViewById(R.id.select_all_check_box);
+		selectAllCheckBox = (CheckBox) rootView.findViewById(R.id.select_all_for_deletion_check_box);
 		selectAllCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -246,35 +246,25 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 
 	private void deleteSelectedStories() {
 		new DeleteTask(this.getActivity()).execute();
-		selectAllCheckBox.setChecked(false);
+//		selectAllCheckBox.setChecked(false);
 	}
 
-	class DeleteTask extends AsyncTask<Void, Void, Void> {
+	class DeleteTask extends AsyncTask<Void, Void, Long> {
 		private Context context;
 		public DeleteTask (Context context){
 			this.context = context;
 		}
 		@Override
-		protected Void doInBackground(Void... params) {
+		protected Long doInBackground(Void... params) {
+			long id = -1;
 			long[] selectedStories = getListView().getCheckedItemIds();
 			final int length = selectedStories.length;
 			final String[] selectedStoriesStrings = new String[length];
 			for(int i = 0; i < length; i++){
 				selectedStoriesStrings[i] = String.valueOf(selectedStories[i]);
 			}
-			if (selectedStories.length > 0) {
-				Cursor cursor = context.getContentResolver().query(CProvider.Stories.CONTENT_URI, new String[] { CProvider.Stories.FILE_NAME }, 
-						CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings, null);
-				if (cursor != null) {
-					while (cursor.moveToNext()) {
-						String filePath = context.getExternalFilesDir(null).getAbsolutePath() + "/" + cursor.getString(cursor.getColumnIndex(CProvider.Stories.FILE_NAME));
-						File file = new File(filePath);
-						file.delete();
-					}
-				}
-				context.getContentResolver().delete(CProvider.Stories.CONTENT_URI, 
-						CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings);
-				if (selectAllCheckBox.isChecked()) {
+			if (length > 0) {
+				if (length == adapter.getCount()) {
 					// Delete everything in files directory, just to make sure no files are "sticking around"
 					String sdPath = context.getExternalFilesDir(null).getAbsolutePath() + "/";
 					File sdPathFile = new File(sdPath);
@@ -284,10 +274,25 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 							file.delete();
 						}
 					}
-					// Set list position to first story if all have been deleted, so that when new ones are downloaded, list isn't in some random position
-					SharedPreferences.Editor editor = pref.edit();
-					editor.putInt("listPosition", 0);
-					editor.commit();
+					context.getContentResolver().delete(CProvider.Stories.CONTENT_URI, 
+							CProvider.Stories.DOWNLOADED + " = ? ", new String[] {"1"});
+				}
+				else {
+					// In the following 2 lines get the id of the currently playing or paused story
+					// so that that story can be set as the current story after deletion
+					int listPosition = pref.getInt("listPosition", 0);
+					id = adapter.getItemId(listPosition);
+					Cursor cursor = context.getContentResolver().query(CProvider.Stories.CONTENT_URI, new String[] { CProvider.Stories.FILE_NAME }, 
+							CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings, null);
+					if (cursor != null) {
+						while (cursor.moveToNext()) {
+							String filePath = context.getExternalFilesDir(null).getAbsolutePath() + "/" + cursor.getString(cursor.getColumnIndex(CProvider.Stories.FILE_NAME));
+							File file = new File(filePath);
+							file.delete();
+						}
+					}
+					int rows = context.getContentResolver().delete(CProvider.Stories.CONTENT_URI, 
+							CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings);
 				}
 			}
 			else {
@@ -297,8 +302,29 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 					}
 				});
 			}
+			return id;
+		}
 
-			return null;
+		@Override
+		protected void onPostExecute(Long id) {
+			int listPosition = 0;
+			if (id != -1) {
+				getLoaderManager().restartLoader(0, null, DownLoadedFragment.this);
+				adapter.notifyDataSetChanged();
+				for (int position = 0; position < adapter.getCount(); position++) {
+					if (adapter.getItemId(position) == id) {
+						listPosition = position;
+						break;
+					}
+				}
+			}
+			//			 Set the current story to be what it was before deletion (or the first one if current story was deleted)
+			SharedPreferences.Editor editor = pref.edit();
+			musicService.mRetriever.listPosition = listPosition + 1;
+			// save this position so its list item can be changed later:
+			editor.putInt("listPosition", listPosition);
+			editor.commit();
+			selectAllCheckBox.setChecked(false);
 		}
 	}
 
@@ -337,6 +363,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 			if (i.getBooleanExtra(DownloadStories.downloadDone, false)) {
 				downloading = false;
 			}
+			// Leaving this here for now, since not sure why it was here before of if it may still be needed, but it generates error now:
 			//				removeStickyBroadcast(i);
 		}
 	};
@@ -395,10 +422,10 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 				row.setTag(holder);
 			}
 			if (position == pref.getInt("listPosition", 0)) {
-				holder.story.setTextColor(Color.YELLOW);
+				holder.story.setTextColor(Color.BLUE);
 			} 
 			else {
-				holder.story.setTextColor(Color.LTGRAY);
+				holder.story.setTextColor(Color.DKGRAY);
 			}
 			holder.storyCheckBox.setChecked(false);
 			long [] checkedIds = getListView().getCheckedItemIds();

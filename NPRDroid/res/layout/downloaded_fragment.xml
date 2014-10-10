@@ -3,7 +3,8 @@
     android:id="@+id/mainLayout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:gravity="center" >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -67,23 +68,23 @@
         android:orientation="horizontal" >
 
         <CheckBox
-            android:id="@+id/select_all_check_box"
+            android:id="@+id/select_all_for_deletion_check_box"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="false"
             android:focusableInTouchMode="false" />
 
         <TextView
-            android:id="@+id/select_all_text"
+            android:id="@+id/select_all_for_deletion_text"
             android:layout_width="wrap_content"
             android:layout_height="24sp"
-            android:layout_alignBaseline="@+id/select_all_check_box"
-            android:layout_alignBottom="@+id/select_all_check_box"
-            android:layout_toRightOf="@+id/select_all_check_box"
+            android:layout_alignBaseline="@+id/select_all_for_deletion_check_box"
+            android:layout_alignBottom="@+id/select_all_for_deletion_check_box"
+            android:layout_toRightOf="@+id/select_all_for_deletion_check_box"
             android:lines="1"
             android:scrollHorizontally="true"
             android:singleLine="true"
-            android:text="@string/select_all" />
+            android:text="@string/select_deselect_all_for_deletion" />
         
     </RelativeLayout>
 
@@ -100,7 +101,7 @@
         android:id="@+id/delete_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:background="@drawable/button"
         android:text="@string/delete_selected_stories" />
 
 </LinearLayout>

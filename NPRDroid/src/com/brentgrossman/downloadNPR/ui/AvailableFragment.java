@@ -54,9 +54,9 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 		atc.setOnClickListener(this);
 		download = (Button) rootView.findViewById(R.id.download_button);
 		download.setOnClickListener(this);
-		selectAllText = (TextView) rootView.findViewById(R.id.select_all_text);
+		selectAllText = (TextView) rootView.findViewById(R.id.select_all_for_deletion_text);
 		selectAllText.setOnClickListener(this);
-		selectAllCheckBox = (CheckBox) rootView.findViewById(R.id.select_all_check_box);
+		selectAllCheckBox = (CheckBox) rootView.findViewById(R.id.select_all_for_deletion_check_box);
 		selectAllCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -71,7 +71,7 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 		for(int i=0; i < getListAdapter().getCount(); i++){
 			listView.setItemChecked(i, yes);
 		}
-		selectAllText.setTextColor(yes ? Color.WHITE : Color.LTGRAY);
+		selectAllText.setTextColor(yes ? Color.BLACK : Color.DKGRAY);
 	}
 
 	@Override
@@ -107,13 +107,13 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		ViewHolder holder = (ViewHolder) v.getTag();
 		holder.storyCheckBox.setChecked(false);
-		holder.story.setTextColor(Color.LTGRAY);
+		holder.story.setTextColor(Color.DKGRAY);
 		long [] checkedIds = l.getCheckedItemIds();
 		if (checkedIds != null) {
 			for (int i = 0; i < checkedIds.length; i++) {
 				if (checkedIds[i] == getListAdapter().getItemId(position)) {
 					holder.storyCheckBox.setChecked(true);
-					holder.story.setTextColor(Color.WHITE);
+					holder.story.setTextColor(Color.BLACK);
 					break;
 				}
 			}
@@ -124,10 +124,10 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 	public void onClick(View v) {
 		int viewId = v.getId();
 		if (viewId == R.id.download_button) downloadStoryFiles();
-		else if (viewId == R.id.select_all_text) {
+		else if (viewId == R.id.select_all_for_deletion_text) {
 			boolean isChecked = selectAllCheckBox.isChecked();
 			selectAllCheckBox.setChecked(!isChecked);
-			selectAllText.setTextColor(isChecked ? Color.LTGRAY : Color.WHITE);
+			selectAllText.setTextColor(isChecked ? Color.DKGRAY : Color.BLACK);
 		}
 		else getStoriesList(v);
 	}
@@ -180,7 +180,7 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 				me.setEnabled(true);
 				download.setEnabled(true);
 				selectAllCheckBox.setChecked(false);
-				selectAllText.setTextColor(Color.LTGRAY);
+				selectAllText.setTextColor(Color.DKGRAY);
 			}
 			getActivity().removeStickyBroadcast(i);
 		}
@@ -200,13 +200,13 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 				row.setTag(holder);
 			}
 			holder.storyCheckBox.setChecked(false);
-			holder.story.setTextColor(Color.LTGRAY);
+			holder.story.setTextColor(Color.DKGRAY);
 			long [] checkedIds = getListView().getCheckedItemIds();
 			if (checkedIds != null) {
 				for (int i = 0; i < checkedIds.length; i++) {
 					if (checkedIds[i] == getListAdapter().getItemId(position)) {
 						holder.storyCheckBox.setChecked(true);
-						holder.story.setTextColor(Color.WHITE);
+						holder.story.setTextColor(Color.BLACK);
 						break;
 					}
 				}

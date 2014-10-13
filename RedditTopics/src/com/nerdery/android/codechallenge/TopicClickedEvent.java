@@ -12,7 +12,7 @@
     http://commonsware.com/Android
  */
 
-package com.nerdery.android.codechallenge.presentation;
+package com.nerdery.android.codechallenge;
 
 import com.google.gson.JsonObject;
 

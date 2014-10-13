@@ -14,6 +14,8 @@
 
 package com.nerdery.android.codechallenge.presentation.activity;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -41,16 +43,16 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
+import com.nerdery.android.codechallenge.ContractListFragment;
 import com.nerdery.android.codechallenge.R;
-import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
-public class TopicsFragment extends SherlockListFragment implements
-FutureCallback<JsonObject> {
+public class TopicsFragment extends ContractListFragment<TopicsFragment.Contract> 
+implements FutureCallback<JsonObject> {
 	ArrayList<JsonObject> normalized;
-	private static final String loadMoreString = "{"  
+	private static final String loadMoreString = "{"
 			+ "'kind':'t3',"
 			+ "'data':{"
 			+ "'author':'',"
@@ -78,13 +80,22 @@ FutureCallback<JsonObject> {
 		loadTopics(25, null);
 
 		setHasOptionsMenu(true);
-
+		
 		return(result);
+	}
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onActivityCreated(savedInstanceState);
+		
+		ListView listView = getListView();
+		listView.setDivider(new ColorDrawable(Color.parseColor("#BFEFFF")));
+		listView.setDividerHeight(1);
 	}
 
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
-		JsonObject item=((ItemsAdapter)getListAdapter()).getItem(position);
 
 		// Load 25 more topics if the last row is touched
 		ListAdapter listAdapter = getListAdapter();
@@ -94,6 +105,19 @@ FutureCallback<JsonObject> {
 			String after = last.getAsJsonObject("data").get("name").getAsString();
 			normalized.remove(listCount - 1);
 			loadTopics(25, after);
+		}
+		else {
+			if (getContract().isPersistentSelection()) {
+				getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+				l.setItemChecked(position, true);
+			}
+			else {
+				getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
+			}
+			JsonObject item = (JsonObject) listAdapter.getItem(position);
+			JsonObject data = item.getAsJsonObject("data");
+			getContract().onTopicSelected(data.get("permalink").getAsString(), 
+					data.get("url").getAsString());
 		}
 	}
 
@@ -108,7 +132,7 @@ FutureCallback<JsonObject> {
 
 		if (json != null) {
 			JsonObject data = json.getAsJsonObject("data");
-			JsonArray items=data.getAsJsonArray("children");
+			JsonArray items = data.getAsJsonArray("children");
 
 			for (int i=0; i < items.size(); i++) {
 				normalized.add(items.get(i).getAsJsonObject());
@@ -144,7 +168,6 @@ FutureCallback<JsonObject> {
 		if (after != null) {
 			url += "&after=" + after;
 		}
-		android.util.Log.wtf("TAG", url);
 		Ion.with(getActivity(), url).asJsonObject().setCallback(this);
 	}
 
@@ -152,21 +175,21 @@ FutureCallback<JsonObject> {
 		int size;
 
 		ItemsAdapter(List<JsonObject> items) {
-			super(getActivity(), R.layout.row, R.id.title, items);
+			super(getActivity(), R.layout.topics_row, R.id.title, items);
 			size = getActivity().getResources().getDimensionPixelSize(R.dimen.icon);
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View row=super.getView(position, convertView, parent);
-			JsonObject item=getItem(position);
+			JsonObject item = getItem(position);
 			JsonObject data = item.getAsJsonObject("data");
 
 			String score = data.get("score").getAsString();
 			int scoreInt = Integer.parseInt(score);
 			TextView scoreTv = (TextView) row.findViewById(R.id.score);
 			TextView timeAndPoster = (TextView) row.findViewById(R.id.time_poster);
-			TextView comments = (TextView) row.findViewById(R.id.comments);
+			TextView comments = (TextView) row.findViewById(R.id.comments_count);
 			ImageView icon=(ImageView)row.findViewById(R.id.icon);
 			TextView title=(TextView)row.findViewById(R.id.title);
 			if (scoreInt != -1) {
@@ -203,9 +226,13 @@ FutureCallback<JsonObject> {
 				title.setText(data.get("title").getAsString());
 			}
 
-			
-
 			return(row);
 		}
+	}
+
+	interface Contract {
+		void onTopicSelected(String permalink, String imageUrl);
+
+		boolean isPersistentSelection();
 	}
 }

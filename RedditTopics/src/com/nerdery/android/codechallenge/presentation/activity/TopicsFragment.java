@@ -51,7 +51,8 @@ import com.actionbarsherlock.view.MenuItem;
 
 public class TopicsFragment extends ContractListFragment<TopicsFragment.Contract> 
 implements FutureCallback<JsonObject> {
-	ArrayList<JsonObject> normalized;
+	ItemsAdapter topicsAdapter;
+	ArrayList<JsonObject> topics;
 	private static final String loadMoreString = "{"
 			+ "'kind':'t3',"
 			+ "'data':{"
@@ -75,7 +76,8 @@ implements FutureCallback<JsonObject> {
 
 		setRetainInstance(true);
 
-		normalized = new ArrayList<JsonObject>();
+		topics = new ArrayList<JsonObject>();
+		topicsAdapter = new ItemsAdapter(topics);
 
 		loadTopics(25, null);
 
@@ -88,6 +90,8 @@ implements FutureCallback<JsonObject> {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onActivityCreated(savedInstanceState);
+		
+		setListAdapter(topicsAdapter);
 		
 		ListView listView = getListView();
 		listView.setDivider(new ColorDrawable(Color.parseColor("#BFEFFF")));
@@ -103,7 +107,7 @@ implements FutureCallback<JsonObject> {
 		if (position == listCount - 1) {
 			JsonObject last = (JsonObject) listAdapter.getItem(listCount - 2);
 			String after = last.getAsJsonObject("data").get("name").getAsString();
-			normalized.remove(listCount - 1);
+			topics.remove(listCount - 1);
 			loadTopics(25, after);
 		}
 		else {
@@ -135,13 +139,13 @@ implements FutureCallback<JsonObject> {
 			JsonArray items = data.getAsJsonArray("children");
 
 			for (int i=0; i < items.size(); i++) {
-				normalized.add(items.get(i).getAsJsonObject());
+				topics.add(items.get(i).getAsJsonObject());
 			}
 
 			JsonObject loadMoreJson = new JsonParser().parse(loadMoreString).getAsJsonObject();
-			normalized.add(loadMoreJson);
-
-			setListAdapter(new ItemsAdapter(normalized));
+			topics.add(loadMoreJson);
+			
+			topicsAdapter.notifyDataSetChanged();
 		}
 	}
 
@@ -156,7 +160,8 @@ implements FutureCallback<JsonObject> {
 		if (item.getItemId() == R.id.refresh) {
 			ListAdapter listAdapter = getListAdapter();
 			JsonObject last = (JsonObject) listAdapter.getItem(listAdapter.getCount() - 2);
-			normalized.clear();
+			topics.clear();
+			getListView().setSelection(0);
 			String after = last.getAsJsonObject("data").get("name").getAsString();
 			loadTopics(25, after);
 		}

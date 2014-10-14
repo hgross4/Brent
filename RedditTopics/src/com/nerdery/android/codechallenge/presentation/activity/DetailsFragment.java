@@ -27,7 +27,8 @@ import com.nerdery.android.codechallenge.R;
 
 public class DetailsFragment extends SherlockFragment implements FutureCallback<JsonArray> {
 
-	ArrayList<JsonObject> normalized;
+	ArrayList<JsonObject> comments;
+	ItemsAdapter commentsAdapter;
 	private String permalink;
 	private ListView commentsList;
 	private ImageView image;
@@ -54,13 +55,34 @@ public class DetailsFragment extends SherlockFragment implements FutureCallback<
 
 		setRetainInstance(true);
 
-		normalized = new ArrayList<JsonObject>();
+		comments = new ArrayList<JsonObject>();
+		
+		commentsAdapter = new ItemsAdapter(comments);
 		
 		commentsList = (ListView) result.findViewById(R.id.comments_list);
 		
 		image = (ImageView) result.findViewById(R.id.image);
 		
 		return(result);
+	}
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		commentsList.setAdapter(commentsAdapter);
+		commentsList.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				// Load 25 more topics if the last row is touched
+				ListAdapter listAdapter = commentsList.getAdapter();
+				int listCount = listAdapter.getCount();
+				if (position == listCount - 1) {
+					comments.remove(position);
+					commentsAdapter.notifyDataSetChanged();
+					loadComments(permalink, listCount + 24);
+				}
+			}
+		});
 	}
 
 	@Override
@@ -78,25 +100,12 @@ public class DetailsFragment extends SherlockFragment implements FutureCallback<
 			JsonArray items = data.getAsJsonArray("children");
 
 			for (int i=0; i < items.size(); i++) {
-				normalized.add(items.get(i).getAsJsonObject());
+				comments.add(items.get(i).getAsJsonObject());
 			}
 
 			JsonObject loadMoreJson = new JsonParser().parse(loadMoreString).getAsJsonObject();
-			normalized.add(loadMoreJson);
-
-			commentsList.setAdapter(new ItemsAdapter(normalized));
-			commentsList.setOnItemClickListener(new OnItemClickListener() {
-				@Override
-				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-					// Load 25 more topics if the last row is touched
-					ListAdapter listAdapter = commentsList.getAdapter();
-					int listCount = listAdapter.getCount();
-					if (position == listCount - 1) {
-						normalized.remove(listCount - 1);
-						loadComments(permalink, listCount + 24);
-					}
-				}
-			});
+			comments.add(loadMoreJson);
+			commentsAdapter.notifyDataSetChanged();
 		}
 	}
 	
@@ -113,7 +122,8 @@ public class DetailsFragment extends SherlockFragment implements FutureCallback<
 				+ ".json?limit=" + limit + "&sort=new";
 		android.util.Log.wtf("TAG", commentsLink);
 		if (limit == 25) { // clear the list, but not if we're adding 25 more
-			normalized.clear();
+			comments.clear();
+			commentsAdapter.notifyDataSetChanged();
 		}
 		Ion.with(getActivity(), commentsLink).asJsonArray().setCallback(this);
 	}
@@ -126,7 +136,6 @@ public class DetailsFragment extends SherlockFragment implements FutureCallback<
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-//			View row = super.getView(position, convertView, parent);
 			if (convertView == null) {
 		        convertView =
 		            LayoutInflater.from(getActivity()).inflate(R.layout.comments_row,

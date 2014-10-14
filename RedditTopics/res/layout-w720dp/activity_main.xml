@@ -11,7 +11,7 @@
     android:layout_height="match_parent"
   />
   <FrameLayout
-    android:id="@+id/details"
+    android:id="@+id/comments"
     android:layout_weight="70"
     android:layout_width="0px"
     android:layout_height="match_parent"

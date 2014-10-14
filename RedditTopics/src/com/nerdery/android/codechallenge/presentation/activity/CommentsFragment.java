@@ -14,7 +14,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -25,7 +24,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 import com.nerdery.android.codechallenge.R;
 
-public class DetailsFragment extends SherlockFragment implements FutureCallback<JsonArray> {
+public class CommentsFragment extends SherlockFragment implements FutureCallback<JsonArray> {
 
 	ArrayList<JsonObject> comments;
 	ItemsAdapter commentsAdapter;
@@ -120,7 +119,7 @@ public class DetailsFragment extends SherlockFragment implements FutureCallback<
 		permalink = commentsLink;
 		commentsLink = "http://www.reddit.com" + commentsLink 
 				+ ".json?limit=" + limit + "&sort=new";
-		android.util.Log.wtf("TAG", commentsLink);
+		
 		if (limit == 25) { // clear the list, but not if we're adding 25 more
 			comments.clear();
 			commentsAdapter.notifyDataSetChanged();
@@ -136,17 +135,23 @@ public class DetailsFragment extends SherlockFragment implements FutureCallback<
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
+			CommentViewHolder commentHolder = null;
+			
 			if (convertView == null) {
 		        convertView =
 		            LayoutInflater.from(getActivity()).inflate(R.layout.comments_row,
 		                                                       parent, false);
+		        commentHolder = new CommentViewHolder(convertView);
+		        convertView.setTag(commentHolder);
 			}
+			else {
+				commentHolder = (CommentViewHolder) convertView.getTag();
+			}
+			
 			JsonObject item = getItem(position);
 			JsonObject data = item.getAsJsonObject("data");
-
-			TextView commentsTv = (TextView) convertView.findViewById(R.id.comment);
 			if (data.get("body") != null) {
-				commentsTv.setText(data.get("body").getAsString());
+				commentHolder.setText(data.get("body").getAsString());
 			}
 
 			return(convertView);

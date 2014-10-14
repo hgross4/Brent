@@ -17,7 +17,7 @@ import android.os.Bundle;
 public class MainActivity extends SherlockFragmentActivity 
 implements TopicsFragment.Contract {
 	private TopicsFragment topicsFragment = null;
-	private DetailsFragment detailsFragment = null;
+	private CommentsFragment commentsFragment = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,12 +32,12 @@ implements TopicsFragment.Contract {
 			.add(R.id.topics, topicsFragment).commit();
 		}
 
-		detailsFragment = 
-				(DetailsFragment) getSupportFragmentManager().findFragmentById(R.id.details);
-		if (detailsFragment == null && findViewById(R.id.details) != null) {
-			detailsFragment = new DetailsFragment();
+		commentsFragment = 
+				(CommentsFragment) getSupportFragmentManager().findFragmentById(R.id.comments);
+		if (commentsFragment == null && findViewById(R.id.comments) != null) {
+			commentsFragment = new CommentsFragment();
 			getSupportFragmentManager().beginTransaction()
-			.add(R.id.details, detailsFragment).commit();
+			.add(R.id.comments, commentsFragment).commit();
 		}
 	}
 
@@ -61,15 +61,14 @@ implements TopicsFragment.Contract {
 
 	@Override
 	public void onTopicSelected(String permalink, String imageUrl) {
-		if (detailsFragment != null && detailsFragment.isVisible()) {
-			detailsFragment.loadImage(imageUrl);
-			detailsFragment.loadComments(permalink, 25);
-			android.util.Log.wtf("TAG", "permalink: " + permalink);
+		if (commentsFragment != null && commentsFragment.isVisible()) {
+			commentsFragment.loadImage(imageUrl);
+			commentsFragment.loadComments(permalink, 25);
 		}
 		else {
-			Intent i=new Intent(this, DetailsActivity.class);
-			i.putExtra(DetailsActivity.PERMALINK, permalink);
-			i.putExtra(DetailsActivity.URL, imageUrl);
+			Intent i=new Intent(this, CommentsActivity.class);
+			i.putExtra(CommentsActivity.PERMALINK, permalink);
+			i.putExtra(CommentsActivity.URL, imageUrl);
 			startActivity(i);
 		}
 

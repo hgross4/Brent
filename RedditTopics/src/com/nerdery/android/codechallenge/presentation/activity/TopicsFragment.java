@@ -186,52 +186,24 @@ implements FutureCallback<JsonObject> {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			View row=super.getView(position, convertView, parent);
+//			View row = super.getView(position, convertView, parent);
+			TopicViewHolder topicHolder = null;
+			
 			JsonObject item = getItem(position);
 			JsonObject data = item.getAsJsonObject("data");
 
-			String score = data.get("score").getAsString();
-			int scoreInt = Integer.parseInt(score);
-			TextView scoreTv = (TextView) row.findViewById(R.id.score);
-			TextView timeAndPoster = (TextView) row.findViewById(R.id.time_poster);
-			TextView comments = (TextView) row.findViewById(R.id.comments_count);
-			ImageView icon=(ImageView)row.findViewById(R.id.icon);
-			TextView title=(TextView)row.findViewById(R.id.title);
-			if (scoreInt != -1) {
-				scoreTv.setText(Html.fromHtml(score));
-
-				Date timePosted = new Date(Long.parseLong(data.get("created_utc")
-						.getAsString().replace(".0", ""))*1000);
-				DateFormat formatter = new SimpleDateFormat("HH:mm", Locale.US);
-				formatter.setTimeZone(TimeZone.getDefault());
-				String timePostedFormatted = formatter.format(timePosted);
-				timeAndPoster.setText(timePostedFormatted + " by " + data.get("author").getAsString());
-
-				comments.setText(data.get("num_comments").getAsString() + " comments");
-
-				Ion.with(icon)
-				.placeholder(R.drawable.logo_nerdery)
-				.resize(size, size)
-				.centerCrop()
-				.error(R.drawable.logo_nerdery)
-				.load(data.get("thumbnail").getAsString());
-
-				title.setMovementMethod(LinkMovementMethod.getInstance());
-				String titleLink = "<a href='" + data.get("url").getAsString() + "'> " + data.get("title").getAsString() + " </a>";
-				title.setText(Html.fromHtml(titleLink));
+			if (convertView == null) {
+				convertView = 
+						LayoutInflater.from(getActivity()).inflate(R.layout.topics_row, parent, false);
+				topicHolder = new TopicViewHolder(convertView);
+				convertView.setTag(topicHolder);
 			}
 			else {
-				scoreTv.setText("");
-				timeAndPoster.setText("");
-				timeAndPoster.setHeight(1);
-				comments.setText("");
-				comments.setHeight(1);
-				icon.setImageDrawable(null);
-				title.setMovementMethod(null);
-				title.setText(data.get("title").getAsString());
+				topicHolder = (TopicViewHolder) convertView.getTag();
 			}
-
-			return(row);
+			topicHolder.populateViews(data, size);
+			
+			return(convertView);
 		}
 	}
 

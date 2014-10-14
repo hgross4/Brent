@@ -1,0 +1,6 @@
+What I've learned in doing this challenge:
+
+How to use a library like Ion, which was very useful
+More about parsing JSON 
+(I got confused when trying to troubleshoot a nullpointerexception when trying to put the comments in the list, and got pretty deep into trying to understand the JSON structure, ultimately realizing that the first element of the returned array is not a comment.)
+How to make an app that works on both phones and tablets. (I'd really only created apps for one or the other before.)

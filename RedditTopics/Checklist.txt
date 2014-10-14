@@ -3,12 +3,11 @@ Test on required OS levels (2.3+)
 Test on tablet (detail view should show next to list)
 Test all links (title, comments)
 Test refresh (new list)
-Refresh with more than 25 items showing displays same number of items(?)
+Refresh with more than 25 items showing displays same number of items(?). Not implemented that way.
 Test "load more" (next 25 items retrieved and displayed)
 Fix refresh button or at least explain problem
 Fix load more to not go to top of list when touched 
-	(add to adapter instead of setting it to arraylist? See how it's done in sample Ion Twitter app)
-Up button to go from detail screen to main screen?
+Up button to go from detail screen to main screen? Not implemented.
 
 Deliverable:
 zip file or git location

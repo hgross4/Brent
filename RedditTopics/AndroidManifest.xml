@@ -34,7 +34,7 @@
             android:screenOrientation="portrait" >
         </activity>
         <activity 
-            android:name=".presentation.activity.DetailsActivity"
+            android:name=".presentation.activity.CommentsActivity"
             android:screenOrientation="portrait" >
         </activity>
     </application>

@@ -5,26 +5,26 @@ import com.nerdery.android.codechallenge.R;
 
 import android.os.Bundle;
 
-public class DetailsActivity extends SherlockFragmentActivity {
+public class CommentsActivity extends SherlockFragmentActivity {
 
 	public static final String PERMALINK = "permalink";
 	public static final String URL = "url";
 	private String commentsLink = null;
 	private String imageUrl = null;
-	private DetailsFragment detailsFragment = null;
+	private CommentsFragment commentsFragment = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		detailsFragment=
-				(DetailsFragment)getSupportFragmentManager().findFragmentById(R.id.details);
+		commentsFragment=
+				(CommentsFragment)getSupportFragmentManager().findFragmentById(R.id.comments);
 
-		if (detailsFragment == null) {
-			detailsFragment = new DetailsFragment();
+		if (commentsFragment == null) {
+			commentsFragment = new CommentsFragment();
 
 			getSupportFragmentManager().beginTransaction()
-			.add(android.R.id.content, detailsFragment)
+			.add(android.R.id.content, commentsFragment)
 			.commit();
 		}
 
@@ -35,8 +35,8 @@ public class DetailsActivity extends SherlockFragmentActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		detailsFragment.loadImage(imageUrl);
-		detailsFragment.loadComments(commentsLink, 25);
+		commentsFragment.loadImage(imageUrl);
+		commentsFragment.loadComments(commentsLink, 25);
 	}
 
 }

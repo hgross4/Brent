@@ -1,4 +1,4 @@
-package com.brent.constactslist;
+package com.brent.constactslist.controllers;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,6 +8,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.brent.constactslist.R;
+import com.brent.constactslist.model.Contact;
 import com.koushikdutta.ion.Ion;
 
 import java.util.List;

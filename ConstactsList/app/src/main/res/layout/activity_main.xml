@@ -11,13 +11,13 @@
 
     <fragment
         android:id="@+id/contacts"
-        android:name="com.brent.constactslist.ContactsListFragment"
+        android:name="com.brent.constactslist.controllers.ContactsListFragment"
         android:layout_width="300sp"
         android:layout_height="match_parent"/>
 
     <fragment
         android:id="@+id/details"
-        android:name="com.brent.constactslist.DetailsFragment"
+        android:name="com.brent.constactslist.controllers.DetailsFragment"
         android:layout_width="400dp"
         android:layout_height="match_parent"
         android:layout_weight="1"/>

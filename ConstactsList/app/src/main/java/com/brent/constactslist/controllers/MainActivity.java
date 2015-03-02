@@ -1,10 +1,13 @@
-package com.brent.constactslist;
+package com.brent.constactslist.controllers;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SlidingPaneLayout;
-import android.view.Menu;
-import android.view.MenuItem;
+
+import com.brent.constactslist.R;
+import com.brent.constactslist.controllers.ContactsListFragment;
+import com.brent.constactslist.controllers.DetailsFragment;
+import com.brent.constactslist.model.Contact;
 
 
 public class MainActivity extends FragmentActivity implements ContactsListFragment.SendDetailsListener {
@@ -16,8 +19,6 @@ public class MainActivity extends FragmentActivity implements ContactsListFragme
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        setTitle("Contacts");
 
         detailsFragment =
                 (DetailsFragment)getSupportFragmentManager().findFragmentById(R.id.details);
@@ -33,29 +34,6 @@ public class MainActivity extends FragmentActivity implements ContactsListFragme
         else {
             pane.openPane();
         }
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.brent.constactslist;
+package com.brent.constactslist.model;
 
 /**
  * Created by Brent on 2/28/15.

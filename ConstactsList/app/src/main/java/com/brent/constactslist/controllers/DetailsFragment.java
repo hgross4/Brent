@@ -1,4 +1,4 @@
-package com.brent.constactslist;
+package com.brent.constactslist.controllers;
 
 
 import android.os.Bundle;
@@ -11,13 +11,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.brent.constactslist.R;
+import com.brent.constactslist.model.Address;
+import com.brent.constactslist.model.Contact;
+import com.brent.constactslist.model.Details;
+import com.brent.constactslist.model.Phone;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 

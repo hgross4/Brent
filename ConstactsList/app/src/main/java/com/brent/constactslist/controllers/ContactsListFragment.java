@@ -1,4 +1,4 @@
-package com.brent.constactslist;
+package com.brent.constactslist.controllers;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.ListView;
 
 
+import com.brent.constactslist.model.Contact;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
@@ -19,7 +20,7 @@ import java.util.List;
  * <p/>
  * <p/>
  * Activities containing this fragment MUST implement the
- * {@link com.brent.constactslist.ContactsListFragment.SendDetailsListener} interface.
+ * {@link ContactsListFragment.SendDetailsListener} interface.
  */
 public class ContactsListFragment extends ListFragment {
 
@@ -40,7 +41,8 @@ public class ContactsListFragment extends ListFragment {
         String endpoint = "https://solstice.applauncher.com/external/contacts.json";
         Ion.with(getActivity())
                 .load(endpoint)
-                .as(new TypeToken<List<Contact>>(){})
+                .as(new TypeToken<List<Contact>>() {
+                })
                 .setCallback(new FutureCallback<List<Contact>>() {
                     @Override
                     public void onCompleted(Exception e, List<Contact> contacts) {

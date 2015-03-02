@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Constacts List</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="name_label">Name:</string>
+    <string name="company_label">Companay:</string>
+    <string name="phone">Phone:</string>
+    <string name="home">Home</string>
+    <string name="work">Work</string>
+    <string name="mobile">Mobile</string>
+    <string name="address">Address:</string>
+    <string name="birthday">Birthday:</string>
+    <string name="email">Email:</string>
+    <string name="website">Website:</string>
+</resources>

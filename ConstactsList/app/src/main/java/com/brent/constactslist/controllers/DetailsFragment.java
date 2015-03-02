@@ -108,7 +108,7 @@ public class DetailsFragment extends Fragment {
                             else {
                                 Log.e(TAG, "error: " + e.getLocalizedMessage());
                                 Toast.makeText(getActivity(), "Are you connected to the Internet?",
-                                        Toast.LENGTH_LONG);
+                                        Toast.LENGTH_LONG).show();
                             }
                         }
                         else if (e == null && details != null) {
@@ -147,7 +147,7 @@ public class DetailsFragment extends Fragment {
                         if (e != null ) {
                             Log.e(TAG, "error: " + e.getLocalizedMessage());
                             Toast.makeText(getActivity(), "Are you connected to the Internet?",
-                                    Toast.LENGTH_LONG);
+                                    Toast.LENGTH_LONG).show();
                         }
                         else if (e == null && details != null) {
                             Ion.with(largeImage)

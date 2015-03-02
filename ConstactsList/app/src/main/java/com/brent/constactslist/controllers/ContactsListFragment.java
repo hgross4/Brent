@@ -3,8 +3,10 @@ package com.brent.constactslist.controllers;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.Toast;
 
 
 import com.brent.constactslist.model.Contact;
@@ -24,6 +26,7 @@ import java.util.List;
  */
 public class ContactsListFragment extends ListFragment {
 
+    private static final String TAG = ContactsListFragment.class.getSimpleName();
     private SendDetailsListener mListener;
     private List<Contact> mContacts = new ArrayList<>();
     static private final String STATE_CHECKED = "state_checked";
@@ -46,7 +49,12 @@ public class ContactsListFragment extends ListFragment {
                 .setCallback(new FutureCallback<List<Contact>>() {
                     @Override
                     public void onCompleted(Exception e, List<Contact> contacts) {
-                        if (e == null && contacts != null) {
+                        if (e != null) {
+                            Log.e(TAG, "error: " + e.getLocalizedMessage());
+                            Toast.makeText(getActivity(), "Are you connected to the Internet?",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        else if (contacts != null) {
                             mContacts = contacts;
                             setListAdapter(new ContactAdapter(getActivity(), contacts));
                             if (savedInstanceState != null) {

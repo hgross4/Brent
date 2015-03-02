@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The mContacts list fragment.
+ * The contacts list fragment.
  * <p/>
  * <p/>
  * Activities containing this fragment MUST implement the

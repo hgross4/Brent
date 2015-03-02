@@ -14,7 +14,8 @@ import android.widget.Toast;
 import com.brent.constactslist.R;
 import com.brent.constactslist.model.Address;
 import com.brent.constactslist.model.Contact;
-import com.brent.constactslist.model.Details;
+import com.brent.constactslist.model.DetailsBooleanFavorite;
+import com.brent.constactslist.model.DetailsIntFavorite;
 import com.brent.constactslist.model.Phone;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
@@ -26,7 +27,7 @@ import java.util.Locale;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ * The fragment that shows the selected contact's details
  */
 public class DetailsFragment extends Fragment {
 
@@ -85,13 +86,64 @@ public class DetailsFragment extends Fragment {
         birthday.setText(formatter.format(calendar.getTime()));
 
         // Get the contact details and populate the details fields
-        String endpoint = contact.getDetailsURL();
+        loadDetailsBoolean(contact.getDetailsURL());
+    }
+
+    /**
+     * Get the contact details for the selected contact
+     * @param endpoint
+     */
+    private void loadDetailsBoolean(final String endpoint) {
+
         Ion.with(getActivity())
                 .load(endpoint)
-                .as(new TypeToken<Details>(){})
-                .setCallback(new FutureCallback<Details>() {
+                .as(new TypeToken<DetailsBooleanFavorite>(){})
+                .setCallback(new FutureCallback<DetailsBooleanFavorite>() {
                     @Override
-                    public void onCompleted(Exception e, Details details) {
+                    public void onCompleted(Exception e, DetailsBooleanFavorite details) {
+                        if (e != null ) {
+                            if (e.getLocalizedMessage().contains("boolean")) {
+                                loadDetailsInt(endpoint);
+                            }
+                            else {
+                                Log.e(TAG, "error: " + e.getLocalizedMessage());
+                                Toast.makeText(getActivity(), "Are you connected to the Internet?",
+                                        Toast.LENGTH_LONG);
+                            }
+                        }
+                        else if (e == null && details != null) {
+                            Ion.with(largeImage)
+                                    .load(details.getLargeImageURL());
+                            if (details.isFavorite()) {
+                                star.setImageResource(android.R.drawable.star_on);
+                            }
+                            else {
+                                star.setImageResource(android.R.drawable.star_off);
+                            }
+                            Address address = details.getAddress();
+                            streetAddress.setText(address.getStreet());
+                            cityStateZip.setText(address.getCity() + ", " +
+                                    address.getState() + " " + address.getZip());
+                            email.setText(details.getEmail());
+                            website.setText(details.getWebsite());
+                        }
+                    }
+                });
+    }
+
+    /**
+     * This is a hack to deal with the few contacts whose "favorite" field is 0 or 1
+     * instead of true or false
+     * @param endpoint
+     */
+    private void loadDetailsInt(final String endpoint) {
+
+        Ion.with(getActivity())
+                .load(endpoint)
+                .as(new TypeToken<DetailsIntFavorite>(){})
+                .setCallback(new FutureCallback<DetailsIntFavorite>() {
+                    @Override
+                    public void onCompleted(Exception e, DetailsIntFavorite details) {
                         if (e != null ) {
                             Log.e(TAG, "error: " + e.getLocalizedMessage());
                             Toast.makeText(getActivity(), "Are you connected to the Internet?",
@@ -100,12 +152,12 @@ public class DetailsFragment extends Fragment {
                         else if (e == null && details != null) {
                             Ion.with(largeImage)
                                     .load(details.getLargeImageURL());
-//                            if (details.isFavorite()) {
-//                                star.setImageResource(android.R.drawable.star_on);
-//                            }
-//                            else {
-//                                star.setImageResource(android.R.drawable.star_off);
-//                            }
+                            if (details.isFavorite()) {
+                                star.setImageResource(android.R.drawable.star_on);
+                            }
+                            else {
+                                star.setImageResource(android.R.drawable.star_off);
+                            }
                             Address address = details.getAddress();
                             streetAddress.setText(address.getStreet());
                             cityStateZip.setText(address.getCity() + ", " +

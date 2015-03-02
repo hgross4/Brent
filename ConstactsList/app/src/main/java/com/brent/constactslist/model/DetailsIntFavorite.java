@@ -2,11 +2,14 @@ package com.brent.constactslist.model;
 
 /**
  * Created by Brent on 2/28/15.
+ * Contains much of the info. shown
+ * on the Details screen for each contact,
+ * for those contacts whose "favorite" field is an int
  */
-public class Details {
+public class DetailsIntFavorite {
 
     private int employeeId;
-//    private boolean favorite;
+    private int favorite;
     private String largeImageURL;
     private String email;
     private String website;
@@ -16,9 +19,9 @@ public class Details {
         return employeeId;
     }
 
-//    public boolean isFavorite() {
-//        return favorite;
-//    }
+    public boolean isFavorite() {
+        return (favorite == 1);
+    }
 
     public String getLargeImageURL() {
         return largeImageURL;

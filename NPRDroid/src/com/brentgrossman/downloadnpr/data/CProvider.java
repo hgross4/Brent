@@ -18,7 +18,7 @@ public class CProvider extends ContentProvider {
 	private static final String TABLE = "stories";
 
 	public static final class Stories implements BaseColumns {
-		public static final Uri CONTENT_URI = Uri.parse("content://com.brentgrossman.downloadNPR/stories");
+		public static final Uri CONTENT_URI = Uri.parse("content://com.brentgrossman.downloadnpr/stories");
 		// public static final String DEFAULT_SORT_ORDER = "title";
 		public static final String TITLE = "title";
 		public static final String AUDIO_LINK = "audio_link";
@@ -29,8 +29,8 @@ public class CProvider extends ContentProvider {
 
 	static {
 		MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
-		MATCHER.addURI("com.brentgrossman.downloadNPR", "stories", STORIES);
-		MATCHER.addURI("com.brentgrossman.downloadNPR", "stories/#", STORY_ID);
+		MATCHER.addURI("com.brentgrossman.downloadnpr", "stories", STORIES);
+		MATCHER.addURI("com.brentgrossman.downloadnpr", "stories/#", STORY_ID);
 	}
 
 	private DBHelper db = null;

@@ -70,13 +70,13 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     // constants exist in our class is a mere convenience: what really defines the actions our
     // service can handle are the <action> tags in the <intent-filters> tag for our service in
     // AndroidManifest.xml.
-    public static final String ACTION_TOGGLE_PLAYBACK = "com.brentgrossman.downloadNPR.action.TOGGLE_PLAYBACK";
-    public static final String ACTION_PLAY = "com.brentgrossman.downloadNPR.action.PLAY";
-    public static final String ACTION_PAUSE = "com.brentgrossman.downloadNPR.action.PAUSE";
-    public static final String ACTION_STOP = "com.brentgrossman.downloadNPR.action.STOP";
-    public static final String ACTION_SKIP = "com.brentgrossman.downloadNPR.action.SKIP";
-    public static final String ACTION_REWIND = "com.brentgrossman.downloadNPR.action.REWIND";
-    public static final String ACTION_URL = "com.brentgrossman.downloadNPR.action.URL";
+    public static final String ACTION_TOGGLE_PLAYBACK = "com.brentgrossman.downloadnpr.action.TOGGLE_PLAYBACK";
+    public static final String ACTION_PLAY = "com.brentgrossman.downloadnpr.action.PLAY";
+    public static final String ACTION_PAUSE = "com.brentgrossman.downloadnpr.action.PAUSE";
+    public static final String ACTION_STOP = "com.brentgrossman.downloadnpr.action.STOP";
+    public static final String ACTION_SKIP = "com.brentgrossman.downloadnpr.action.SKIP";
+    public static final String ACTION_REWIND = "com.brentgrossman.downloadnpr.action.REWIND";
+    public static final String ACTION_URL = "com.brentgrossman.downloadnpr.action.URL";
 
     // The volume we set the media player to when we lose audio focus, but are allowed to reduce
     // the volume instead of stopping playback.

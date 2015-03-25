@@ -1,31 +1,32 @@
-¥ Fix player sometimes resetting to beginning of first story when play button pressed, instead of remembering its place in the list. (Done?)
-¥ Save story files to internal storage (confirm this is best thing to do).
-¥ Ability to abort download ("cancel download" button and stopservice command?)
-¥ Check for data connection (see how FeedReader does this)
-¥ Check that available stories are newer than those already downloaded?
-¥ Format each list entry better (show, title, well-formatted date, duration--maybe make each entry expandable?)
-¥ Put more space between stories in list
-¥ Change app title
-¥ Change app icon
-¥ Figure out how to handle saved position between app uses (set to 0 when a download is performed? have play button play highlighted story otherwise (right now play button just starts from first story when app started up fresh))
-¥ Have paused story stay in notification bar and be available to be restarted at paused position at any time (the way ES handles this)
-¥ Warn user when there's no Internet connection (take them to settings?)
-¥ What happens when stories downloaded while audio is playing, and how should that be handled?
-¥ Voice commands
+â€¢ Make viewpager tabs shorter (vertical dimension)
+â€¢ Fix player sometimes resetting to beginning of first story when play button pressed, instead of remembering its place in the list. (Done?)
+â€¢ Save story files to internal storage (confirm this is best thing to do).
+â€¢ Ability to abort download ("cancel download" button and stopservice command?)
+â€¢ Check for data connection (see how FeedReader does this) (Done?)
+â€¢ Check that available stories are newer than those already downloaded?
+â€¢ Format each list entry better (show, title, well-formatted date, duration--maybe make each entry expandable?)
+â€¢ Put more space between stories in list
+â€¢ Change app title
+â€¢ Change app icon
+â€¢ Figure out how to handle saved position between app uses (set to 0 when a download is performed? have play button play highlighted story otherwise (right now play button just starts from first story when app started up fresh))
+â€¢ Have paused story stay in notification bar and be available to be restarted at paused position at any time (the way ES handles this)
+â€¢ Warn user when there's no Internet connection (take them to settings?)
+â€¢ What happens when stories downloaded while audio is playing, and how should that be handled?
+â€¢ Voice commands
 
 Done
-¥ Fix next story not starting when previous ends 
-¥ Change radio buttons and single download button to 2 buttons (one for each show) and a heading ("Download today's stories")
-¥ Audio continues to play when UI not in foreground
-¥ Seekbar shows story playback progress
-¥ Highlight story in list that's currently playing or paused
-¥ Moved CustomAdapter class to its own file
-¥ Troubleshoot why list doesn't update after download done when activity not in foreground (intent not "sticking around"?) 
-¥ SeekBar to allow for moving within story
-¥ Story titles instead of file names in story list
-¥ Have player pause when it loses audio focus ("ducks") so audio isn't drowned out.
-¥ Change "Download today's stories" to "Download available stories" (or something to that effect)
-¥ Player buttons (rewind, play, pause, next)
+â€¢ Fix next story not starting when previous ends 
+â€¢ Change radio buttons and single download button to 2 buttons (one for each show) and a heading ("Download today's stories")
+â€¢ Audio continues to play when UI not in foreground
+â€¢ Seekbar shows story playback progress
+â€¢ Highlight story in list that's currently playing or paused
+â€¢ Moved CustomAdapter class to its own file
+â€¢ Troubleshoot why list doesn't update after download done when activity not in foreground (intent not "sticking around"?) 
+â€¢ SeekBar to allow for moving within story
+â€¢ Story titles instead of file names in story list
+â€¢ Have player pause when it loses audio focus ("ducks") so audio isn't drowned out.
+â€¢ Change "Download today's stories" to "Download available stories" (or something to that effect)
+â€¢ Player buttons (rewind, play, pause, next)
 	- Implement next button pressed (so user knows that it's been pressed)
 	- Activate and change graphic for rewind button, and make it move story back X seconds (X = 10, 30?) DONE (though needs to change when pressed)
 	- Combine play and pause buttons into 1 button that toggles between images appropriately

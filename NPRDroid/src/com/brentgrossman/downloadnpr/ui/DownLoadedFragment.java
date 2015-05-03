@@ -61,8 +61,9 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 	private int seekBarProgress;
 	private TextView selectAllText;
 	private CheckBox selectAllCheckBox;
+    private long id = -1;
 
-	@Override
+    @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)  {
 		View rootView = inflater.inflate(R.layout.downloaded_fragment, container, false);
 		pref = this.getActivity().getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
@@ -246,22 +247,43 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 
 	private void deleteSelectedStories() {
 		new DeleteTask(this.getActivity()).execute();
-//		selectAllCheckBox.setChecked(false);
 	}
 
-	class DeleteTask extends AsyncTask<Void, Void, Long> {
+	class DeleteTask extends AsyncTask<Void, Void, Void> {
 		private Context context;
 		public DeleteTask (Context context){
 			this.context = context;
 		}
 		@Override
-		protected Long doInBackground(Void... params) {
-			long id = -1;
+		protected Void doInBackground(Void... params) {
+            // In the following 2 lines get the id of the currently playing or paused story
+            // so that that story can be maintained as the current story after deletion,
+            // if it's not one of the stories being deleted
+            int listPosition = pref.getInt("listPosition", 0);
+            id = adapter.getItemId(listPosition);
 			long[] selectedStories = getListView().getCheckedItemIds();
 			final int length = selectedStories.length;
 			final String[] selectedStoriesStrings = new String[length];
 			for(int i = 0; i < length; i++){
-				selectedStoriesStrings[i] = String.valueOf(selectedStories[i]);
+                long selectedStory = selectedStories[i];
+				selectedStoriesStrings[i] = String.valueOf(selectedStory);
+                // Don't save the id if the currently playing/highlighted story is being deleted,
+                // stop playback, and set the list position to the first item
+                if (id == selectedStory) {
+                    id = -1;
+                    if (musicService.mState != null) {
+                        DownLoadedFragment.this.getActivity()
+                                .startService(new Intent(MusicService.ACTION_STOP));
+                    }
+                    SharedPreferences.Editor editor = pref.edit();
+                    if (musicService != null && musicService.mRetriever != null) {
+                        musicService.mRetriever.listPosition = 1;
+                    }
+                    // save this position so its list item can be changed later:
+                    editor.putInt("listPosition", 0);
+                    editor.commit();
+
+                }
 			}
 			if (length > 0) {
 				if (length == adapter.getCount()) {
@@ -278,10 +300,6 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 							CProvider.Stories.DOWNLOADED + " = ? ", new String[] {"1"});
 				}
 				else {
-					// In the following 2 lines get the id of the currently playing or paused story
-					// so that that story can be set as the current story after deletion
-					int listPosition = pref.getInt("listPosition", 0);
-					id = adapter.getItemId(listPosition);
 					Cursor cursor = context.getContentResolver().query(CProvider.Stories.CONTENT_URI, new String[] { CProvider.Stories.FILE_NAME }, 
 							CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings, null);
 					if (cursor != null) {
@@ -291,7 +309,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 							file.delete();
 						}
 					}
-					int rows = context.getContentResolver().delete(CProvider.Stories.CONTENT_URI, 
+					context.getContentResolver().delete(CProvider.Stories.CONTENT_URI,
 							CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings);
 				}
 			}
@@ -302,31 +320,16 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 					}
 				});
 			}
-			return id;
-		}
 
-		@Override
-		protected void onPostExecute(Long id) {
-			int listPosition = 0;
-			if (id != -1) {
-				getLoaderManager().restartLoader(0, null, DownLoadedFragment.this);
-				adapter.notifyDataSetChanged();
-				for (int position = 0; position < adapter.getCount(); position++) {
-					if (adapter.getItemId(position) == id) {
-						listPosition = position;
-						break;
-					}
-				}
-			}
-			//			 Set the current story to be what it was before deletion (or the first one if current story was deleted)
-			SharedPreferences.Editor editor = pref.edit();
-			musicService.mRetriever.listPosition = listPosition + 1;
-			// save this position so its list item can be changed later:
-			editor.putInt("listPosition", listPosition);
-			editor.commit();
-			selectAllCheckBox.setChecked(false);
-		}
-	}
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            selectAllCheckBox.setChecked(false);
+        }
+    }
 
 	private String makePlaceholders(int length) {
 		if (length < 1) {
@@ -399,7 +402,28 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 	@Override
 	public void onLoadFinished(Loader<Cursor> arg0, Cursor arg1) {
 		adapter.swapCursor(arg1);
-
+        // If onLoadFinished called because 1 or more stories deleted,
+        // make sure the highlighted/playing story is still highlighted
+        if (id != -1) {
+            int listPosition = 0;
+            getLoaderManager().restartLoader(0, null, DownLoadedFragment.this);
+            adapter.notifyDataSetChanged();
+            for (int position = 0; position < adapter.getCount(); position++) {
+                if (adapter.getItemId(position) == id) {
+                    listPosition = position;
+                    break;
+                }
+            }
+            // Set the current story to be what it was before deletion (or the first one if current story was deleted)
+            SharedPreferences.Editor editor = pref.edit();
+            if (musicService != null && musicService.mRetriever != null) {
+                musicService.mRetriever.listPosition = listPosition + 1;
+            }
+            // save this position so its list item can be changed later:
+            editor.putInt("listPosition", listPosition);
+            editor.commit();
+            id = -1;
+        }
 	}
 
 	@Override

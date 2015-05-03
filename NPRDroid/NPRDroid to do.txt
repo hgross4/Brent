@@ -1,4 +1,3 @@
-• Make viewpager tabs shorter (vertical dimension)
 • Fix player sometimes resetting to beginning of first story when play button pressed, instead of remembering its place in the list. (Done?)
 • Save story files to internal storage (confirm this is best thing to do).
 • Ability to abort download ("cancel download" button and stopservice command?)
@@ -30,3 +29,4 @@ Done
 	- Implement next button pressed (so user knows that it's been pressed)
 	- Activate and change graphic for rewind button, and make it move story back X seconds (X = 10, 30?) DONE (though needs to change when pressed)
 	- Combine play and pause buttons into 1 button that toggles between images appropriately
+• Make viewpager tabs shorter (their vertical dimension)

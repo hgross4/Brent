@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:gravity="center_vertical">
 
     <CheckBox
         android:id="@+id/story_check_box"
@@ -15,10 +16,7 @@
     <TextView
         android:id="@+id/story"
         android:layout_width="wrap_content"
-        android:layout_height="24sp"
-        android:lines="1"
-        android:scrollHorizontally="true"
-        android:singleLine="true"
+        android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/story_check_box"
         android:layout_alignBottom="@+id/story_check_box"
         android:layout_toRightOf="@+id/story_check_box" />

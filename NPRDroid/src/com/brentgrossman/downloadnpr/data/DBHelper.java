@@ -10,7 +10,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "stories.db";
 
 	public DBHelper(Context context) {
-	    super(context, DATABASE_NAME, null, 1);
+	    super(context, DATABASE_NAME, null, 3);
 	  }
 
 	@Override
@@ -20,7 +20,8 @@ public class DBHelper extends SQLiteOpenHelper {
 	    try {
 	      if (c.getCount()==0) {
 	        db.execSQL("CREATE TABLE stories (_id INTEGER PRIMARY KEY AUTOINCREMENT, "
-	        		+ "title TEXT UNIQUE, audio_link TEXT, file_name TEXT, selected INTEGER, downloaded INTEGER);");
+	        		+ "title TEXT UNIQUE, audio_link TEXT, file_name TEXT, selected INTEGER, " +
+                    "downloaded INTEGER, percentage_played REAL);");
 	      }
 	    }
 	    finally {

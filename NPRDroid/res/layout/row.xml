@@ -17,8 +17,6 @@
         android:id="@+id/story"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/story_check_box"
-        android:layout_alignBottom="@+id/story_check_box"
         android:layout_toRightOf="@+id/story_check_box" />
 
 </RelativeLayout>

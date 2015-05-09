@@ -25,6 +25,7 @@ public class CProvider extends ContentProvider {
 		public static final String FILE_NAME = "file_name";
 		public static final String SELECTED = "selected";
 		public static final String DOWNLOADED = "downloaded";
+        public static final String PERCENTAGE_PLAYED = "percentage_played";
 	}
 
 	static {

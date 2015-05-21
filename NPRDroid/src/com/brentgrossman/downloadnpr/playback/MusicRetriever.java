@@ -54,17 +54,31 @@ public class MusicRetriever {
     public void prepare() {
     	mItems.clear();
 		Cursor cursor = mContentResolver.query(CProvider.Stories.CONTENT_URI, 
-				new String[] {CProvider.Stories.FILE_NAME}, 
+				new String[] {CProvider.Stories._ID, CProvider.Stories.FILE_NAME},
 				CProvider.Stories.DOWNLOADED + " = ? ", new String[] {"1"}, CProvider.Stories._ID);
 		if (cursor != null) {
+            long id = 0;
 			while (cursor.moveToNext()) {
-				mItems.add(new Item(0, null, cursor.getString(cursor.getColumnIndex(CProvider.Stories.FILE_NAME)), null, 0));
+                try {
+                    id = Long.parseLong(cursor.getString(cursor.getColumnIndex(CProvider.Stories._ID)));
+                }
+                catch (NumberFormatException nfe) {
+                    nfe.getLocalizedMessage();
+                }
+				mItems.add(new Item(id, null,
+                        cursor.getString(cursor.getColumnIndex(CProvider.Stories.FILE_NAME)), null, 0));
 			}
+            cursor.close();
 		}
     }
 
     public ContentResolver getContentResolver() {
         return mContentResolver;
+    }
+
+    public Item getItem() {
+        if (mItems.size() <= 0 || listPosition == mItems.size()) return null;
+        return mItems.get(listPosition);
     }
 
     /** Returns a random Item. If there are no items available, returns null. */

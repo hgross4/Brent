@@ -21,6 +21,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -47,6 +48,7 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import com.brentgrossman.downloadnpr.R;
+import com.brentgrossman.downloadnpr.data.CProvider;
 import com.brentgrossman.downloadnpr.ui.DownloadNPRActivity;
 
 /**
@@ -88,6 +90,9 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     // our AudioFocusHelper object, if it's available (it's available on SDK level >= 8)
     // If not available, this will be null. Always check for null before using!
     AudioFocusHelper mAudioFocusHelper = null;
+
+    // The id of the current story from the database
+    private long storyId;
 
     // indicates the state our service:
     public enum State {
@@ -453,6 +458,10 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             }
             else {
                 mIsStreaming = false; // playing a locally available song
+                // Get the id of the last song played before refreshing the list in the musicRetriever
+                if (mRetriever != null && mRetriever.getItem() != null) {
+                    storyId = mRetriever.getItem().getId();
+                }
                 mRetriever.prepare(); // if not called, mRetriever won't have correct file names while download is happening
                 playingItem = mRetriever.getNextItem(); 
                 if (playingItem == null) {
@@ -543,6 +552,13 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 
     /** Called when media player is done playing current song. */
     public void onCompletion(MediaPlayer player) {
+        // Set the percent played of the story to 100%
+        if (storyId > 0) {
+            ContentValues values = new ContentValues();
+            values.put(CProvider.Stories.PERCENTAGE_PLAYED, 1);
+            getContentResolver().update(CProvider.Stories.CONTENT_URI, values,
+                            CProvider.Stories._ID + " = ? ", new String[]{String.valueOf(storyId)});
+        }
         // The media player finished playing the current song, so we go ahead and start the next.
         playNextSong(null);
     }

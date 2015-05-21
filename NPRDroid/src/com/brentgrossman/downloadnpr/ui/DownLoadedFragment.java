@@ -46,7 +46,8 @@ import com.brentgrossman.downloadnpr.internet.DownloadStories;
 import com.brentgrossman.downloadnpr.playback.MusicService;
 import com.brentgrossman.downloadnpr.playback.MusicService.State;
 
-public class DownLoadedFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnClickListener, OnSeekBarChangeListener {
+public class DownLoadedFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>,
+        OnClickListener, OnSeekBarChangeListener {
     private static DownloadedCursorAdapter adapter = null;
     private static String TAG = DownLoadedFragment.class.getSimpleName();
     private ImageButton rewindButton, playButton, nextButton;
@@ -69,7 +70,9 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)  {
         View rootView = inflater.inflate(R.layout.downloaded_fragment, container, false);
         pref = this.getActivity().getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
-        adapter = new DownloadedCursorAdapter(getActivity(), R.layout.row, null, new String[] { CProvider.Stories.TITLE }, new int[] { R.id.story }, 0);
+        adapter = new DownloadedCursorAdapter(getActivity(), R.layout.row, null,
+                new String[] { CProvider.Stories.TITLE, CProvider.Stories.PERCENTAGE_PLAYED },
+                new int[] { R.id.story, R.id.percentage_played }, 0);
         setListAdapter(adapter);
         getLoaderManager().initLoader(0, null, this);
         rewindButton = (ImageButton) rootView.findViewById(R.id.rewindButton);
@@ -115,7 +118,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
         startRepeatingTask();
         IntentFilter filter = new IntentFilter(DownloadStories.downloading);
         this.getActivity().registerReceiver(download, filter);
-        //		if (downloading) updateStoriesList();
+        getListView().smoothScrollToPosition(pref.getInt("listPosition", 0));
     }
 
     @Override
@@ -405,9 +408,8 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
     @Override
     public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
         return new CursorLoader(this.getActivity(), CProvider.Stories.CONTENT_URI,
-                new String[] { CProvider.Stories._ID, CProvider.Stories.TITLE },
+                new String[] { CProvider.Stories._ID, CProvider.Stories.TITLE, CProvider.Stories.PERCENTAGE_PLAYED },
                 CProvider.Stories.DOWNLOADED + " = ? ", new String[] {"1"}, CProvider.Stories._ID);
-
     }
 
     @Override
@@ -472,11 +474,12 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
                 float percentagePlayed =
                         cursor.getFloat(cursor.getColumnIndex(CProvider.Stories.PERCENTAGE_PLAYED));
                 if (percentagePlayed > 0) {
-                    holder.story.append(" ");
-                    holder.story.append(Html.fromHtml(" - <b>" + (int) (percentagePlayed * 100) + "%</b>"));
+                    holder.percentagePlayed.setText(Integer.toString((int) (percentagePlayed * 100)) +"%");
                 }
                 cursor.close();
             }
+            // Set list items as properly selected or not based on the state of their corresponding checkboxes
+            // (see http://stackoverflow.com/questions/25026347/check-and-uncheck-all-checkboxes-in-listview)
             holder.storyCheckBox.setChecked(false);
             long [] checkedIds = getListView().getCheckedItemIds();
             if (checkedIds != null) {
@@ -500,10 +503,12 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
 
     class ViewHolder {
         CheckBox storyCheckBox;
+        TextView percentagePlayed;
         TextView story = null;
 
         ViewHolder(View row) {
             storyCheckBox = (CheckBox) row.findViewById(R.id.story_check_box);
+            percentagePlayed = (TextView) row.findViewById(R.id.percentage_played);
             story = (TextView) row.findViewById(R.id.story);
         }
     }

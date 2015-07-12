@@ -223,7 +223,11 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 
         // Create the retriever and start an asynchronous task that will prepare it.
         mRetriever = new MusicRetriever(getContentResolver());
-        (new PrepareMusicRetrieverTask(mRetriever,this)).execute();
+//        (new PrepareMusicRetrieverTask(mRetriever,this)).execute();
+        // Stopped using asynctask so that ID of playing story is immediately available,
+        // to set percentage played when screen off
+        mRetriever.prepare();
+        this.onMusicRetrieverPrepared();
 
         // create the Audio Focus Helper, if the Audio Focus feature is available (SDK 8 or above)
         if (android.os.Build.VERSION.SDK_INT >= 8)
@@ -469,6 +473,15 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
                 		Toast.makeText(this, "No available music to play. Place some music on your external storage "
                 				+ "device (e.g. your SD card) and try again.", Toast.LENGTH_LONG).show();
                 	}
+                    // Set the list position to be no none of the valid positions,
+                    // in part to prevent the last item play percentage to go to 0
+                    // when it's done playing and the player is stopped
+                    // (which sets the player position to 0:00)
+                    SharedPreferences pref = getSharedPreferences("NPRDownloadPreferences", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putInt("listPosition", -1);
+                    editor.apply();
+                    storyId = 0;
                     processStopRequest(true); // stop everything!
                     return;
                 }

@@ -48,7 +48,8 @@ public class PopulateAvailable extends IntentService {
 		String rawXML = null;
 		// Make the connection to the URL and get the xml as one big string
 		try {
-			int showID = intent.getExtras().getString(whichShow).equalsIgnoreCase("atc") ? 2 : 3;
+//			int showID = intent.getExtras().getString(whichShow).equalsIgnoreCase("atc") ? 2 : 3;
+			int showID = intent.getIntExtra(whichShow, 2);
 			URL url = new URL(queryUrl + showID);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");

@@ -4,10 +4,19 @@
     <string name="me">Morning\nEdition</string>
     <string name="atc">All Things\nConsidered</string>
     <string name="downloads_complete">Stories download complete</string>
-    <string name="latest_stories">Show the latest stories</string>
+    <string name="latest_stories">Select a show to see its latest content</string>
     <string name="download_selected_stories">Download selected stories</string>
-    <string name="delete_selected_stories">Delete selected stories</string>
+    <string name="delete_selected_stories">Delete selected</string>
     <string name="select_deselect_all_for_deletion">Select/deselect all for deletion</string>
     <string name="select_deselect_all_for_download">Select/deselect all for download</string>
+    <string name="delete_played_stories">Delete played</string>
+    <string-array name="shows_array">
+        <item>@string/latest_stories</item>
+        <item>All Things Considered</item>
+        <item>Fresh Air</item>
+        <item>Morning Edition</item>
+        <item>Weekend Edition Saturday</item>
+        <item>Weekend Edition Sunday</item>
+    </string-array>
 
 </resources>

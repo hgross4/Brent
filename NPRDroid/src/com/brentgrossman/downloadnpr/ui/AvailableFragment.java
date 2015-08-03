@@ -16,15 +16,19 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.LoaderManager;
@@ -32,7 +36,8 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 
 
-public class AvailableFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnClickListener {
+public class AvailableFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>,
+		OnClickListener, AdapterView.OnItemSelectedListener {
 
 	static SharedPreferences pref;
 	private AvailableCursorAdapter adapter = null;
@@ -40,17 +45,25 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 	private TextView selectAllText;
 	private CheckBox selectAllCheckBox;
 	private Button atc, me, download;
+	private Spinner showSpinner;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)  {
 		View rootView = inflater.inflate(R.layout.available_fragment, container, false);
-		adapter = new AvailableCursorAdapter(getActivity(), R.layout.row, null, new String[] { CProvider.Stories.TITLE }, new int[] { R.id.story }, 0);
+		adapter = new AvailableCursorAdapter(getActivity(), R.layout.row, null,
+				new String[] { CProvider.Stories.TITLE }, new int[] { R.id.story }, 0);
 		setListAdapter(adapter);
 		getLoaderManager().initLoader(0, null, this);
-		me = (Button) rootView.findViewById(R.id.me);
-		me.setOnClickListener(this);
-		atc = (Button) rootView.findViewById(R.id.atc);
-		atc.setOnClickListener(this);
+//		me = (Button) rootView.findViewById(R.id.me);
+//		me.setOnClickListener(this);
+//		atc = (Button) rootView.findViewById(R.id.atc);
+//		atc.setOnClickListener(this);
+		showSpinner = (Spinner) rootView.findViewById(R.id.show_spinner);
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
+				R.array.shows_array, android.R.layout.simple_spinner_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		showSpinner.setAdapter(adapter);
+		showSpinner.setOnItemSelectedListener(this);
 		download = (Button) rootView.findViewById(R.id.download_button);
 		download.setOnClickListener(this);
 		selectAllText = (TextView) rootView.findViewById(R.id.select_all_for_deletion_text);
@@ -78,6 +91,7 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 		super.onResume();
 		IntentFilter filter = new IntentFilter(DownloadStories.downloading);
 		getActivity().registerReceiver(afterDownload, filter);
+		showSpinner.setSelection(0);
 	}
 	
 	@Override
@@ -128,21 +142,6 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 			selectAllCheckBox.setChecked(!isChecked);
 			selectAllText.setTextColor(isChecked ? Color.DKGRAY : Color.BLACK);
 		}
-		else getStoriesList(v);
-	}
-
-	public void getStoriesList(View view) {
-		if (isOnline()) {
-			String showChoice;
-			showChoice = view.getId() == R.id.me ? "me" : "atc";
-			Intent intent = new Intent(this.getActivity(), PopulateAvailable.class);
-			intent.putExtra(PopulateAvailable.whichShow, showChoice);
-			this.getActivity().startService(intent);
-//			selectAllStories(true); not working because it gets executed before stories are done being retrieved
-		}
-		else {
-			Toast.makeText(this.getActivity(), "No Internet connection.", Toast.LENGTH_LONG).show();
-		}
 	}
 
 	private boolean isOnline() {
@@ -154,14 +153,50 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 		return false;
 	}
 
+	@Override
+	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+		boolean isOnline = isOnline();
+		if (isOnline && position > 0) {
+			int showChoice = 0;
+			String[] showsArray = getResources().getStringArray(R.array.shows_array);
+			if (position == 1) {
+				showChoice = 2;
+			}
+			if (position == 2) {
+				showChoice = 13;
+			}
+			if (position == 3) {
+				showChoice = 3;
+			}
+			if (position == 4) {
+				showChoice = 7;
+			}
+			if (position == 5) {
+				showChoice = 10;
+			}
+			Intent intent = new Intent(this.getActivity(), PopulateAvailable.class);
+			intent.putExtra(PopulateAvailable.whichShow, showChoice);
+			this.getActivity().startService(intent);
+		}
+		else if (!isOnline) {
+			Toast.makeText(this.getActivity(), "No Internet connection.", Toast.LENGTH_LONG).show();
+		}
+	}
+
+	@Override
+	public void onNothingSelected(AdapterView<?> parent) {
+
+	}
+
 	private void downloadStoryFiles() {
 		if (isOnline()) {
 			Intent intent = new Intent(this.getActivity(), DownloadStories.class);
 			long[] selectedStories = getListView().getCheckedItemIds();
 			if (selectedStories.length > 0) {
 				intent.putExtra("selectedStories", selectedStories);
-				atc.setEnabled(false);
-				me.setEnabled(false);
+//				atc.setEnabled(false);
+//				me.setEnabled(false);
+				showSpinner.setEnabled(false);
 				download.setEnabled(false);
 				this.getActivity().startService(intent);
 			}
@@ -175,8 +210,9 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 	private BroadcastReceiver afterDownload = new BroadcastReceiver() { 
 		public void onReceive(Context ctxt, Intent i) {
 			if (i.getBooleanExtra(DownloadStories.downloadDone, false)) {
-				atc.setEnabled(true);
-				me.setEnabled(true);
+//				atc.setEnabled(true);
+//				me.setEnabled(true);
+				showSpinner.setEnabled(true);
 				download.setEnabled(true);
 				selectAllCheckBox.setChecked(false);
 				selectAllText.setTextColor(Color.DKGRAY);

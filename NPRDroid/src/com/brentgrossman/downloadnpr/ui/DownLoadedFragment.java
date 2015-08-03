@@ -64,6 +64,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
     private TextView selectAllText;
     private CheckBox selectAllCheckBox;
     private long id = -1;
+    private enum DeleteType { PLAYED, SELECTED};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)  {
@@ -85,8 +86,10 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
         mHandler = new Handler();
         textRemaining = (TextView) rootView.findViewById(R.id.textRemaining);
         textDuration = (TextView) rootView.findViewById(R.id.textDuration);
-        Button delete = (Button) rootView.findViewById(R.id.delete_button);
-        delete.setOnClickListener(this);
+        Button deleteSelected = (Button) rootView.findViewById(R.id.delete_selected_button);
+        deleteSelected.setOnClickListener(this);
+        Button deletePlayed = (Button) rootView.findViewById(R.id.delete_played_button);
+        deletePlayed.setOnClickListener(this);
         selectAllText = (TextView) rootView.findViewById(R.id.select_all_for_deletion_text);
         selectAllText.setOnClickListener(this);
         selectAllCheckBox = (CheckBox) rootView.findViewById(R.id.select_all_for_deletion_check_box);
@@ -250,7 +253,8 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
             // produces weird effects
             playButton.setImageResource(R.drawable.play_button_pressed);
         }
-        else if (v.getId() == R.id.delete_button) deleteSelectedStories();
+        else if (v.getId() == R.id.delete_selected_button) deleteSelectedStories();
+        else if (v.getId() == R.id.delete_played_button) deletePlayedStories();
         else if (v == selectAllText) {
             boolean isChecked = selectAllCheckBox.isChecked();
             selectAllCheckBox.setChecked(!isChecked);
@@ -258,13 +262,19 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
     }
 
     private void deleteSelectedStories() {
-        new DeleteTask(this.getActivity()).execute();
+        new DeleteStoriesTask(this.getActivity(), DeleteType.SELECTED).execute();
     }
 
-    class DeleteTask extends AsyncTask<Void, Void, Void> {
+    private void deletePlayedStories() {
+        new DeleteStoriesTask(this.getActivity(), DeleteType.PLAYED).execute();
+    }
+
+    class DeleteStoriesTask extends AsyncTask<Void, Void, Void> {
         private Context context;
-        public DeleteTask (Context context){
+        private DeleteType deleteType;
+        public DeleteStoriesTask(Context context, DeleteType deleteType){
             this.context = context;
+            this.deleteType = deleteType;
         }
         @Override
         protected Void doInBackground(Void... params) {
@@ -273,66 +283,106 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
             // if it's not one of the stories being deleted
             int listPosition = pref.getInt("listPosition", 0);
             id = adapter.getItemId(listPosition);
-            long[] selectedStories = getListView().getCheckedItemIds();
-            final int length = selectedStories.length;
-            final String[] selectedStoriesStrings = new String[length];
-            for(int i = 0; i < length; i++){
-                long selectedStory = selectedStories[i];
-                selectedStoriesStrings[i] = String.valueOf(selectedStory);
-                // Don't save the id if the currently playing/highlighted story is being deleted,
-                // stop playback, and set the list position to the first item
-                if (id == selectedStory) {
-                    id = -1;
-                    if (musicService.mState != null) {
-                        DownLoadedFragment.this.getActivity()
-                                .startService(new Intent(MusicService.ACTION_STOP));
-                    }
-                    SharedPreferences.Editor editor = pref.edit();
-                    if (musicService != null && musicService.mRetriever != null) {
-                        musicService.mRetriever.listPosition = 1;
-                    }
-                    // save this position so its list item can be changed later:
-                    editor.putInt("listPosition", 0);
-                    editor.commit();
-
-                }
-            }
-            if (length > 0) {
-                if (length == adapter.getCount()) {
-                    // Delete everything in files directory, just to make sure no files are "sticking around"
-                    String sdPath = context.getExternalFilesDir(null).getAbsolutePath() + "/";
-                    File sdPathFile = new File(sdPath);
-                    File[] files = sdPathFile.listFiles();
-                    if (files.length > 0) {
-                        for (File file : files) {
-                            file.delete();
+            switch (deleteType) {
+                case SELECTED:
+                    long[] selectedStories = getListView().getCheckedItemIds();
+                    final int length = selectedStories.length;
+                    final String[] selectedStoriesStrings = new String[length];
+                    for (int i = 0; i < length; i++) {
+                        long selectedStory = selectedStories[i];
+                        selectedStoriesStrings[i] = String.valueOf(selectedStory);
+                        // Don't save the id if the currently playing/highlighted story is being deleted,
+                        // stop playback, and set the list position to the first item
+                        if (id == selectedStory) {
+                            id = -1;
+                            if (musicService.mState != null) {
+                                DownLoadedFragment.this.getActivity()
+                                        .startService(new Intent(MusicService.ACTION_STOP));
+                            }
+                            SharedPreferences.Editor editor = pref.edit();
+                            if (musicService != null && musicService.mRetriever != null) {
+                                musicService.mRetriever.listPosition = 1;
+                            }
+                            // save this position so its list item can be changed later:
+                            editor.putInt("listPosition", 0);
+                            editor.commit();
                         }
                     }
-                    context.getContentResolver().delete(CProvider.Stories.CONTENT_URI,
-                            CProvider.Stories.DOWNLOADED + " = ? ", new String[] {"1"});
-                }
-                else {
-                    Cursor cursor = context.getContentResolver().query(CProvider.Stories.CONTENT_URI, new String[] { CProvider.Stories.FILE_NAME },
-                            CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings, null);
-                    if (cursor != null) {
-                        while (cursor.moveToNext()) {
-                            String filePath = context.getExternalFilesDir(null).getAbsolutePath() + "/" + cursor.getString(cursor.getColumnIndex(CProvider.Stories.FILE_NAME));
-                            File file = new File(filePath);
-                            file.delete();
+                    if (length > 0) {
+                        if (length == adapter.getCount()) {
+                            // Delete everything in files directory, just to make sure no files are "sticking around"
+                            String sdPath = context.getExternalFilesDir(null).getAbsolutePath() + "/";
+                            File sdPathFile = new File(sdPath);
+                            File[] files = sdPathFile.listFiles();
+                            if (files.length > 0) {
+                                for (File file : files) {
+                                    file.delete();
+                                }
+                            }
+                            context.getContentResolver().delete(CProvider.Stories.CONTENT_URI,
+                                    CProvider.Stories.DOWNLOADED + " = ? ", new String[]{"1"});
+                        }
+                        else {
+                            Cursor cursor = context.getContentResolver().query(CProvider.Stories.CONTENT_URI, new String[]{CProvider.Stories.FILE_NAME},
+                                    CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings, null);
+                            if (cursor != null) {
+                                while (cursor.moveToNext()) {
+                                    String filePath = context.getExternalFilesDir(null).getAbsolutePath() + "/" + cursor.getString(cursor.getColumnIndex(CProvider.Stories.FILE_NAME));
+                                    File file = new File(filePath);
+                                    file.delete();
+                                }
+                            }
+                            context.getContentResolver().delete(CProvider.Stories.CONTENT_URI,
+                                    CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings);
                         }
                     }
-                    context.getContentResolver().delete(CProvider.Stories.CONTENT_URI,
-                            CProvider.Stories._ID + " IN (" + makePlaceholders(length) + ")", selectedStoriesStrings);
-                }
-            }
-            else {
-                DownLoadedFragment.this.getActivity().runOnUiThread(new Runnable() {
-                    public void run() {
-                        Toast.makeText(context, "No stories selected.", Toast.LENGTH_LONG).show();
+                    else {
+                        DownLoadedFragment.this.getActivity().runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(context, "No stories selected.", Toast.LENGTH_LONG).show();
+                            }
+                        });
                     }
-                });
+                    break;
+                case PLAYED:
+                    String where = CProvider.Stories.PERCENTAGE_PLAYED + " = ?";
+                    String[] whereArgs = new String[] {"1"};
+                    Cursor cursor = context.getContentResolver().query(CProvider.Stories.CONTENT_URI,
+                            new String[] { CProvider.Stories.FILE_NAME }, where, whereArgs, null);
+                    if (cursor != null && cursor.getCount() > 0) {
+                        if (cursor.getCount() == adapter.getCount()) {
+                            // Delete everything in files directory, just to make sure no files are "sticking around"
+                            String sdPath = context.getExternalFilesDir(null).getAbsolutePath() + "/";
+                            File sdPathFile = new File(sdPath);
+                            File[] files = sdPathFile.listFiles();
+                            if (files.length > 0) {
+                                for (File file : files) {
+                                    file.delete();
+                                }
+                            }
+                            context.getContentResolver().delete(CProvider.Stories.CONTENT_URI,
+                                    CProvider.Stories.DOWNLOADED + " = ? ", new String[]{"1"});
+                        }
+                        else {
+                            while (cursor.moveToNext()) {
+                                String filePath = context.getExternalFilesDir(null).getAbsolutePath() + "/" +
+                                        cursor.getString(cursor.getColumnIndex(CProvider.Stories.FILE_NAME));
+                                File file = new File(filePath);
+                                file.delete();
+                            }
+                        }
+                        context.getContentResolver().delete(CProvider.Stories.CONTENT_URI, where, whereArgs);
+                    }
+                    else {
+                        DownLoadedFragment.this.getActivity().runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(context, "There are no completely played stories.",
+                                        Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                    break;
             }
-
             return null;
         }
 
@@ -340,6 +390,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             selectAllCheckBox.setChecked(false);
+            getListView().smoothScrollToPosition(pref.getInt("listPosition", 0));
         }
     }
 
@@ -474,6 +525,12 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
                         cursor.getFloat(cursor.getColumnIndex(CProvider.Stories.PERCENTAGE_PLAYED));
                 if (percentagePlayed > 0) {
                     holder.percentagePlayed.setText(Integer.toString((int) (percentagePlayed * 100)) +"%");
+                }
+                if (percentagePlayed == 1) {
+                    row.setBackgroundColor(Color.LTGRAY);
+                }
+                else {
+                    row.setBackgroundColor(Color.TRANSPARENT);
                 }
                 cursor.close();
             }

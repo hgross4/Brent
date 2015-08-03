@@ -5,43 +5,19 @@
     android:gravity="center"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/buttonHeading"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:gravity="center"
-        android:text="@string/latest_stories"
-        android:textSize="18sp" />
-
-    <LinearLayout
+    <Spinner
+        android:id="@+id/show_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/me"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/button"
-            android:text="@string/me" />
-
-        <Button
-            android:id="@+id/atc"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/button"
-            android:text="@string/atc" />
-    </LinearLayout>
+        android:layout_marginTop="10dp"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="left"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp">
 
         <CheckBox
             android:id="@+id/select_all_for_deletion_check_box"

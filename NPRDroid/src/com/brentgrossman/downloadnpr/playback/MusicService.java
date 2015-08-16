@@ -462,11 +462,11 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
             }
             else {
                 mIsStreaming = false; // playing a locally available song
-                // Get the id of the last song played before refreshing the list in the musicRetriever
+                mRetriever.prepare(); // if not called, mRetriever won't have correct file names while download is happening
+                // Get the id of the last song played before advancing to the next one
                 if (mRetriever != null && mRetriever.getItem() != null) {
                     storyId = mRetriever.getItem().getId();
                 }
-                mRetriever.prepare(); // if not called, mRetriever won't have correct file names while download is happening
                 playingItem = mRetriever.getNextItem(); 
                 if (playingItem == null) {
                 	if (mRetriever.listPosition != mRetriever.mItems.size()) {

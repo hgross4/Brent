@@ -16,27 +16,32 @@
         android:layout_height="wrap_content"
         android:gravity="left"
         android:orientation="horizontal"
-        android:paddingBottom="10dp"
-        android:paddingTop="10dp">
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp"
+        android:background="#4067B2">
 
         <CheckBox
-            android:id="@+id/select_all_for_deletion_check_box"
+            android:id="@+id/select_all_for_download_check_box"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="false"
-            android:focusableInTouchMode="false" />
+            android:focusableInTouchMode="false"
+            android:buttonTint="@android:color/white"/>
 
         <TextView
-            android:id="@+id/select_all_for_deletion_text"
+            android:id="@+id/select_all_for_download_text"
             android:layout_width="wrap_content"
             android:layout_height="24sp"
-            android:layout_alignBaseline="@+id/select_all_for_deletion_check_box"
-            android:layout_alignBottom="@+id/select_all_for_deletion_check_box"
-            android:layout_toRightOf="@+id/select_all_for_deletion_check_box"
+            android:layout_alignBaseline="@+id/select_all_for_download_check_box"
+            android:layout_alignBottom="@+id/select_all_for_download_check_box"
+            android:layout_toRightOf="@+id/select_all_for_download_check_box"
             android:lines="1"
             android:scrollHorizontally="true"
             android:singleLine="true"
-            android:text="@string/select_deselect_all_for_download" />
+            android:text="@string/select_deselect_all_for_download"
+            android:textColor="@android:color/white"/>
     </RelativeLayout>
 
     <ListView
@@ -48,11 +53,17 @@
         android:drawSelectorOnTop="true" >
     </ListView>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_green_dark">
     <Button
         android:id="@+id/download_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/button"
-        android:text="@string/download_selected_stories" />
+        android:text="@string/download_selected_stories"
+        android:textColor="@android:color/white"/>
+    </LinearLayout>
 
 </LinearLayout>

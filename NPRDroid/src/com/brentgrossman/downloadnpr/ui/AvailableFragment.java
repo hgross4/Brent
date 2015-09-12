@@ -10,13 +10,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,6 +26,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
@@ -35,29 +36,26 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 
-
 public class AvailableFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>,
 		OnClickListener, AdapterView.OnItemSelectedListener {
 
 	static SharedPreferences pref;
-	private AvailableCursorAdapter adapter = null;
-	private static final String[] PROJECTION = new String[] { CProvider.Stories._ID, CProvider.Stories.TITLE };
+	private AvailableCursorAdapter2 adapter = null;
+	private static final String[] PROJECTION =
+			new String[] { CProvider.Stories._ID, CProvider.Stories.TITLE, CProvider.Stories.AUDIO_LINK };
 	private TextView selectAllText;
 	private CheckBox selectAllCheckBox;
-	private Button atc, me, download;
+	private Button download;
 	private Spinner showSpinner;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)  {
 		View rootView = inflater.inflate(R.layout.available_fragment, container, false);
-		adapter = new AvailableCursorAdapter(getActivity(), R.layout.row, null,
-				new String[] { CProvider.Stories.TITLE }, new int[] { R.id.story }, 0);
+//		adapter = new AvailableCursorAdapter(getActivity(), R.layout.row, null,
+//				new String[] { CProvider.Stories.TITLE }, new int[] { R.id.story }, 0);
+		adapter = new AvailableCursorAdapter2(getActivity(), null, 0);
 		setListAdapter(adapter);
 		getLoaderManager().initLoader(0, null, this);
-//		me = (Button) rootView.findViewById(R.id.me);
-//		me.setOnClickListener(this);
-//		atc = (Button) rootView.findViewById(R.id.atc);
-//		atc.setOnClickListener(this);
 		showSpinner = (Spinner) rootView.findViewById(R.id.show_spinner);
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
 				R.array.shows_array, android.R.layout.simple_spinner_item);
@@ -66,9 +64,11 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 		showSpinner.setOnItemSelectedListener(this);
 		download = (Button) rootView.findViewById(R.id.download_button);
 		download.setOnClickListener(this);
-		selectAllText = (TextView) rootView.findViewById(R.id.select_all_for_deletion_text);
+		selectAllText = (TextView) rootView.findViewById(R.id.select_all_for_download_text);
 		selectAllText.setOnClickListener(this);
-		selectAllCheckBox = (CheckBox) rootView.findViewById(R.id.select_all_for_deletion_check_box);
+		selectAllCheckBox = (CheckBox) rootView.findViewById(R.id.select_all_for_download_check_box);
+		int id = Resources.getSystem().getIdentifier("btn_check_holo_dark", "drawable", "android");
+		selectAllCheckBox.setButtonDrawable(id);
 		selectAllCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -83,7 +83,6 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 		for(int i=0; i < getListAdapter().getCount(); i++){
 			listView.setItemChecked(i, yes);
 		}
-		selectAllText.setTextColor(yes ? Color.BLACK : Color.DKGRAY);
 	}
 
 	@Override
@@ -103,7 +102,8 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		return new CursorLoader(this.getActivity(), CProvider.Stories.CONTENT_URI, PROJECTION, 
-				CProvider.Stories.DOWNLOADED + " IS NULL OR " + CProvider.Stories.DOWNLOADED + " != ? ", new String[] {"1"}, null);
+				CProvider.Stories.DOWNLOADED + " IS NULL OR " + CProvider.Stories.DOWNLOADED
+						+ " != ? ", new String[] {"1"}, null);
 	}
 
 	@Override
@@ -137,10 +137,9 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 	public void onClick(View v) {
 		int viewId = v.getId();
 		if (viewId == R.id.download_button) downloadStoryFiles();
-		else if (viewId == R.id.select_all_for_deletion_text) {
+		else if (viewId == R.id.select_all_for_download_text) {
 			boolean isChecked = selectAllCheckBox.isChecked();
 			selectAllCheckBox.setChecked(!isChecked);
-			selectAllText.setTextColor(isChecked ? Color.DKGRAY : Color.BLACK);
 		}
 	}
 
@@ -158,21 +157,34 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 		boolean isOnline = isOnline();
 		if (isOnline && position > 0) {
 			int showChoice = 0;
-			String[] showsArray = getResources().getStringArray(R.array.shows_array);
-			if (position == 1) {
-				showChoice = 2;
-			}
-			if (position == 2) {
-				showChoice = 13;
-			}
-			if (position == 3) {
-				showChoice = 3;
-			}
-			if (position == 4) {
-				showChoice = 7;
-			}
-			if (position == 5) {
-				showChoice = 10;
+			switch (position) {
+				case 1:
+					showChoice = 2;
+					break;
+				case 2:
+					showChoice = 13;
+					break;
+				case 3:
+					showChoice = 3;
+					break;
+				case 4:
+					showChoice = 7;
+					break;
+				case 5:
+					showChoice = 10;
+					break;
+				case 6:
+					showChoice = 58;
+					break;
+				case 7:
+					showChoice = 60;
+					break;
+				case 8:
+					showChoice = 57;
+					break;
+				case 9:
+					showChoice = 35;
+					break;
 			}
 			Intent intent = new Intent(this.getActivity(), PopulateAvailable.class);
 			intent.putExtra(PopulateAvailable.whichShow, showChoice);
@@ -194,8 +206,6 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 			long[] selectedStories = getListView().getCheckedItemIds();
 			if (selectedStories.length > 0) {
 				intent.putExtra("selectedStories", selectedStories);
-//				atc.setEnabled(false);
-//				me.setEnabled(false);
 				showSpinner.setEnabled(false);
 				download.setEnabled(false);
 				this.getActivity().startService(intent);
@@ -210,12 +220,9 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 	private BroadcastReceiver afterDownload = new BroadcastReceiver() { 
 		public void onReceive(Context ctxt, Intent i) {
 			if (i.getBooleanExtra(DownloadStories.downloadDone, false)) {
-//				atc.setEnabled(true);
-//				me.setEnabled(true);
 				showSpinner.setEnabled(true);
 				download.setEnabled(true);
 				selectAllCheckBox.setChecked(false);
-				selectAllText.setTextColor(Color.DKGRAY);
 			}
 			getActivity().removeStickyBroadcast(i);
 		}
@@ -267,4 +274,57 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 		}
 	}
 
+	class AvailableCursorAdapter2 extends CursorAdapter {
+
+		public AvailableCursorAdapter2(Context context, Cursor c, int flags) {
+			super(context, c, flags);
+		}
+
+		@Override
+		public View newView(Context context, Cursor cursor, ViewGroup parent) {
+			View view = LayoutInflater.from(context).inflate(R.layout.row, parent, false);
+			ViewHolder viewHolder = new ViewHolder(view);
+			view.setTag(viewHolder);
+			return view;
+		}
+
+		@Override
+		public void bindView(View view, Context context, Cursor cursor) {
+
+			ViewHolder viewHolder = (ViewHolder) view.getTag();
+			final int position = cursor.getPosition();
+
+			String storyTitle = cursor.getString(cursor.getColumnIndex(CProvider.Stories.TITLE));
+			String storyAudioLink =
+					cursor.getString(cursor.getColumnIndex(CProvider.Stories.AUDIO_LINK));
+			String storyDate = storyAudioLink.split("/")[8];
+			storyDate = storyDate.split("_")[0];
+			storyDate = storyDate.substring(4);
+			storyDate = new StringBuilder(storyDate).insert(2, "/").toString();
+			// Use joda time to determine how many days back story goes,
+			// instead of just showing the date
+//			DateTimeFormatter formatter = DateTimeFormat.forPattern("MM/dd");
+//			DateTime dt = formatter.parseDateTime(string);
+			viewHolder.story.setText(storyTitle + " - " + storyDate);
+			viewHolder.storyCheckBox.setChecked(false);
+			viewHolder.story.setTextColor(Color.DKGRAY);
+			long [] checkedIds = getListView().getCheckedItemIds();
+			if (checkedIds != null) {
+				for (int i = 0; i < checkedIds.length; i++) {
+					if (checkedIds[i] == getListAdapter().getItemId(position)) {
+						viewHolder.storyCheckBox.setChecked(true);
+						viewHolder.story.setTextColor(Color.BLACK);
+						break;
+					}
+				}
+			}
+			final boolean isChecked = viewHolder.storyCheckBox.isChecked();
+			viewHolder.storyCheckBox.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					getListView().setItemChecked(position, !isChecked);
+				}
+			});
+		}
+	}
 }

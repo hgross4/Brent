@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -93,6 +94,8 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
         selectAllText = (TextView) rootView.findViewById(R.id.select_all_for_deletion_text);
         selectAllText.setOnClickListener(this);
         selectAllCheckBox = (CheckBox) rootView.findViewById(R.id.select_all_for_deletion_check_box);
+        int id = Resources.getSystem().getIdentifier("btn_check_holo_dark", "drawable", "android");
+        selectAllCheckBox.setButtonDrawable(id);
         selectAllCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -390,7 +393,6 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             selectAllCheckBox.setChecked(false);
-            getListView().smoothScrollToPosition(pref.getInt("listPosition", 0));
         }
     }
 
@@ -485,6 +487,8 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
             // save this position so its list item can be changed later:
             editor.putInt("listPosition", listPosition);
             editor.commit();
+            // Scroll to the currently playing story
+            getListView().smoothScrollToPosition(pref.getInt("listPosition", 0));
             id = -1;
         }
     }
@@ -510,7 +514,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
                 row.setTag(holder);
             }
             if (position == pref.getInt("listPosition", 0)) {
-                holder.story.setTextColor(Color.BLUE);
+                holder.story.setTextColor(Color.parseColor("#4067B2"));
             }
             else {
                 holder.story.setTextColor(Color.DKGRAY);

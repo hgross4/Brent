@@ -1,17 +1,17 @@
-• Fix player sometimes resetting to beginning of first story when play button pressed, instead of remembering its place in the list. (Done?)
-• Save story files to internal storage (confirm this is best thing to do).
+
+• Add more shows
+• Add dates to downloaded list
+• See if downloaded list and available list can share a cursoradapter
+
+• Save story files to user accessbile storage.
+• Player controls in notification screen or widget
 • Ability to abort download ("cancel download" button and stopservice command?)
-• Check for data connection (see how FeedReader does this) (Done?)
 • Check that available stories are newer than those already downloaded?
 • Format each list entry better (show, title, well-formatted date, duration--maybe make each entry expandable?)
-• Put more space between stories in list
-• Change app title
-• Change app icon
 • Figure out how to handle saved position between app uses (set to 0 when a download is performed? have play button play highlighted story otherwise (right now play button just starts from first story when app started up fresh))
 • Have paused story stay in notification bar and be available to be restarted at paused position at any time (the way ES handles this)
-• Warn user when there's no Internet connection (take them to settings?)
-• What happens when stories downloaded while audio is playing, and how should that be handled?
 • Voice commands
+• Warn user when there's no Internet connection (take them to settings?)
 
 Done
 • Fix next story not starting when previous ends 
@@ -30,3 +30,9 @@ Done
 	- Activate and change graphic for rewind button, and make it move story back X seconds (X = 10, 30?) DONE (though needs to change when pressed)
 	- Combine play and pause buttons into 1 button that toggles between images appropriately
 • Make viewpager tabs shorter (their vertical dimension)
+• Put more space between stories in list
+• Change app title
+• Change app icon
+• Check for data connection
+• What happens when stories downloaded while audio is playing, and how should that be handled? (Seems to be OK.)
+• Fix player sometimes resetting to beginning of first story when play button pressed, instead of remembering its place in the list. (Done?)

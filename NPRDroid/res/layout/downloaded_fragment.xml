@@ -53,7 +53,8 @@
             android:id="@+id/seekBar"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:thumbTint="#4067B2"/>
 
         <TextView
             android:id="@+id/textDuration"
@@ -66,15 +67,19 @@
         android:layout_height="wrap_content"
         android:gravity="left"
         android:orientation="horizontal"
-        android:paddingBottom="10dp"
-        android:paddingTop="10dp">
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp"
+        android:background="#4067B2">
 
         <CheckBox
             android:id="@+id/select_all_for_deletion_check_box"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="false"
-            android:focusableInTouchMode="false" />
+            android:focusableInTouchMode="false"
+            android:buttonTint="@android:color/white"/>
 
         <TextView
             android:id="@+id/select_all_for_deletion_text"
@@ -86,7 +91,8 @@
             android:lines="1"
             android:scrollHorizontally="true"
             android:singleLine="true"
-            android:text="@string/select_deselect_all_for_deletion" />
+            android:text="@string/select_deselect_all_for_deletion"
+            android:textColor="@android:color/white"/>
         
     </RelativeLayout>
 
@@ -102,7 +108,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="#EE3A23">
 
         <Button
             android:id="@+id/delete_selected_button"
@@ -110,7 +117,14 @@
             android:layout_weight="1"
             android:layout_height="match_parent"
             android:background="@drawable/button"
-            android:text="@string/delete_selected_stories" />
+            android:text="@string/delete_selected_stories"
+            android:textColor="@android:color/white"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight=".02"
+            android:background="@android:color/white"/>
 
         <Button
             android:id="@+id/delete_played_button"
@@ -119,7 +133,8 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="-2dp"
             android:background="@drawable/button"
-            android:text="@string/delete_played_stories" />
+            android:text="@string/delete_played_stories"
+            android:textColor="@android:color/white"/>
 
     </LinearLayout>
 

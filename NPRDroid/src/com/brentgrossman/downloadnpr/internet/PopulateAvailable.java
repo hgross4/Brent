@@ -26,9 +26,11 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.SQLException;
 import android.util.Log;
+import android.widget.Toast;
 
 public class PopulateAvailable extends IntentService {
 
+	private static final String TAG = PopulateAvailable.class.getSimpleName();
 	public static final String whichShow = "whichShow";
 	private static final String queryUrl = 
 			"http://api.npr.org/query?fields=title,audio&date=current&dateType=story&sort=assigned&output=NPRML&numResults=30&apiKey=MDA5NDM4NDA3MDEzMzY1MTMyNjA2NjIyMg001&id=";
@@ -48,7 +50,6 @@ public class PopulateAvailable extends IntentService {
 		String rawXML = null;
 		// Make the connection to the URL and get the xml as one big string
 		try {
-//			int showID = intent.getExtras().getString(whichShow).equalsIgnoreCase("atc") ? 2 : 3;
 			int showID = intent.getIntExtra(whichShow, 2);
 			URL url = new URL(queryUrl + showID);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -97,30 +98,36 @@ public class PopulateAvailable extends IntentService {
 			Element storyEntry = (Element)storyNodes.item(i);
 			NodeList storyChildren = storyEntry.getChildNodes();
 			Element formatEntry = (Element)formatNodes.item(i);
-			NodeList formatChildren = formatEntry.getChildNodes();
-			for (int j = 0; j < formatChildren.getLength(); j++) {
-				if (storyChildren.item(j).getNodeType() == Node.ELEMENT_NODE) {
-					Element child = (Element) storyChildren.item(j);
-					if (child.getNodeName().equals("title")) {
-						title = child.getFirstChild().getNodeValue();
+			if (formatEntry != null) {
+				NodeList formatChildren = formatEntry.getChildNodes();
+				for (int j = 0; j < formatChildren.getLength(); j++) {
+					if (storyChildren.item(j).getNodeType() == Node.ELEMENT_NODE) {
+						Element child = (Element) storyChildren.item(j);
+						if (child.getNodeName().equals("title")) {
+							title = child.getFirstChild().getNodeValue();
+						}
+					}
+					if (formatChildren.item(j).getNodeType() == Node.ELEMENT_NODE) {
+						Element child = (Element) formatChildren.item(j);
+						if (child.getNodeName().equals("mp4")) {
+							audioLink = child.getFirstChild().getNodeValue();
+						}
 					}
 				}
-				if (formatChildren.item(j).getNodeType() == Node.ELEMENT_NODE) {
-					Element child = (Element) formatChildren.item(j);
-					if (child.getNodeName().equals("mp4")) {
-						audioLink = child.getFirstChild().getNodeValue();
+				if (title != null && audioLink != null) {
+					ContentValues values = new ContentValues();
+					values.put(CProvider.Stories.TITLE, title);
+					values.put(CProvider.Stories.AUDIO_LINK, audioLink);
+					try {
+						getContentResolver().insert(CProvider.Stories.CONTENT_URI, values);
+					} catch (SQLException e) {
+						Log.e("PopulateAvailable", "Row could not be inserted: " + e.getLocalizedMessage());
 					}
 				}
 			}
-			if (title != null && audioLink != null) {
-				ContentValues values = new ContentValues();
-				values.put(CProvider.Stories.TITLE, title);
-				values.put(CProvider.Stories.AUDIO_LINK, audioLink);
-				try {
-					getContentResolver().insert(CProvider.Stories.CONTENT_URI, values);
-				} catch (SQLException e) {
-					Log.e("PopulateAvailable", "Row could not be inserted: " + e.getLocalizedMessage());
-				}
+			else {
+				Toast.makeText(this, "Stories not available", Toast.LENGTH_LONG).show();
+				Log.e(TAG, "Not all stories are available yet or something else is wrong on NPR's side");
 			}
 		}
 	}

@@ -54,47 +54,25 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:thumbTint="#4067B2"/>
+            android:thumbTint="@color/npr_blue"/>
 
         <TextView
             android:id="@+id/textDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
-    
-    <RelativeLayout
+
+    <ToggleButton
+        android:id="@+id/select_all_for_deletion_toggle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="left"
-        android:orientation="horizontal"
-        android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
-        android:paddingBottom="5dp"
-        android:paddingTop="5dp"
-        android:background="#4067B2">
-
-        <CheckBox
-            android:id="@+id/select_all_for_deletion_check_box"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:buttonTint="@android:color/white"/>
-
-        <TextView
-            android:id="@+id/select_all_for_deletion_text"
-            android:layout_width="wrap_content"
-            android:layout_height="24sp"
-            android:layout_alignBaseline="@+id/select_all_for_deletion_check_box"
-            android:layout_alignBottom="@+id/select_all_for_deletion_check_box"
-            android:layout_toRightOf="@+id/select_all_for_deletion_check_box"
-            android:lines="1"
-            android:scrollHorizontally="true"
-            android:singleLine="true"
-            android:text="@string/select_deselect_all_for_deletion"
-            android:textColor="@android:color/white"/>
-        
-    </RelativeLayout>
+        android:layout_marginBottom="10dp"
+        android:background="@color/npr_blue"
+        android:textOff="@string/select_all_for_deletion"
+        android:textOn="@string/deselect_all_for_deletion"
+        android:textColor="@android:color/white"
+        android:textSize="16dp"/>
 
     <ListView
         android:id="@+id/android:list"
@@ -109,7 +87,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#EE3A23">
+        android:background="@color/npr_red">
 
         <Button
             android:id="@+id/delete_selected_button"

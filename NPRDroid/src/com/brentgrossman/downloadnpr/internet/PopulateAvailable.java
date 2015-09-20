@@ -126,7 +126,6 @@ public class PopulateAvailable extends IntentService {
 				}
 			}
 			else {
-				Toast.makeText(this, "Stories not available", Toast.LENGTH_LONG).show();
 				Log.e(TAG, "Not all stories are available yet or something else is wrong on NPR's side");
 			}
 		}

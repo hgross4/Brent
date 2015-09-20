@@ -39,6 +39,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.ToggleButton;
 
 import com.brentgrossman.downloadnpr.R;
 import com.brentgrossman.downloadnpr.data.CProvider;
@@ -64,6 +65,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
     private int seekBarProgress;
     private TextView selectAllText;
     private CheckBox selectAllCheckBox;
+    private ToggleButton selectAllToggle;
     private long id = -1;
     private enum DeleteType { PLAYED, SELECTED};
 
@@ -91,12 +93,8 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
         deleteSelected.setOnClickListener(this);
         Button deletePlayed = (Button) rootView.findViewById(R.id.delete_played_button);
         deletePlayed.setOnClickListener(this);
-        selectAllText = (TextView) rootView.findViewById(R.id.select_all_for_deletion_text);
-        selectAllText.setOnClickListener(this);
-        selectAllCheckBox = (CheckBox) rootView.findViewById(R.id.select_all_for_deletion_check_box);
-        int id = Resources.getSystem().getIdentifier("btn_check_holo_dark", "drawable", "android");
-        selectAllCheckBox.setButtonDrawable(id);
-        selectAllCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        selectAllToggle = (ToggleButton) rootView.findViewById(R.id.select_all_for_deletion_toggle);
+        selectAllToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 final ListView listView = getListView();
@@ -258,10 +256,6 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
         }
         else if (v.getId() == R.id.delete_selected_button) deleteSelectedStories();
         else if (v.getId() == R.id.delete_played_button) deletePlayedStories();
-        else if (v == selectAllText) {
-            boolean isChecked = selectAllCheckBox.isChecked();
-            selectAllCheckBox.setChecked(!isChecked);
-        }
     }
 
     private void deleteSelectedStories() {
@@ -392,7 +386,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            selectAllCheckBox.setChecked(false);
+            selectAllToggle.setChecked(false);
         }
     }
 
@@ -514,7 +508,7 @@ public class DownLoadedFragment extends ListFragment implements LoaderManager.Lo
                 row.setTag(holder);
             }
             if (position == pref.getInt("listPosition", 0)) {
-                holder.story.setTextColor(Color.parseColor("#4067B2"));
+                holder.story.setTextColor(getResources().getColor(R.color.npr_blue));
             }
             else {
                 holder.story.setTextColor(Color.DKGRAY);

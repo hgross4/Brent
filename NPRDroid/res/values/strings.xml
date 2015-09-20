@@ -10,17 +10,22 @@
     <string name="select_deselect_all_for_deletion">Select/deselect all for deletion</string>
     <string name="select_deselect_all_for_download">Select/deselect all for download</string>
     <string name="delete_played_stories">Delete played</string>
+    <string name="select_all_for_download">Select all for download</string>
+    <string name="deselect_all_for_download">Deselect all for download</string>
+    <string name="deselect_all_for_deletion">Deselect all for deletion</string>
+    <string name="select_all_for_deletion">Select all for deletion</string>
+    <string name="downloading_files">Downloading audio files…</string>
     <string-array name="shows_array">
         <item>@string/latest_stories</item>
-        <item>All Things Considered</item>
-        <item>Fresh Air</item>
         <item>Morning Edition</item>
-        <item>Weekend Edition Saturday</item>
-        <item>Weekend Edition Sunday</item>
+        <item>All Things Considered</item>
         <item>Ask Me Another</item>
+        <item>Fresh Air</item>
         <item>Here &amp; Now</item>
         <item>TED Radio Hour</item>
         <item>Wait Wait…Don\'t Tell Me!</item>
+        <item>Weekend Edition Saturday</item>
+        <item>Weekend Edition Sunday</item>
     </string-array>
 
 </resources>

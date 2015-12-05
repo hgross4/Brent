@@ -1,6 +1,6 @@
-package com.brentgrossman.downloadnpr.ui;
+package com.brentgrossman.publicradiounplugged.ui;
 
-import com.brentgrossman.downloadnpr.R;
+import com.brentgrossman.publicradiounplugged.R;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;

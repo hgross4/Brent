@@ -1,4 +1,4 @@
-package com.brentgrossman.downloadnpr.internet;
+package com.brentgrossman.publicradiounplugged.internet;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -8,8 +8,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import com.brentgrossman.downloadnpr.data.CProvider;
-import com.brentgrossman.downloadnpr.ui.DownloadNPRActivity;
+import com.brentgrossman.publicradiounplugged.data.CProvider;
+import com.brentgrossman.publicradiounplugged.ui.DownloadNPRActivity;
 
 import android.app.IntentService;
 import android.app.Notification;

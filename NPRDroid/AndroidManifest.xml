@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.brentgrossman.downloadnpr"
-    android:versionCode="8"
-    android:versionName="2.3.2" >
+    package="com.brentgrossman.publicradiounplugged"
+    android:versionCode="1"
+    android:versionName="1.0" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -20,12 +20,12 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Holo.Light" >
         <provider
-            android:name="com.brentgrossman.downloadnpr.data.CProvider"
-            android:authorities="com.brentgrossman.downloadnpr"
+            android:name="com.brentgrossman.publicradiounplugged.data.CProvider"
+            android:authorities="com.brentgrossman.publicradiounplugged"
             android:exported="false" />
 
         <activity
-            android:name="com.brentgrossman.downloadnpr.ui.DownloadNPRActivity"
+            android:name="com.brentgrossman.publicradiounplugged.ui.DownloadNPRActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize"
             android:label="@string/app_name" >
             <intent-filter>
@@ -36,22 +36,22 @@
         </activity>
 
         <service
-            android:name="com.brentgrossman.downloadnpr.playback.MusicService"
+            android:name="com.brentgrossman.publicradiounplugged.playback.MusicService"
             android:exported="false" >
             <intent-filter>
-                <action android:name="com.brentgrossman.downloadnpr.action.TOGGLE_PLAYBACK" />
-                <action android:name="com.brentgrossman.downloadnpr.action.PLAY" />
-                <action android:name="com.brentgrossman.downloadnpr.action.PAUSE" />
-                <action android:name="com.brentgrossman.downloadnpr.action.SKIP" />
-                <action android:name="com.brentgrossman.downloadnpr.action.REWIND" />
-                <action android:name="com.brentgrossman.downloadnpr.action.STOP" />
+                <action android:name="com.brentgrossman.publicradiounplugged.action.TOGGLE_PLAYBACK" />
+                <action android:name="com.brentgrossman.publicradiounplugged.action.PLAY" />
+                <action android:name="com.brentgrossman.publicradiounplugged.action.PAUSE" />
+                <action android:name="com.brentgrossman.publicradiounplugged.action.SKIP" />
+                <action android:name="com.brentgrossman.publicradiounplugged.action.REWIND" />
+                <action android:name="com.brentgrossman.publicradiounplugged.action.STOP" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.brentgrossman.downloadnpr.action.URL" />
+                <action android:name="com.brentgrossman.publicradiounplugged.action.URL" />
             </intent-filter>
         </service>
 
-        <receiver android:name="com.brentgrossman.downloadnpr.playback.MusicIntentReceiver" >
+        <receiver android:name="com.brentgrossman.publicradiounplugged.playback.MusicIntentReceiver" >
             <intent-filter>
                 <action android:name="android.media.AUDIO_BECOMING_NOISY" />
             </intent-filter>
@@ -60,11 +60,11 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="com.brentgrossman.downloadnpr.internet.DownloadStories" >
+        <service android:name="com.brentgrossman.publicradiounplugged.internet.DownloadStories" >
         </service>
-        <service android:name="com.brentgrossman.downloadnpr.internet.PopulateAvailable" >
+        <service android:name="com.brentgrossman.publicradiounplugged.internet.PopulateAvailable" >
         </service>
-        <service android:name="com.brentgrossman.downloadnpr.internet.DownloadStories" >
+        <service android:name="com.brentgrossman.publicradiounplugged.internet.DownloadStories" >
         </service>
     </application>
 

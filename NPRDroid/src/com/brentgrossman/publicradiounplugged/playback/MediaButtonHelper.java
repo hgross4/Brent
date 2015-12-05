@@ -1,4 +1,4 @@
-package com.brentgrossman.downloadnpr.playback;
+package com.brentgrossman.publicradiounplugged.playback;
 
 import android.content.ComponentName;
 import android.media.AudioManager;

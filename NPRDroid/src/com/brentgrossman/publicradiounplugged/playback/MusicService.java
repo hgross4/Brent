@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.brentgrossman.downloadnpr.playback;
+package com.brentgrossman.publicradiounplugged.playback;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -47,9 +47,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.IOException;
-import com.brentgrossman.downloadnpr.R;
-import com.brentgrossman.downloadnpr.data.CProvider;
-import com.brentgrossman.downloadnpr.ui.DownloadNPRActivity;
+import com.brentgrossman.publicradiounplugged.R;
+import com.brentgrossman.publicradiounplugged.data.CProvider;
+import com.brentgrossman.publicradiounplugged.ui.DownloadNPRActivity;
 
 /**
  * Service that handles media playback. This is the Service through which we perform all the media
@@ -72,13 +72,13 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     // constants exist in our class is a mere convenience: what really defines the actions our
     // service can handle are the <action> tags in the <intent-filters> tag for our service in
     // AndroidManifest.xml.
-    public static final String ACTION_TOGGLE_PLAYBACK = "com.brentgrossman.downloadnpr.action.TOGGLE_PLAYBACK";
-    public static final String ACTION_PLAY = "com.brentgrossman.downloadnpr.action.PLAY";
-    public static final String ACTION_PAUSE = "com.brentgrossman.downloadnpr.action.PAUSE";
-    public static final String ACTION_STOP = "com.brentgrossman.downloadnpr.action.STOP";
-    public static final String ACTION_SKIP = "com.brentgrossman.downloadnpr.action.SKIP";
-    public static final String ACTION_REWIND = "com.brentgrossman.downloadnpr.action.REWIND";
-    public static final String ACTION_URL = "com.brentgrossman.downloadnpr.action.URL";
+    public static final String ACTION_TOGGLE_PLAYBACK = "com.brentgrossman.publicradiounplugged.action.TOGGLE_PLAYBACK";
+    public static final String ACTION_PLAY = "com.brentgrossman.publicradiounplugged.action.PLAY";
+    public static final String ACTION_PAUSE = "com.brentgrossman.publicradiounplugged.action.PAUSE";
+    public static final String ACTION_STOP = "com.brentgrossman.publicradiounplugged.action.STOP";
+    public static final String ACTION_SKIP = "com.brentgrossman.publicradiounplugged.action.SKIP";
+    public static final String ACTION_REWIND = "com.brentgrossman.publicradiounplugged.action.REWIND";
+    public static final String ACTION_URL = "com.brentgrossman.publicradiounplugged.action.URL";
 
     // The volume we set the media player to when we lose audio focus, but are allowed to reduce
     // the volume instead of stopping playback.

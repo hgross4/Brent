@@ -1,4 +1,4 @@
-package com.brentgrossman.downloadnpr.ui;
+package com.brentgrossman.publicradiounplugged.ui;
 
 import java.io.File;
 
@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -41,11 +40,11 @@ import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ToggleButton;
 
-import com.brentgrossman.downloadnpr.R;
-import com.brentgrossman.downloadnpr.data.CProvider;
-import com.brentgrossman.downloadnpr.internet.DownloadStories;
-import com.brentgrossman.downloadnpr.playback.MusicService;
-import com.brentgrossman.downloadnpr.playback.MusicService.State;
+import com.brentgrossman.publicradiounplugged.R;
+import com.brentgrossman.publicradiounplugged.data.CProvider;
+import com.brentgrossman.publicradiounplugged.internet.DownloadStories;
+import com.brentgrossman.publicradiounplugged.playback.MusicService;
+import com.brentgrossman.publicradiounplugged.playback.MusicService.State;
 
 public class DownLoadedFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>,
         OnClickListener, OnSeekBarChangeListener {

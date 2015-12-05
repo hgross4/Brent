@@ -1,16 +1,15 @@
-package com.brentgrossman.downloadnpr.ui;
+package com.brentgrossman.publicradiounplugged.ui;
 
-import com.brentgrossman.downloadnpr.R;
-import com.brentgrossman.downloadnpr.data.CProvider;
-import com.brentgrossman.downloadnpr.internet.DownloadStories;
-import com.brentgrossman.downloadnpr.internet.PopulateAvailable;
+import com.brentgrossman.publicradiounplugged.R;
+import com.brentgrossman.publicradiounplugged.data.CProvider;
+import com.brentgrossman.publicradiounplugged.internet.DownloadStories;
+import com.brentgrossman.publicradiounplugged.internet.PopulateAvailable;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
@@ -28,7 +27,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;

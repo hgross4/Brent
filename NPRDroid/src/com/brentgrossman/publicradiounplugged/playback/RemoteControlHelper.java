@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.brentgrossman.downloadnpr.playback;
+package com.brentgrossman.publicradiounplugged.playback;
 
 import android.media.AudioManager;
 import android.util.Log;

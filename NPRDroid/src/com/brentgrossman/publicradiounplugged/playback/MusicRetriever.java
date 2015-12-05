@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.brentgrossman.downloadnpr.playback;
+package com.brentgrossman.publicradiounplugged.playback;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.brentgrossman.downloadnpr.data.CProvider;
+import com.brentgrossman.publicradiounplugged.data.CProvider;
 
 /**
  * Retrieves and organizes media to play. Before being used, you must call {@link #prepare()},

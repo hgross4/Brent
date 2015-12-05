@@ -1,4 +1,4 @@
-package com.brentgrossman.downloadnpr.internet;
+package com.brentgrossman.publicradiounplugged.internet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,14 +19,13 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.brentgrossman.downloadnpr.data.CProvider;
+import com.brentgrossman.publicradiounplugged.data.CProvider;
 
 import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.SQLException;
 import android.util.Log;
-import android.widget.Toast;
 
 public class PopulateAvailable extends IntentService {
 

@@ -1,4 +1,4 @@
-package com.brentgrossman.downloadnpr.data;
+package com.brentgrossman.publicradiounplugged.data;
 
 import android.content.Context;
 import android.database.Cursor;

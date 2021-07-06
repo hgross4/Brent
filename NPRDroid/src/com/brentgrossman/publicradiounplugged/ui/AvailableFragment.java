@@ -267,8 +267,6 @@ public class AvailableFragment extends ListFragment implements LoaderManager.Loa
 			storyDate = new StringBuilder(storyDate).insert(2, "/").toString();
 			// TODO: Use joda time to determine how many days back story goes,
 			// instead of just showing the date (e.g., "today", "yesterday", "3 days ago"
-//			DateTimeFormatter formatter = DateTimeFormat.forPattern("MM/dd");
-//			DateTime dt = formatter.parseDateTime(string);
 			viewHolder.story.setText(storyTitle + " - " + storyDate);
 			viewHolder.storyCheckBox.setChecked(false);
 			viewHolder.story.setTextColor(Color.DKGRAY);
